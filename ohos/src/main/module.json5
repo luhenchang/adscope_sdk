@@ -1,0 +1,10 @@
+{
+  "module": {
+    "name": "adscope_sdk",
+    "type": "har",
+    "deviceTypes": [
+      "default",
+      "tablet"
+    ]
+  }
+}
