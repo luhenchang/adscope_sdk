@@ -31,7 +31,7 @@ export class AMPSEventManager {
 
   init(binaryMessenger: BinaryMessenger) {
     if (!this.channel) {
-      this.channel = new MethodChannel(binaryMessenger, "amps_sdk")
+      this.channel = new MethodChannel(binaryMessenger, "adscope_sdk")
       this.channel.setMethodCallHandler({
         onMethodCall(call: MethodCall, result: MethodResult) {
           if (InitMethodNames.includes(call.method)) {

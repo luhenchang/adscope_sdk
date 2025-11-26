@@ -89,6 +89,7 @@ export class AMPSSplashManager {
   private handleSplashLoad(call: MethodCall, result: MethodResult): void {
     try {
       const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(call.args);
+      adOption.adCount = 1
       let context = AMPSEventManager.getInstance().getContext()
       this.mWindowStage = context?.windowStage;
       if (this.mWindowStage) {

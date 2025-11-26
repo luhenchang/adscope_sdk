@@ -22,7 +22,7 @@ export class AdOptionsModule {
     // 严格类型检查与空值处理
     const spaceId = map.get(KEY_SPACE_ID) as string ?? ""
     // 解析可选参数并指定类型
-    const adCount = map.has(KEY_AD_COUNT) ? map.get(KEY_AD_COUNT) as number : undefined
+    const adCount = map.has(KEY_AD_COUNT) ? map.get(KEY_AD_COUNT) as number : 1
     const s2sImpl = map.has(KEY_S2S_IMPL) ? map.get(KEY_S2S_IMPL) as string : undefined
     const timeoutInterval = map.has(KEY_TIMEOUT_INTERVAL) ? map.get(KEY_TIMEOUT_INTERVAL) as number : undefined
     const expressSize = map.has(KEY_EXPRESS_SIZE) ? map.get(KEY_EXPRESS_SIZE) as [number?, number?] : undefined
