@@ -1,6 +1,6 @@
-import 'package:amps_sdk_example/widgets/blurred_background.dart';
-import 'package:amps_sdk/amps_sdk_export.dart';
-import 'package:amps_sdk_example/widgets/button_widget.dart';
+import 'package:adscope_sdk_example/widgets/blurred_background.dart';
+import 'package:adscope_sdk/amps_sdk_export.dart';
+import 'package:adscope_sdk_example/widgets/button_widget.dart';
 import 'package:flutter/material.dart';
 
 class SplashWidgetPage extends StatefulWidget {

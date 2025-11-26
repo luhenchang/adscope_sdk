@@ -1,6 +1,8 @@
-import 'package:amps_sdk/amps_sdk_export.dart';
-import 'package:amps_sdk_example/widgets/button_widget.dart';
+import 'package:adscope_sdk/amps_sdk_export.dart';
+import 'package:adscope_sdk_example/widgets/button_widget.dart';
 import 'package:flutter/material.dart';
+
+import 'data/common.dart';
 class InterstitialPage extends StatefulWidget {
   const InterstitialPage({super.key, required this.title});
 
@@ -74,7 +76,7 @@ class _InterstitialPageState extends State<InterstitialPage> {
           debugPrint("ad load onVideoSkipToEnd=$duration");
         });
 
-    AdOptions options = AdOptions(spaceId: '111502');
+    AdOptions options = AdOptions(spaceId: interstitialSpaceId);
     _interAd = AMPSInterstitialAd(config: options, mCallBack: _adCallBack);
   }
   @override

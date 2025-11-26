@@ -1,9 +1,9 @@
 import 'dart:collection';
-import 'package:amps_sdk_example/interstitial_show_page.dart';
-import 'package:amps_sdk_example/splash_show_page.dart';
-import 'package:amps_sdk_example/widgets/blurred_background.dart';
-import 'package:amps_sdk/amps_sdk_export.dart';
-import 'package:amps_sdk_example/widgets/button_widget.dart';
+import 'package:adscope_sdk_example/interstitial_show_page.dart';
+import 'package:adscope_sdk_example/splash_show_page.dart';
+import 'package:adscope_sdk_example/widgets/blurred_background.dart';
+import 'package:adscope_sdk/amps_sdk_export.dart';
+import 'package:adscope_sdk_example/widgets/button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -87,7 +87,7 @@ class _SplashPageState extends State<SplashPage> {
     sdkConfig = AMPSBuilder("12379")
         .setCity("北京")
         .setRegion("朝阳区双井")
-        .setCurrency(CurrencyType.CURRENCY_TYPE_USD)
+        .setCurrency(CurrencyType.currencyTypeUsd)
         .setCountryCN(CountryType.countryTypeChinaMainland)
         //.setDebugSetting(true)
         //.setIsMediation(false)

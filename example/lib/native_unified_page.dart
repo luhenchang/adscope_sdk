@@ -1,9 +1,10 @@
-import 'dart:math';
 
-import 'package:amps_sdk/amps_sdk_export.dart';
-import 'package:amps_sdk/common.dart';
-import 'package:amps_sdk/widget/native_unified_widget.dart';
-import 'package:amps_sdk_example/widgets/button_widget.dart';
+
+import 'package:adscope_sdk/amps_sdk_export.dart';
+import 'package:adscope_sdk/common.dart';
+import 'package:adscope_sdk/widget/native_unified_widget.dart';
+import 'package:adscope_sdk_example/data/common.dart';
+import 'package:adscope_sdk_example/widgets/button_widget.dart';
 import 'package:flutter/material.dart';
 
 class NativeUnifiedPage extends StatefulWidget {
@@ -93,7 +94,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
       }
     );
     AdOptions options = AdOptions(
-        spaceId: '124302',
+        spaceId: nativeSpaceId,
         adCount: 1,
         expressSize: [expressWidth, expressHeight]);
     _nativeAd = AMPSNativeAd(
