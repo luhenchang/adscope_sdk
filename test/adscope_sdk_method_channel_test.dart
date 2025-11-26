@@ -1,11 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:adscope_sdk/adscope_sdk_method_channel.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  MethodChannelAdscopeSdk platform = MethodChannelAdscopeSdk();
   const MethodChannel channel = MethodChannel('adscope_sdk');
 
   setUp(() {
@@ -22,6 +20,5 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    expect(await platform.getPlatformVersion(), '42');
   });
 }

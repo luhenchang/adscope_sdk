@@ -1,8 +1,7 @@
 
-import 'adscope_sdk_platform_interface.dart';
-
+import 'package:flutter/services.dart';
+///Flutter层公用的Channel
 class AdscopeSdk {
-  Future<String?> getPlatformVersion() {
-    return AdscopeSdkPlatform.instance.getPlatformVersion();
-  }
+  ///通道标识amps_sdk
+  static const MethodChannel channel = MethodChannel('adscope_sdk');
 }
