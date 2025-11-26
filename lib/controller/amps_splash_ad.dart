@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 
+import '../adscope_sdk.dart';
 import '../common.dart';
 import '../data/amps_ad.dart';
 import '../widget/splash_bottom_widget.dart';
@@ -79,9 +80,9 @@ class AMPSSplashAd {
   }
   ///开屏广告加载调用
   void load() async {
-    _channel = const MethodChannel(AMPSChannels.ampsSdk);
+    _channel = AdscopeSdk.channel;
     setMethodCallHandler(null);
-    await _channel?.invokeMethod(
+    await AdscopeSdk.channel.invokeMethod(
       AMPSAdSdkMethodNames.splashLoad,
       config.toMap(),
     );

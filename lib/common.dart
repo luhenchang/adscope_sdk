@@ -1,7 +1,7 @@
-const String channelDomain = "biz.beizi.adn";
+const String channelDomain = "xyz.adscope.amps";
 ///Flutter层的常量，此部分各端应该有一份完全一样的对应。
 class AMPSChannels {
-  static const String ampsSdk = 'amps_sdk';
+  static const String ampsSdk = 'adscope_sdk';
   static const String ampsSdkInit = '$channelDomain/sdk';
   static const String ampsSdkSplash = '$channelDomain/splash';
   static const ampsSdkSplashAdLoad = '$channelDomain/splash_ad_load';
