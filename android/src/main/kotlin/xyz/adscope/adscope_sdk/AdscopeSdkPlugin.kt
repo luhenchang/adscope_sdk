@@ -1,4 +1,3 @@
-package xyz.adscope.adscope_sdk
 
 import androidx.annotation.NonNull
 
@@ -7,6 +6,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import xyz.adscope.amps.AMPSSDK
 
 /** AdscopeSdkPlugin */
 class AdscopeSdkPlugin: FlutterPlugin, MethodCallHandler {

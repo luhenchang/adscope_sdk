@@ -1,4 +1,4 @@
-package xyz.adscope.adscope_sdk
+package android.src.test.kotlin.xyz.adscope.adscope_sdk
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
