@@ -1,4 +1,5 @@
 import 'amps_sdk_api_keys.dart';
+
 ///UI模式【自动、黑色、浅色】
 enum UiModel { uiModelAuto, uiModelDark, uiModelLight }
 
@@ -72,7 +73,7 @@ class AMPSLocation {
     this.timeStamp = timeStamp ?? 0; // 确保默认值为0
   }
 
-/// 转为 Map
+  /// 转为 Map
   Map<String, dynamic> toJson() {
     return {
       AMPSLocationKey.latitude: latitude,
@@ -92,6 +93,33 @@ class StrUtil {
   }
 }
 
+///对应Android端的PackageInfo
+class PackageInfo {
+  String? packageName;
+  int? versionCode;
+  String? versionName;
+  int? firstInstallTime;
+  int? lastUpdateTime;
+
+  PackageInfo.required({
+    required this.packageName,
+    required this.versionName,
+    this.versionCode,
+    this.firstInstallTime,
+    this.lastUpdateTime,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "packageName": packageName,
+      "versionCode": versionCode,
+      "versionName": versionName,
+      "firstInstallTime": firstInstallTime,
+      "lastUpdateTime": lastUpdateTime
+    };
+  }
+}
+
 /// 用户控制类. 重写相关方法设置SDK可用内容
 class AMPSCustomController {
   /// 是否可以使用PhoneState权限
@@ -102,7 +130,7 @@ class AMPSCustomController {
 
   /// 是否允许使用个性化推荐
   /// true: 允许 false: 不允许
-  bool isSupportPersonalized;
+  bool isSupportPersonalized; //TODO OK 4
 
   /// 适龄标记
   /// 取值参考 [UnderageTag]
@@ -120,6 +148,26 @@ class AMPSCustomController {
   /// 用于记录，三方设置的位置信息
   AMPSLocation? location;
 
+  bool isCanUseWifiState;
+  bool isCanUseOaid;
+  String? devOaid;
+  bool isCanUseAppList;
+  List<PackageInfo>? getAppList;
+  bool isCanUseAndroidId;
+  String? androidId;
+  bool isCanUseMacAddress;
+  String? macAddress;
+  bool isCanUseWriteExternal;
+  bool isCanUseShakeAd;
+  String? devImei;
+  List<String>? devImeiList;
+  bool isCanUseRecordAudio;
+  bool isCanUseIP;
+  String? ip;
+  bool isCanUseSimOperator;
+  String? devSimOperatorCode;
+  String? devSimOperatorName;
+
   AMPSCustomController({
     required AMPSCustomControllerParam? param,
   })  : isCanUsePhoneState = param?.isCanUsePhoneState ?? false,
@@ -128,10 +176,29 @@ class AMPSCustomController {
         getUnderageTag = param?.getUnderageTag ?? UnderageTag.unknown,
         userAgent = param?.userAgent,
         isCanUseSensor = param?.isCanUseSensor ?? true,
+        getAppList = param?.getAppList,
         isLocationEnabled = param?.isLocationEnabled ?? true,
-        location = param?.location;
+        location = param?.location,
+        isCanUseWifiState = param?.isCanUseWifiState ?? true,
+        isCanUseOaid = param?.isCanUseOaid ?? true,
+        devOaid = param?.devOaid,
+        isCanUseAppList = param?.isCanUseAppList ?? true,
+        isCanUseAndroidId = param?.isCanUseAndroidId ?? true,
+        androidId = param?.androidId,
+        isCanUseMacAddress = param?.isCanUseMacAddress ?? true,
+        macAddress = param?.macAddress ?? "",
+        isCanUseWriteExternal = param?.isCanUseWriteExternal ?? true,
+        isCanUseShakeAd = param?.isCanUseShakeAd ?? true,
+        devImei = param?.devImei,
+        devImeiList = param?.devImeiList,
+        isCanUseRecordAudio = param?.isCanUseRecordAudio ?? true,
+        isCanUseIP = param?.isCanUseIP ?? true,
+        ip = param?.ip,
+        isCanUseSimOperator = param?.isCanUseSimOperator ?? true,
+        devSimOperatorCode = param?.devSimOperatorCode ?? "",
+        devSimOperatorName = param?.devSimOperatorName ?? "";
 
-/// 转为 Map
+  /// 转为 Map
   Map<String, dynamic> toJson() {
     return {
       AMPSControllerKey.isCanUsePhoneState: isCanUsePhoneState,
@@ -142,6 +209,26 @@ class AMPSCustomController {
       AMPSControllerKey.isCanUseSensor: isCanUseSensor,
       AMPSControllerKey.isLocationEnabled: isLocationEnabled,
       AMPSControllerKey.location: location?.toJson(), // 嵌套对象序列化
+      AMPSControllerKey.isCanUseWifiState: isCanUseWifiState,
+      AMPSControllerKey.isCanUseOaid: isCanUseOaid,
+      AMPSControllerKey.devOaid: devOaid,
+      AMPSControllerKey.isCanUseAppList: isCanUseAppList,
+      AMPSControllerKey.getAppList:
+          getAppList?.map((info) => info.toJson()).toList(),
+      AMPSControllerKey.isCanUseAndroidId: isCanUseAndroidId,
+      AMPSControllerKey.androidId: androidId,
+      AMPSControllerKey.isCanUseMacAddress: isCanUseMacAddress,
+      AMPSControllerKey.macAddress: macAddress,
+      AMPSControllerKey.isCanUseWriteExternal: isCanUseWriteExternal,
+      AMPSControllerKey.isCanUseShakeAd: isCanUseShakeAd,
+      AMPSControllerKey.devImei: devImei,
+      AMPSControllerKey.devImeiList: devImeiList,
+      AMPSControllerKey.isCanUseRecordAudio: isCanUseRecordAudio,
+      AMPSControllerKey.isCanUseIP: isCanUseIP,
+      AMPSControllerKey.ip: ip,
+      AMPSControllerKey.isCanUseSimOperator: isCanUseSimOperator,
+      AMPSControllerKey.devSimOperatorCode: devSimOperatorCode,
+      AMPSControllerKey.devSimOperatorName: devSimOperatorName,
     };
   }
 }
@@ -172,6 +259,28 @@ class AMPSCustomControllerParam {
   /// 三方设置的位置信息
   final AMPSLocation? location;
 
+  final bool? isCanUseWifiState;
+  final bool? isCanUseOaid;
+  final String? devOaid;
+  final bool? isCanUseAppList;
+
+  /// app安装列表
+  final List<PackageInfo>? getAppList;
+  final bool? isCanUseAndroidId;
+  final String? androidId;
+  final bool? isCanUseMacAddress;
+  final String? macAddress;
+  final bool? isCanUseWriteExternal;
+  final bool? isCanUseShakeAd;
+  final String? devImei;
+  final List<String>? devImeiList;
+  final bool? isCanUseRecordAudio;
+  final bool? isCanUseIP;
+  final String? ip;
+  final bool? isCanUseSimOperator;
+  final String? devSimOperatorCode;
+  final String? devSimOperatorName;
+
   AMPSCustomControllerParam({
     this.isCanUsePhoneState,
     this.OAID,
@@ -181,10 +290,28 @@ class AMPSCustomControllerParam {
     this.isCanUseSensor,
     this.isLocationEnabled,
     this.location,
+    this.isCanUseWifiState,
+    this.isCanUseOaid,
+    this.devOaid,
+    this.isCanUseAppList,
+    this.getAppList,
+    this.isCanUseAndroidId,
+    this.androidId,
+    this.isCanUseMacAddress,
+    this.macAddress,
+    this.isCanUseWriteExternal,
+    this.isCanUseShakeAd,
+    this.devImei,
+    this.devImeiList,
+    this.isCanUseRecordAudio,
+    this.isCanUseIP,
+    this.ip,
+    this.isCanUseSimOperator,
+    this.devSimOperatorCode,
+    this.devSimOperatorName,
   });
 }
 
-///TODO
 /// AMPSInitConfig类，用于表示初始化配置
 class AMPSInitConfig {
   /// 媒体的账户ID
@@ -210,11 +337,13 @@ class AMPSInitConfig {
   final String? province;
   final String? city;
   final String? region;
+  final String? customGAID;
   /// 自定义UA
   final String? customUA;
+
   /// androidID
   final String? androidID;
-  final String? gaId;
+
   ///optionInfo Android特有
   final String? optionInfo;
 
@@ -223,6 +352,8 @@ class AMPSInitConfig {
 
   /// 聚合模式下，传递第三方广告渠道平台初始化参数
   final Map<String, Map<String, dynamic>> extensionParam;
+
+  final bool isUseSplashPunchLine;
 
   final Map<String, dynamic> optionFields;
 
@@ -246,7 +377,7 @@ class AMPSInitConfig {
         countryCN = builder.countryCN,
         customUA = builder.customUA,
         androidID = builder.androidID,
-        gaId = builder.gaId,
+        customGAID = builder.customGAID,
         optionInfo = builder.optionInfo,
         isTestAd = builder.isTestAd,
         adController = builder.adController,
@@ -257,6 +388,7 @@ class AMPSInitConfig {
         region = builder.region,
         adapterNames = builder.adapterNames,
         extensionParam = builder.extensionParam,
+        isUseSplashPunchLine = builder.isUseSplashPunchLine,
         isMediation = builder.isMediation;
 
   /// 转为 Map（用于JSON序列化）
@@ -273,7 +405,7 @@ class AMPSInitConfig {
       AMPSInitConfigKey.appName: appName,
       AMPSInitConfigKey.customUA: customUA,
       AMPSInitConfigKey.androidId: androidID,
-      AMPSInitConfigKey.gaId: gaId,
+      AMPSInitConfigKey.customGAID: customGAID,
       AMPSInitConfigKey.optionInfo: optionInfo,
       AMPSInitConfigKey.userId: userId,
       AMPSInitConfigKey.province: province,
@@ -281,44 +413,41 @@ class AMPSInitConfig {
       AMPSInitConfigKey.city: city,
       AMPSInitConfigKey.region: region,
       AMPSInitConfigKey.isMediation: isMediation,
-      /// 枚举类型：用名称或值传递
       AMPSInitConfigKey.uiModel: uiModel.name, // 假设 UiModel 是枚举
-      /// 列表类型
       AMPSInitConfigKey.adapterNames: adapterNames,
-      /// Map 转为 Map（Flutter 中 Map 可直接序列化）
       AMPSInitConfigKey.extensionParam: extensionParam,
       AMPSInitConfigKey.optionFields: optionFields,
-      /// 嵌套对象：通过 toJson 转换
+      AMPSInitConfigKey.isUseSplashPunchLine: isUseSplashPunchLine,
       AMPSInitConfigKey.adController: adController.toJson(),
     };
   }
 
-/// 获取uiModel的方法
+  /// 获取uiModel的方法
   UiModel getUiModel() {
     return uiModel;
   }
 
-/// 获取appId的方法
+  /// 获取appId的方法
   String getAppId() {
     return appId;
   }
 
-/// 获取设置的省份
+  /// 获取设置的省份
   String? getProvince() {
     return province;
   }
 
-/// 获取设置的城市
+  /// 获取设置的城市
   String? getCity() {
     return city;
   }
 
-/// 获取设置的地区
+  /// 获取设置的地区
   String? getRegion() {
     return region;
   }
 
-/// 获取设置的第三方平台参数
+  /// 获取设置的第三方平台参数
   Map<String, Map<String, dynamic>> getExtensionParams() {
     return extensionParam;
   }
@@ -327,40 +456,40 @@ class AMPSInitConfig {
     return adapterNames;
   }
 
-/// 获取设置的某个第三方平台参数
+  /// 获取设置的某个第三方平台参数
   Map<String, dynamic> getExtensionParamItems(String key) {
     if (extensionParam.containsKey(key)) {
-      return extensionParam[key] ?? <String,dynamic>{};
+      return extensionParam[key] ?? <String, dynamic>{};
     }
-    return <String,dynamic>{};
+    return <String, dynamic>{};
   }
 
-/// 获取appName的方法
+  /// 获取appName的方法
   String getAppName() {
     return appName;
   }
 
-/// 获取isDebugSetting的方法
+  /// 获取isDebugSetting的方法
   bool isDebugSetting() {
     return _isDebugSetting;
   }
 
-/// 获取isUseHttps的方法
+  /// 获取isUseHttps的方法
   bool isUseHttps() {
     return _isUseHttps;
   }
 
-/// 获取userId的方法
+  /// 获取userId的方法
   String getUserId() {
     return userId;
   }
 
-/// 获取用户设置的userAgent
+  /// 获取用户设置的userAgent
   String? getUserAgent() {
     return adController.userAgent;
   }
 
-/// 禁用奔溃日志收集，默认否【默认收集日志】
+  /// 禁用奔溃日志收集，默认否【默认收集日志】
   bool disableCrashCollect() {
     if (optionFields.containsKey(OptionFieldKey.crashCollectSwitch)) {
       final disableCrashCollect =
@@ -392,70 +521,62 @@ class AMPSInitConfig {
     return "";
   }
 
-///用于提供获取用户是否统一SDK自身定位。
+  ///用于提供获取用户是否统一SDK自身定位。
   bool isLocationEnabled() {
     return adController.isLocationEnabled;
   }
 
-///用于提供获取用户是否统一SDK自身定位。
+  ///用于提供获取用户是否统一SDK自身定位。
   AMPSLocation? getUserLocation() {
     return adController.location;
   }
 
-/// 获取optionFields的方法
+  /// 获取optionFields的方法
   Map<String, dynamic> getOptionFields() {
     return optionFields;
   }
 
-/// 获取currency的方法
+  /// 获取currency的方法
   String getCurrency() {
     return currency;
   }
 
-/// 获取countryCN的方法
+  /// 获取countryCN的方法
   int getCountryCN() {
     return countryCN;
   }
 
-/// 获取isTestAd的方法
+  /// 获取isTestAd的方法
   bool getIsTestAd() {
     return isTestAd;
   }
 
-/// 获取自定义OAID的方法
+  /// 获取自定义OAID的方法
   String getCustomOAID() {
     return adController.OAID;
   }
 
-/// 获取是否可以使用电话状态的方法
+  /// 获取是否可以使用电话状态的方法
   bool isCanUsePhoneState() {
     return adController.isCanUsePhoneState;
   }
 
-/// 获取是否可以使用传感器
+  /// 获取是否可以使用传感器
   bool isCanUseSensor() {
     return adController.isCanUseSensor;
   }
 }
 
-/// 假设已定义以下依赖类/枚举
-/// - AMPSInitConfig
-/// - AMPSConstants (包含CountryType和UiModel)
-/// - AMPSCustomController
-/// - Map
-/// - StrUtil
-/// - WebUseAgentInstance
-
 class AMPSBuilder {
   String appId;
   String appName = "";
-  bool isDebugSetting = true;
+  bool isDebugSetting = false;
   bool isUseHttps = false;
   String userId = "";
   String? customUA;
   String? androidID;
   String? optionInfo;
-  String? gaId;
+  String? customGAID;
   Map<String, dynamic> optionFields = {};
   String currency = "";
   int countryCN = CountryType.countryTypeChinaMainland;
@@ -469,6 +590,7 @@ class AMPSBuilder {
   List<String>? adapterNames = [];
   late Map<String, Map<String, dynamic>> extensionParam;
   bool isMediation = false;
+  var isUseSplashPunchLine = false;
 
   /// 构造函数，接收appId和context并进行初始化
   AMPSBuilder(this.appId) {
@@ -480,12 +602,14 @@ class AMPSBuilder {
     this.isMediation = isMediation;
     return this;
   }
+
   /// 设置自定义UserAgent
   AMPSBuilder setCustomUA(String ua) {
     customUA = ua;
     return this;
   }
-  /// 设置自定义UserAgent
+
+  /// 设置AndroidID
   AMPSBuilder setAndroidID(String id) {
     androidID = id;
     return this;
@@ -590,14 +714,22 @@ class AMPSBuilder {
     this.isTestAd = isTestAd;
     return this;
   }
-  ///
-  AMPSBuilder setGAID(String gaId) {
-    this.gaId = gaId;
+
+  /// 设置customGAID
+  AMPSBuilder setGAID(String customGAID) {
+    this.customGAID = customGAID;
     return this;
   }
+
   /// 设置落地页是否适配状态栏高度
   AMPSBuilder setLandStatusBarHeight([bool adapter = true]) {
     this.adapter = adapter;
+    return this;
+  }
+
+  /// 设置是否使用开屏广告标语
+  AMPSBuilder setIsUseSplashPunchLine(bool isUseSplashPunchLine) {
+    this.isUseSplashPunchLine = isUseSplashPunchLine;
     return this;
   }
 

@@ -29,6 +29,26 @@ class AMPSControllerKey {
 
   /// 对应 location 的序列化键
   static const String location = 'location';
+
+  static const String isCanUseWifiState = 'isCanUseWifiState';
+  static const String isCanUseOaid = 'isCanUseOaid';
+  static const String devOaid = 'devOaid';
+  static const String isCanUseAppList = 'isCanUseAppList';
+  static const String getAppList = 'getAppList';
+  static const String isCanUseAndroidId = 'isCanUseAndroidId';
+  static const String androidId = 'androidId';
+  static const String isCanUseMacAddress = 'isCanUseMacAddress';
+  static const String macAddress = 'macAddress';
+  static const String isCanUseWriteExternal = 'isCanUseWriteExternal';
+  static const String isCanUseShakeAd = 'isCanUseShakeAd';
+  static const String devImei = 'devImei';
+  static const String devImeiList = 'devImeiList';
+  static const String isCanUseRecordAudio = 'isCanUseRecordAudio';
+  static const String isCanUseIP = 'isCanUseIP';
+  static const String ip = 'ip';
+  static const String isCanUseSimOperator = 'isCanUseSimOperator';
+  static const String devSimOperatorCode = 'devSimOperatorCode';
+  static const String devSimOperatorName = 'devSimOperatorName';
 }
 
 class AMPSLocationKey {
@@ -47,6 +67,7 @@ class AMPSLocationKey {
 
 class AMPSInitConfigKey {
   static const String testModel = 'testModel';
+
   /// 对应 appId 的序列化键
   static const String appId = 'appId';
 
@@ -73,7 +94,7 @@ class AMPSInitConfigKey {
 
   static const String androidId = "AndroidID";
 
-  static const String gaId = "gaId";
+  static const String customGAID = "customGAID";
 
   static const String optionInfo = "optionInfo";
 
@@ -109,4 +130,7 @@ class AMPSInitConfigKey {
 
   /// 对应 adController 的序列化键
   static const String adController = 'adController';
+
+  /// 对应 isUseSplashPunchLine 的序列化键
+  static var isUseSplashPunchLine = 'isUseSplashPunchLine';
 }
