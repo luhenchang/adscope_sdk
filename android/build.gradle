@@ -2,14 +2,14 @@ group = "xyz.adscope.adscope_sdk"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.kotlin_version = "2.1.0"
+    ext.kotlin_version = "1.7.10"
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.9.1")
+        classpath("com.android.tools.build:gradle:7.3.0")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     }
 }
@@ -25,17 +25,19 @@ apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
 android {
-    namespace = "xyz.adscope.adscope_sdk"
+    if (project.android.hasProperty("namespace")) {
+        namespace = "xyz.adscope.adscope_sdk"
+    }
 
-    compileSdk = 36
+    compileSdk = 34
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11
+        jvmTarget = "1.8"
     }
 
     sourceSets {
@@ -44,16 +46,10 @@ android {
     }
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 21
     }
-    repositories {
-        flatDir {
-            dirs 'libs'
-        }
-    }
+
     dependencies {
-        compileOnly(name: 'AMPSSDK-5.1.1.4', ext: 'aar')
-        compileOnly(name: 'common_5.1.1.4', ext: 'aar')
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
     }
