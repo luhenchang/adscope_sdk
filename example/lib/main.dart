@@ -7,6 +7,7 @@ import 'package:adscope_sdk_example/widgets/button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'data/common.dart';
 import 'data/init_data.dart';
 import 'interstitial_page.dart';
 import 'native_page.dart';
@@ -84,7 +85,7 @@ class _SplashPageState extends State<SplashPage> {
     ksSdkEx["crashLog"] = true;
     ksSdkEx["ks_sdk_roller"] = "roller_click";
     ksSdkEx["ks_sdk_location"] = "baidu";
-    sdkConfig = AMPSBuilder("12379")
+    sdkConfig = AMPSBuilder(appId)
         .setCity("北京")
         .setRegion("朝阳区双井")
         .setCurrency(CurrencyType.currencyTypeUsd)
