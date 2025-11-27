@@ -5,5 +5,7 @@
   "main": "index.ets",
   "author": "",
   "license": "Apache-2.0",
-  "dependencies": {}
+  "dependencies": {
+    "xyz.adscope.amps": "file: ./libs/AMPSAdSDK_5.1.1.har",
+  }
 }

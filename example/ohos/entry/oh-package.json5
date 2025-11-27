@@ -6,6 +6,14 @@
   "main": "",
   "author": "",
   "license": "",
-  "dependencies": {},
+  "dependencies": {
+    "amps_ks_adapter": "file:../libs/amps_ks_adapter_5.1.308.har",
+    'amps_gm_adapter': "file:../libs/amps_gm_adapter_5.1.720.har",
+    "amps_csj_adapter": "file:../libs/amps_csj_adapter_5.1.720.har",
+    "amps_hw_adapter": "file:../libs/amps_hw_adapter_5.1.10.har",
+    "amps_gdt_adapter": "file:../libs/amps_gdt_adapter_5.1.120.har",
+    "amps_sigmob_adapter": "file:../libs/amps_sigmob_adapter_5.1.113.har",
+    "amps_jad_adapter": "file:../libs/amps_jad_adapter_5.1.1010.har"
+  },
 }
 

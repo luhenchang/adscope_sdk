@@ -2,6 +2,20 @@
 {
   "apiType": 'stageMode',
   "buildOption": {
+    "arkOptions": {
+      "runtimeOnly": {
+        "packages": [
+//          "xyz.adscope.amps",
+          "amps_ks_adapter",
+          'amps_gm_adapter',
+          "amps_csj_adapter",
+          "amps_hw_adapter",
+          "amps_sigmob_adapter",
+          "amps_gdt_adapter",
+          "amps_jad_adapter"
+        ]
+      },
+    }
   },
   "targets": [
     {

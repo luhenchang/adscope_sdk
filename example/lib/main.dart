@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'package:adscope_sdk_example/data/common.dart';
 import 'package:adscope_sdk_example/interstitial_show_page.dart';
 import 'package:adscope_sdk_example/splash_show_page.dart';
 import 'package:adscope_sdk_example/widgets/blurred_background.dart';
@@ -7,7 +8,6 @@ import 'package:adscope_sdk_example/widgets/button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'data/common.dart';
 import 'data/init_data.dart';
 import 'interstitial_page.dart';
 import 'native_page.dart';
@@ -90,8 +90,8 @@ class _SplashPageState extends State<SplashPage> {
         .setRegion("朝阳区双井")
         .setCurrency(CurrencyType.currencyTypeUsd)
         .setCountryCN(CountryType.countryTypeChinaMainland)
-        //.setDebugSetting(true)
-        //.setIsMediation(false)
+        .setDebugSetting(true)
+        .setIsMediation(true)
         //.setIsTestAd(false)
         //.setGAID("")
         .setLandStatusBarHeight(true)
@@ -117,7 +117,7 @@ class _SplashPageState extends State<SplashPage> {
                     longitude: 116.31985,
                     timeStamp: 1113939393,
                     coordinate: CoordinateType.baidu)))) //个性化，传感器等外部设置
-        .setIsMediation(false)
+        // .setIsMediation(false)
         .setUiModel(UiModel.uiModelAuto)
         .build();
   }

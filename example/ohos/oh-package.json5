@@ -6,6 +6,11 @@
   "main": "",
   "author": "",
   "license": "",
+  "overrides": {
+    "xyz.adscope.amps": "file:./libs/AMPSAdSDK_5.1.1.har",
+    "ksadsdk": "file:./libs/KSAdSDK-3.0.8.har",
+    '@gdt/gdt-union-sdk': "file:./libs/GDTUnionSDK-1.2.0.har",
+  },
   "dependencies": {},
   "devDependencies": {
     "@ohos/hypium": "1.0.6"
