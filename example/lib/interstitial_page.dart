@@ -1,8 +1,8 @@
 import 'package:adscope_sdk/amps_sdk_export.dart';
+import 'package:adscope_sdk_example/data/common.dart';
 import 'package:adscope_sdk_example/widgets/button_widget.dart';
 import 'package:flutter/material.dart';
 
-import 'data/common.dart';
 class InterstitialPage extends StatefulWidget {
   const InterstitialPage({super.key, required this.title});
 
