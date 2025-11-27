@@ -68,7 +68,7 @@ class _InterstitialShowPageState extends State<InterstitialShowPage> {
           debugPrint("ad load onVideoSkipToEnd=$duration");
         });
 
-    AdOptions options = AdOptions(spaceId: splashSpaceId);
+    AdOptions options = AdOptions(spaceId: interstitialSpaceId);
     _interAd = AMPSInterstitialAd(config: options, mCallBack: _adCallBack);
   }
   @override

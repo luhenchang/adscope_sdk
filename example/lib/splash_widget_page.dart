@@ -16,7 +16,7 @@ class SplashWidgetPage extends StatefulWidget {
 class _SplashWidgetPageState extends State<SplashWidgetPage> {
   AMPSSplashAd? _splashAd;
   late AdCallBack _adCallBack;
-  bool splashVisible = true;
+  bool splashVisible = false;
   bool couldBack = true;
 
   num eCpm = -1;
@@ -28,6 +28,7 @@ class _SplashWidgetPageState extends State<SplashWidgetPage> {
     _adCallBack = AdCallBack(onRenderOk: () {
       setState(() {
         couldBack = false;
+        splashVisible = true;
       });
       debugPrint("ad load onRenderOk");
     },onAdShow: () {
@@ -70,9 +71,7 @@ class _SplashWidgetPageState extends State<SplashWidgetPage> {
                     buttonText: '点击加载开屏页面',
                     callBack: () {
                       // 点击再次刷新，加载广告。
-                      setState(() {
-                        splashVisible = true;
-                      });
+                      _splashAd?.load();
                     }),
                 ButtonWidget(
                     buttonText: '获取竞价=$eCpm',

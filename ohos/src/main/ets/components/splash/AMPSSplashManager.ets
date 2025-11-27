@@ -25,6 +25,10 @@ export class AMPSSplashManager {
     return AMPSSplashManager.instance;
   }
 
+  getSplashAd(): AMPSSplashAd | undefined{
+    return this.mSplashAd
+  }
+
   // 优化回调定义，减少重复代码
   private callback: ampsAd.CallBack = {
     onLoadSuccess: () => this.sendMessage(AMPSAdCallBackChannelMethod.onLoadSuccess),

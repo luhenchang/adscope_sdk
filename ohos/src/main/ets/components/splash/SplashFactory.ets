@@ -14,6 +14,6 @@ export class SplashFactory extends PlatformViewFactory {
   }
 
   public create(context: common.Context, viewId: number, args: Object): PlatformView {
-    return new OhosPlatformSplashView(context, viewId, args, this.message);
+    return new OhosPlatformSplashView(args);
   }
 }
