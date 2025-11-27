@@ -1,3 +1,4 @@
+import 'package:adscope_sdk_example/data/common.dart';
 import 'package:adscope_sdk_example/widgets/blurred_background.dart';
 import 'package:adscope_sdk/amps_sdk_export.dart';
 import 'package:adscope_sdk_example/widgets/button_widget.dart';
@@ -49,7 +50,7 @@ class _SplashWidgetPageState extends State<SplashWidgetPage> {
       debugPrint("ad load onAdClosed");
     });
 
-    AdOptions options = AdOptions(spaceId: '15288', splashAdBottomBuilderHeight: 100);
+    AdOptions options = AdOptions(spaceId: splashSpaceId, splashAdBottomBuilderHeight: 100);
     _splashAd = AMPSSplashAd(config: options, mCallBack: _adCallBack);
   }
 

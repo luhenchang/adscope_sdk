@@ -1,7 +1,7 @@
 import { ampsAd } from 'xyz.adscope.amps';
 import { StringConstants } from './StringConstants';
 
-const channelDomain = "xyz.adscope.com";
+const channelDomain = "xyz.adscope.amps";
 
 export class AMPSChannels {
   static readonly ampsSdkInit = `${channelDomain}/sdk`;

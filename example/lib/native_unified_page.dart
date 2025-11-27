@@ -94,7 +94,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
       }
     );
     AdOptions options = AdOptions(
-        spaceId: nativeSpaceId,
+        spaceId: unifiedSpaceId,
         adCount: 1,
         expressSize: [expressWidth, expressHeight]);
     _nativeAd = AMPSNativeAd(
