@@ -27,11 +27,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
        initialRoute: 'SplashPage',
        routes: {
-         'SplashPage':(context)=>const SplashPage(title: '开屏页面'),
-         'SplashShowPage':(context)=>const SplashShowPage(title: '开屏页面'),
+         'SplashPage':(context)=>const SplashPage(title: '开屏组件页面'),
+         'SplashShowPage':(context)=>const SplashShowPage(title: '开屏show页面'),
          'SplashWidgetPage':(context)=>const SplashWidgetPage(title: '开屏页面'),
-         'InterstitialShowPage':(context)=> const InterstitialShowPage(title: '插屏页面'),
-         'InterstitialPage':(context)=> const InterstitialPage(title: '插屏页面'),
+         'InterstitialShowPage':(context)=> const InterstitialShowPage(title: '插屏show页面'),
+         'InterstitialPage':(context)=> const InterstitialPage(title: '插屏组件页面'),
          'NativePage':(context)=> const NativePage(title: '原生页面'),
          'NativeUnifiedPage':(context)=> const NativeUnifiedPage(title: '原生自渲染页面')
        },

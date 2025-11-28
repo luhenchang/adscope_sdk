@@ -15,11 +15,11 @@ class AMPSSplashAd {
 
   AMPSSplashAd({required this.config, this.mCallBack});
 
-  void registerChannel(int id,AdWidgetNeedCloseCall? closeWidgetCall) {
-    _channel = null;
-    _channel = MethodChannel('${AMPSPlatformViewRegistry.ampsSdkSplashViewId}$id');
-    setMethodCallHandler(closeWidgetCall);
-  }
+  // void registerChannel(int id,AdWidgetNeedCloseCall? closeWidgetCall) {
+  //   _channel = null;
+  //   _channel = MethodChannel('${AMPSPlatformViewRegistry.ampsSdkSplashViewId}$id');
+  //   setMethodCallHandler(closeWidgetCall);
+  // }
 
   void setMethodCallHandler(AdWidgetNeedCloseCall? closeWidgetCall) {
     _channel?.setMethodCallHandler(

@@ -39,6 +39,9 @@ export class AMPSInterstitialManager {
     }
     return AMPSInterstitialManager.instance;
   }
+  getInterstitialAd(){
+    return this.interstitialAd
+  }
 
   handleMethodCall(call: MethodCall, result: MethodResult) {
     switch (call.method) {

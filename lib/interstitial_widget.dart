@@ -40,13 +40,13 @@ class _InterstitialWidgetState extends State<InterstitialWidget> {
           onPlatformViewCreated: _onPlatformViewCreated,
           creationParamsCodec: const StandardMessageCodec());
     }
-    // else if (Platform.isOhos) {
-    //   view =  OhosView(
-    //       viewType: AMPSPlatformViewRegistry.ampsSdkInterstitialViewId,
-    //       onPlatformViewCreated: _onPlatformViewCreated,
-    //       creationParams: param,
-    //       creationParamsCodec: const StandardMessageCodec());
-    // }
+    else if (Platform.isOhos) {
+      view =  OhosView(
+          viewType: AMPSPlatformViewRegistry.ampsSdkInterstitialViewId,
+          onPlatformViewCreated: _onPlatformViewCreated,
+          creationParams: param,
+          creationParamsCodec: const StandardMessageCodec());
+    }
     else {
       view =  const Center(child: Text("暂不支持此平台"));
     }
@@ -55,10 +55,9 @@ class _InterstitialWidgetState extends State<InterstitialWidget> {
   }
   ///通知关闭开屏显示组件内容，避免关闭广告之后用户可见。
   void _onPlatformViewCreated(int id) {
-    widget.ad?.registerChannel(id, () {
-      setState(() {
-        widgetNeedClose = true;
-      });
+    debugPrint("ad load  _onPlatformViewCreated");
+    setState(() {
+      widgetNeedClose = true;
     });
   }
 }

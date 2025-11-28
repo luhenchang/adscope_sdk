@@ -15,7 +15,7 @@ class InterstitialPage extends StatefulWidget {
 class _InterstitialPageState extends State<InterstitialPage> {
   late AdCallBack _adCallBack;
   AMPSInterstitialAd? _interAd;
-  bool visibleAd = true;
+  bool visibleAd = false;
   bool couldBack = true;
 
   num eCpm = -1;
@@ -37,7 +37,6 @@ class _InterstitialPageState extends State<InterstitialPage> {
         onAdClicked: () {
           setState(() {
             couldBack = true;
-            visibleAd = false;
           });
           debugPrint("ad load onAdClicked");
         },
@@ -81,18 +80,18 @@ class _InterstitialPageState extends State<InterstitialPage> {
   }
   @override
   void dispose() {
-    debugPrint("差评调用来了11");
+    debugPrint("差评销毁来了11");
     super.dispose();
   }
   @override
   Widget build(BuildContext context) {
     return  PopScope(
-        canPop: couldBack,
+        canPop: true,
         child:  Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Stack(children: [
+      body: Stack(alignment: AlignmentDirectional.center, children: [
         Column(
             children:[
               ElevatedButton(
@@ -100,9 +99,7 @@ class _InterstitialPageState extends State<InterstitialPage> {
                 onPressed: () {
                   // 返回上一页
                   debugPrint("差评调用来了11");
-                  setState(() {
-                    visibleAd = true;
-                  });
+                  _interAd?.load();
                 },
               ),
               ButtonWidget(

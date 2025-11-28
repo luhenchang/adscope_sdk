@@ -14,6 +14,6 @@ export class InterstitialFactory extends PlatformViewFactory {
   }
 
   public create(context: common.Context, viewId: number, args: Object): PlatformView {
-    return new OhosPlatformInterstitialView(context, viewId, args, this.message);
+    return new OhosPlatformInterstitialView();
   }
 }
