@@ -7,8 +7,8 @@ import android.util.TypedValue
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
-import com.example.amps_sdk.data.SplashBottomModule
 import androidx.core.graphics.toColorInt
+import xyz.adscope.adscope_sdk.data.SplashBottomModule
 
 
 object SplashBottomViewFactory {

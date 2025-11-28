@@ -1,32 +1,188 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="xyz.adscope.adscope_sdk_example">
+
+    <!--由于引入的sdk支持的最小版本与app支持的最小版本可能不一致，需要在AndroidManifest文件中添加overrideLibrary配置-->
+    <uses-sdk tools:overrideLibrary="xyz.adscope.amps,
+    xyz.adscope.ad,xyz.adscope.amps.adapter.asnp,
+    com.beizi.ad,com.beizi.fusion,xyz.adscope.amps.adapter.bz,
+    xyz.adscope.common.v2" />
+
+    <!--AsnpSDK所需权限 start-->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!--AsnpSDK所需权限 end-->
+
+    <!--BeiZiSDK所需权限 start-->
+    <!--必要权限-->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!--可选权限-->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!--BeiZiSDK所需权限 end-->
+
+
+    <!--广点通SDK所需权限 start-->
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />    <!-- 必要权限，权限会用在下载类广告安装应用时使用 -->
+    <!--可选权限 -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!--广点通SDK所需权限 end-->
+
+    <!--快手SDK所需权限 start-->
+
+    <!--检测当前⽹络状态是2G、3G、4G还是WiFi-->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!--联⽹权限-->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!--获取设备标识IMEI。⽤于标识⽤户-->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!--读写存储权限-->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!--获取MAC地址，⽤于标识⽤户-->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!--安装应⽤权限-->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!--定位权限，不强制要求-->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!--建议添加“query_all_package”权限，SDK将通过此权限在AndroidR系统上判定⼴告对应的应⽤
+    是否在⽤户的app上安装，避免投放错误的⼴告，以此提⾼⽤户的⼴告体验。若添加此权限，需要在您的⽤
+    户隐私⽂档中声明-->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <!--通知栏权限，⽤于展示下载通知，⾮必须-->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--快手SDK所需权限 end-->
+
+    <!--穿山甲-GroMore融合版本SDK所需权限 start-->
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!--可选权限，申请后用于防作弊功能以及有助于广告平台投放广告-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <permission
+        android:name="${applicationId}.openadsdk.permission.TT_PANGOLIN"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="${applicationId}.openadsdk.permission.TT_PANGOLIN" />
+
+    <!--建议添加“query_all_package”权限，穿山甲将通过此权限在Android R系统上判定广告对应的应用是否在用户的app上安装，避免投放错误的广告，以此提高用户的广告体验。若添加此权限，需要在您的用户隐私文档中声明！ -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+
+    <!--穿山甲-GroMore融合版本SDK所需权限 end-->
+
+    <!--百度SDK所需权限 start-->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permissio.WRITE_EXTERNAL_STORAGE" />
+    <!--可选权限-->
+    <!--高于Android 7的系统上，如果应用的 targetSdkVersion >= 26 ，推荐增加权限声明（SDK将通过此权限触发App安装动作-->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!--高于Android 11的系统上，如果应用的 targetSdkVersion >= 30 ，推荐增加以下权限声明（SDK将通过此权限正常触发广告行为，并保证广告的正确投放。此权限需要在用户隐私文档中声明。-->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <!--百度SDK所需权限 end-->
+
+
+    <!--京东SDK所需权限 start-->
+    <!--必要权限 用户SDK可访问网络-->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--可选权限-->
+    <!--用于SDK可获取网络状态变化，更及时的更新媒体广告位配置-->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!--用于SDK，在媒体允许的情况下，获取IMEI 标识用户的唯一性，有助于广告填充-->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!--用于SDK，在媒体允许的情况下，获取使用Wi-Fi等WLAN无线网，有助于广告精准投放-->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!--用于SDK，在媒体允许的情况下，获取位置信息，更精确的推送最有价值的广告-->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!--用于京东渲染广告图片缓存 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!--建议添加“query_all_package”权限，京东广告将通过此权限在Android R系统上判定广告对应的应用是否在用户的app上安装，
+    避免投放错误的广告，以此提高用户的广告体验。若添加此权限，需要在您的用户隐私文档中声明！-->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <!--京东SDK所需权限 end-->
+
+    <!--华为SDK所需权限 start-->
+
+    <!--华为SDK所需权限 end-->
+
+    <!--趣盟SDK所需权限 start-->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!--趣盟SDK所需权限 end-->
+
+
     <application
-        android:label="adscope_sdk_example"
-        android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AMPSSDKDemoAndroid"
+        android:usesCleartextTraffic="true"
+        tools:replace="android:allowBackup"
+        tools:targetApi="23">
         <activity
             android:name=".MainActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:exported="true"
+            android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-            android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues
                  to determine the Window background behind the Flutter UI. -->
             <meta-data
-              android:name="io.flutter.embedding.android.NormalTheme"
-              android:resource="@style/NormalTheme"
-              />
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- Don't delete the meta-data below.
-             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <!--BeiZiSDK start-->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/beizi_file_path" />
+        </provider>
+        <!--BeiZiSDK end-->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
@@ -38,8 +194,8 @@
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
         <intent>
-            <action android:name="android.intent.action.PROCESS_TEXT"/>
-            <data android:mimeType="text/plain"/>
+            <action android:name="android.intent.action.PROCESS_TEXT" />
+            <data android:mimeType="text/plain" />
         </intent>
     </queries>
 </manifest>

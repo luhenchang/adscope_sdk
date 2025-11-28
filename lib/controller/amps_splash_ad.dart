@@ -1,9 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 import '../adscope_sdk.dart';
 import '../common.dart';
 import '../data/amps_ad.dart';
 import '../widget/splash_bottom_widget.dart';
+import '';
 ///开屏广告类
 class AMPSSplashAd {
   MethodChannel? _channel;
@@ -82,6 +84,7 @@ class AMPSSplashAd {
   void load() async {
     _channel = AdscopeSdk.channel;
     setMethodCallHandler(null);
+    debugPrint("Flutter == onAmpsAdLoaded=load");
     await AdscopeSdk.channel.invokeMethod(
       AMPSAdSdkMethodNames.splashLoad,
       config.toMap(),

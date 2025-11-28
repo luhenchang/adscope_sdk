@@ -1,5 +1,6 @@
 package xyz.adscope.adscope_sdk.utils
 
+//noinspection SuspiciousImport
 import android.R
 import android.app.Activity
 import android.content.Context

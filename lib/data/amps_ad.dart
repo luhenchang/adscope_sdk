@@ -1,6 +1,5 @@
 
 import '../common.dart';
-import '../controller/screen_mode.dart';
 
 ///广告加载入参参数
 class AdOptions {
@@ -14,7 +13,6 @@ class AdOptions {
   final String? userId;
   final String? extra;
   final String? ipAddress;
-  final ScreenMode? screenMode;
 
   AdOptions({
     required this.spaceId,
@@ -26,8 +24,7 @@ class AdOptions {
     this.splashAdBottomBuilderHeight,
     this.userId,
     this.extra,
-    this.ipAddress,
-    this.screenMode
+    this.ipAddress
   });
 
   Map<dynamic, dynamic> toMap({NativeType? nativeType}) {
@@ -42,8 +39,7 @@ class AdOptions {
       'splashAdBottomBuilderHeight': splashAdBottomBuilderHeight,
       'userId': userId,
       'extra': extra,
-      'ipAddress': ipAddress,
-      'splashAdDisplayType': screenMode?.value ?? ScreenMode.fullScreen.value
+      'ipAddress': ipAddress
     };
   }
 }

@@ -1,6 +1,8 @@
 package xyz.adscope.adscope_sdk.manager
 
 import android.app.Activity
+import android.graphics.Color
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -43,12 +45,13 @@ class AMPSSplashManager private constructor() {
 
     private val adCallback = object : AMPSSplashLoadEventListener {
         override fun onAmpsAdLoaded() {
+            Log.e("开屏","onAmpsAdLoaded=renderOK")
             sendMessage(AMPSAdCallBackChannelMethod.ON_LOAD_SUCCESS)
-            // 在旧代码中，这里也有 ON_RENDER_OK，如果 SDK 行为如此，则保留
             sendMessage(AMPSAdCallBackChannelMethod.ON_RENDER_OK)
         }
 
         override fun onAmpsAdShow() {
+            Log.e("开屏","onAmpsAdLoaded=onAmpsAdShow")
             sendMessage(AMPSAdCallBackChannelMethod.ON_AD_SHOW)
         }
 
@@ -140,6 +143,7 @@ class AMPSSplashManager private constructor() {
 
     // handleSplashShowAd 现在也接收 MethodCall 和 Result，以便统一错误处理和参数获取
     private fun handleSplashShowAd(call: MethodCall, result: Result) {
+        Log.e("开屏","onAmpsAdLoaded=handleSplashShowAd")
         val activity = getCurrentActivity()
         if (mSplashAd == null) {
             result.error("SHOW_FAILED", "Splash ad not loaded.", null)
@@ -213,7 +217,6 @@ class AMPSSplashManager private constructor() {
             // 否则 (没有底部视图或底部视图无效)，adContainer 将默认填充整个 mainContainerLocal (因为宽高都是 MATCH_PARENT)
             adContainerLocal.layoutParams = adContainerParams
             mainContainerLocal.addView(adContainerLocal) // 再添加广告容器
-
             decorView.addView(mainContainerLocal)
             // --- 视图创建和添加结束 ---
             if (mSplashAd?.isReady == true) {

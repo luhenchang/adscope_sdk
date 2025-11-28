@@ -21,9 +21,9 @@ class _SplashShowPageState extends State<SplashShowPage> {
   bool couldBack = true;
   @override
   void initState() {
-    //SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     super.initState();
     _adCallBack = AdCallBack(onRenderOk: () {
+      debugPrint("Flutter==onAmpsAdLoaded=renderOK");
       _splashAd?.showAd(
           splashBottomWidget: SplashBottomWidget(
               height: 100,
@@ -44,6 +44,9 @@ class _SplashShowPageState extends State<SplashShowPage> {
               text: 'Hello Android!',
             ),
           ]));
+      setState(() {
+        couldBack = false;
+      });
       debugPrint("ad load onRenderOk");
     }, onLoadFailure: (code, msg) {
       debugPrint("ad load failure=$code;$msg");
@@ -80,8 +83,7 @@ class _SplashShowPageState extends State<SplashShowPage> {
       debugPrint("ad load onVideoSkipToEnd=$duration");
     });
 
-    AdOptions options =
-        AdOptions(spaceId: splashSpaceId,screenMode: ScreenMode.fullScreen, splashAdBottomBuilderHeight: 100);
+    AdOptions options = AdOptions(spaceId: splashSpaceId, splashAdBottomBuilderHeight: 100);
     _splashAd = AMPSSplashAd(config: options, mCallBack: _adCallBack);
   }
 

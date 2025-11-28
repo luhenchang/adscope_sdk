@@ -125,12 +125,9 @@ class AMPSCustomController {
   /// 是否可以使用PhoneState权限
   bool isCanUsePhoneState;
 
-  /// 透传OAID
-  String OAID;
-
   /// 是否允许使用个性化推荐
   /// true: 允许 false: 不允许
-  bool isSupportPersonalized; //TODO OK 4
+  bool isSupportPersonalized;
 
   /// 适龄标记
   /// 取值参考 [UnderageTag]
@@ -171,7 +168,6 @@ class AMPSCustomController {
   AMPSCustomController({
     required AMPSCustomControllerParam? param,
   })  : isCanUsePhoneState = param?.isCanUsePhoneState ?? false,
-        OAID = param?.OAID ?? "",
         isSupportPersonalized = param?.isSupportPersonalized ?? true,
         getUnderageTag = param?.getUnderageTag ?? UnderageTag.unknown,
         userAgent = param?.userAgent,
@@ -202,7 +198,6 @@ class AMPSCustomController {
   Map<String, dynamic> toJson() {
     return {
       AMPSControllerKey.isCanUsePhoneState: isCanUsePhoneState,
-      AMPSControllerKey.oaid: OAID,
       AMPSControllerKey.isSupportPersonalized: isSupportPersonalized,
       AMPSControllerKey.getUnderageTag: getUnderageTag.value, // 枚举用名称传递
       AMPSControllerKey.userAgent: userAgent,
@@ -421,150 +416,6 @@ class AMPSInitConfig {
       AMPSInitConfigKey.adController: adController.toJson(),
     };
   }
-
-  /// 获取uiModel的方法
-  UiModel getUiModel() {
-    return uiModel;
-  }
-
-  /// 获取appId的方法
-  String getAppId() {
-    return appId;
-  }
-
-  /// 获取设置的省份
-  String? getProvince() {
-    return province;
-  }
-
-  /// 获取设置的城市
-  String? getCity() {
-    return city;
-  }
-
-  /// 获取设置的地区
-  String? getRegion() {
-    return region;
-  }
-
-  /// 获取设置的第三方平台参数
-  Map<String, Map<String, dynamic>> getExtensionParams() {
-    return extensionParam;
-  }
-
-  List<String>? getAdapterNames() {
-    return adapterNames;
-  }
-
-  /// 获取设置的某个第三方平台参数
-  Map<String, dynamic> getExtensionParamItems(String key) {
-    if (extensionParam.containsKey(key)) {
-      return extensionParam[key] ?? <String, dynamic>{};
-    }
-    return <String, dynamic>{};
-  }
-
-  /// 获取appName的方法
-  String getAppName() {
-    return appName;
-  }
-
-  /// 获取isDebugSetting的方法
-  bool isDebugSetting() {
-    return _isDebugSetting;
-  }
-
-  /// 获取isUseHttps的方法
-  bool isUseHttps() {
-    return _isUseHttps;
-  }
-
-  /// 获取userId的方法
-  String getUserId() {
-    return userId;
-  }
-
-  /// 获取用户设置的userAgent
-  String? getUserAgent() {
-    return adController.userAgent;
-  }
-
-  /// 禁用奔溃日志收集，默认否【默认收集日志】
-  bool disableCrashCollect() {
-    if (optionFields.containsKey(OptionFieldKey.crashCollectSwitch)) {
-      final disableCrashCollect =
-          optionFields[OptionFieldKey.crashCollectSwitch];
-      if (disableCrashCollect is bool) {
-        return disableCrashCollect;
-      }
-    }
-    return false;
-  }
-
-  String getLightColor() {
-    if (optionFields.containsKey(OptionFieldKey.colorLight)) {
-      final lightColor = optionFields[OptionFieldKey.colorLight];
-      if (lightColor is String) {
-        return lightColor;
-      }
-    }
-    return "";
-  }
-
-  String getDarkColor() {
-    if (optionFields.containsKey(OptionFieldKey.colorDark)) {
-      final darkColor = optionFields[OptionFieldKey.colorDark];
-      if (darkColor is String) {
-        return darkColor;
-      }
-    }
-    return "";
-  }
-
-  ///用于提供获取用户是否统一SDK自身定位。
-  bool isLocationEnabled() {
-    return adController.isLocationEnabled;
-  }
-
-  ///用于提供获取用户是否统一SDK自身定位。
-  AMPSLocation? getUserLocation() {
-    return adController.location;
-  }
-
-  /// 获取optionFields的方法
-  Map<String, dynamic> getOptionFields() {
-    return optionFields;
-  }
-
-  /// 获取currency的方法
-  String getCurrency() {
-    return currency;
-  }
-
-  /// 获取countryCN的方法
-  int getCountryCN() {
-    return countryCN;
-  }
-
-  /// 获取isTestAd的方法
-  bool getIsTestAd() {
-    return isTestAd;
-  }
-
-  /// 获取自定义OAID的方法
-  String getCustomOAID() {
-    return adController.OAID;
-  }
-
-  /// 获取是否可以使用电话状态的方法
-  bool isCanUsePhoneState() {
-    return adController.isCanUsePhoneState;
-  }
-
-  /// 获取是否可以使用传感器
-  bool isCanUseSensor() {
-    return adController.isCanUseSensor;
-  }
 }
 
 class AMPSBuilder {
@@ -589,7 +440,7 @@ class AMPSBuilder {
   String? region;
   List<String>? adapterNames = [];
   late Map<String, Map<String, dynamic>> extensionParam;
-  bool isMediation = false;
+  bool isMediation = true;
   var isUseSplashPunchLine = false;
 
   /// 构造函数，接收appId和context并进行初始化

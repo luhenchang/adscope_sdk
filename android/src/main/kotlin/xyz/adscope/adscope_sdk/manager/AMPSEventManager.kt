@@ -40,7 +40,7 @@ class AMPSEventManager private constructor() : MethodCallHandler {
      */
     fun init(binaryMessenger: BinaryMessenger) {
         if (channel == null) {
-            channel = MethodChannel(binaryMessenger, "amps_sdk") // "amps_sdk" 是通道名称
+            channel = MethodChannel(binaryMessenger, "adscope_sdk") // "amps_sdk" 是通道名称
             channel?.setMethodCallHandler(this) // 将当前类设置为回调处理器
         }
     }
