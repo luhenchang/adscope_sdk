@@ -85,48 +85,50 @@ class _InterstitialPageState extends State<InterstitialPage> {
   }
   @override
   Widget build(BuildContext context) {
-    return  PopScope(
+    return PopScope(
         canPop: true,
-        child:  Scaffold(
-      body: Stack(alignment: AlignmentDirectional.center, children: [
-        Column(
-            children:[
-              ElevatedButton(
-                child: const Text('点击展示插屏'),
-                onPressed: () {
-                  // 返回上一页
-                  debugPrint("差评调用来了11");
-                  _interAd?.load();
-                },
-              ),
-              ButtonWidget(
-                  buttonText: '获取竞价=$eCpm',
-                  callBack: () async {
-                    bool? isReadyAd = await _interAd?.isReadyAd();
-                    debugPrint("isReadyAd=$isReadyAd");
-                    if(_interAd != null){
-                      num ecPmResult =  await _interAd!.getECPM();
-                      setState(() {
-                        eCpm = ecPmResult;
-                        debugPrint("ecPm请求结果=$eCpm");
-                      });
-                    }
-                  }),
-              ButtonWidget(
-                  buttonText: '上报竞胜',
-                  callBack: () async {
-                    _interAd?.notifyRTBWin(11, 3);
-                  }),
-              ButtonWidget(
-                  buttonText: '上报竞价失败',
-                  callBack: () async {
-                    _interAd?.notifyRTBLoss(11, 3,"给的价格太低");
-                  }),
-
-            ]
-        ),
-        if(visibleAd) const InterstitialWidget()
-      ],)
-    ));
+        child: Scaffold(
+            appBar: AppBar(
+              title: Text(widget.title),
+            ),
+            body: Stack(
+              alignment: AlignmentDirectional.center,
+              children: [
+                Column(children: [
+                  ElevatedButton(
+                    child: const Text('点击展示插屏'),
+                    onPressed: () {
+                      // 返回上一页
+                      debugPrint("差评调用来了11");
+                      _interAd?.load();
+                    },
+                  ),
+                  ButtonWidget(
+                      buttonText: '获取竞价=$eCpm',
+                      callBack: () async {
+                        bool? isReadyAd = await _interAd?.isReadyAd();
+                        debugPrint("isReadyAd=$isReadyAd");
+                        if (_interAd != null) {
+                          num ecPmResult = await _interAd!.getECPM();
+                          setState(() {
+                            eCpm = ecPmResult;
+                            debugPrint("ecPm请求结果=$eCpm");
+                          });
+                        }
+                      }),
+                  ButtonWidget(
+                      buttonText: '上报竞胜',
+                      callBack: () async {
+                        _interAd?.notifyRTBWin(11, 3);
+                      }),
+                  ButtonWidget(
+                      buttonText: '上报竞价失败',
+                      callBack: () async {
+                        _interAd?.notifyRTBLoss(11, 3, "给的价格太低");
+                      }),
+                ]),
+                if (visibleAd) const InterstitialWidget()
+              ],
+            )));
   }
 }
