@@ -82,9 +82,9 @@ class AMPSSplashAd {
     await AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.splashLoad);
   }
 
-  ///获取ecpm
+  ///开屏广预加载
   void  preLoad() async {
-    return await AdscopeSdk.channel
+    await AdscopeSdk.channel
         .invokeMethod(AMPSAdSdkMethodNames.splashPreLoad);
   }
 
@@ -106,13 +106,13 @@ class AMPSSplashAd {
         .invokeMethod(AMPSAdSdkMethodNames.splashGetECPM);
   }
 
-  ///获取ecpm
+  ///调用addPreLoadAdInfo
   void addPreLoadAdInfo() async {
-    AdscopeSdk.channel
+    await AdscopeSdk.channel
         .invokeMethod(AMPSAdSdkMethodNames.splashAddPreLoadAdInfo);
   }
 
-  ///获取ecpm
+  ///调用addPreGetMediaExtraInfo
   Future<Map<String, dynamic>?> addPreGetMediaExtraInfo() async {
     return await AdscopeSdk.channel
         .invokeMethod(AMPSAdSdkMethodNames.splashAddPreGetMediaExtraInfo);
