@@ -40,13 +40,13 @@ class _InterstitialWidgetState extends State<InterstitialWidget> {
           onPlatformViewCreated: _onPlatformViewCreated,
           creationParamsCodec: const StandardMessageCodec());
     }
-    else if (Platform.isOhos) {
-      view =  OhosView(
-          viewType: AMPSPlatformViewRegistry.ampsSdkInterstitialViewId,
-          onPlatformViewCreated: _onPlatformViewCreated,
-          creationParams: param,
-          creationParamsCodec: const StandardMessageCodec());
-    }
+    // else if (Platform.isOhos) {
+    //   view =  OhosView(
+    //       viewType: AMPSPlatformViewRegistry.ampsSdkInterstitialViewId,
+    //       onPlatformViewCreated: _onPlatformViewCreated,
+    //       creationParams: param,
+    //       creationParamsCodec: const StandardMessageCodec());
+    // }
     else {
       view =  const Center(child: Text("暂不支持此平台"));
     }

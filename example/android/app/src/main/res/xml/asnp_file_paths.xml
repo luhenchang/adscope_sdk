@@ -1,0 +1,12 @@
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-path
+        name="external"
+        path="asnp" />
+    <external-path
+        name="external_files"
+        path="." />
+    <files-path
+        name="name"
+        path="ASNP" />
+
+</paths>

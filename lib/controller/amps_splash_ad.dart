@@ -1,28 +1,23 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
-
 import '../adscope_sdk.dart';
 import '../common.dart';
 import '../data/amps_ad.dart';
 import '../widget/splash_bottom_widget.dart';
-import '';
+
 ///开屏广告类
 class AMPSSplashAd {
-  MethodChannel? _channel;
   AdOptions config;
   AdCallBack? mCallBack;
   AdCallBack? mViewCallBack;
 
-  AMPSSplashAd({required this.config, this.mCallBack});
-
-  // void registerChannel(int id,AdWidgetNeedCloseCall? closeWidgetCall) {
-  //   _channel = null;
-  //   _channel = MethodChannel('${AMPSPlatformViewRegistry.ampsSdkSplashViewId}$id');
-  //   setMethodCallHandler(closeWidgetCall);
-  // }
+  AMPSSplashAd({required this.config, this.mCallBack}) {
+    AdscopeSdk.channel.invokeMethod(
+      AMPSAdSdkMethodNames.splashCreate,
+      config.toMap(),
+    );
+  }
 
   void setMethodCallHandler(AdWidgetNeedCloseCall? closeWidgetCall) {
-    _channel?.setMethodCallHandler(
+    AdscopeSdk.channel.setMethodCallHandler(
       (call) async {
         switch (call.method) {
           case AMPSAdCallBackChannelMethod.onLoadSuccess:
@@ -80,45 +75,45 @@ class AMPSSplashAd {
       },
     );
   }
+
   ///开屏广告加载调用
   void load() async {
-    _channel = AdscopeSdk.channel;
-    setMethodCallHandler(null);
-    debugPrint("Flutter == onAmpsAdLoaded=load");
-    await AdscopeSdk.channel.invokeMethod(
-      AMPSAdSdkMethodNames.splashLoad,
-      config.toMap(),
-    );
+    await AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.splashLoad);
   }
+
+  ///获取ecpm
+  void  preLoad() async {
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.splashPreLoad);
+  }
+
   ///开屏广告显示调用
   void showAd({SplashBottomWidget? splashBottomWidget}) async {
-    await _channel?.invokeMethod(AMPSAdSdkMethodNames.splashShowAd, splashBottomWidget?.toMap());
+    await AdscopeSdk.channel.invokeMethod(
+        AMPSAdSdkMethodNames.splashShowAd, splashBottomWidget?.toMap());
   }
+
   ///开屏广告是否有预加载
   Future<bool> isReadyAd() async {
-    return await _channel?.invokeMethod(AMPSAdSdkMethodNames.splashIsReadyAd);
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.splashIsReadyAd);
   }
+
   ///获取ecpm
   Future<num> getECPM() async {
-    return await _channel?.invokeMethod(AMPSAdSdkMethodNames.splashGetECPM);
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.splashGetECPM);
   }
-  ///上报竞胜
-  notifyRTBWin(double winPrice, double secPrice,{String? winAdnId}) {
-    final Map<String, dynamic> args = {
-      adWinPrice: winPrice,
-      adSecPrice: secPrice,
-      adWinAdnId: winAdnId
-    };
-    _channel?.invokeMethod(AMPSAdSdkMethodNames.splashNotifyRTBWin, args);
+
+  ///获取ecpm
+  void addPreLoadAdInfo() async {
+    AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.splashAddPreLoadAdInfo);
   }
-  ///上报竞败
-  notifyRTBLoss(double winPrice, double secPrice, String lossReason,{String? winAdnId}) {
-    final Map<String, dynamic> args = {
-      adWinPrice: winPrice,
-      adSecPrice: secPrice,
-      adLossReason: lossReason,
-      adWinAdnId: winAdnId
-    };
-    _channel?.invokeMethod(AMPSAdSdkMethodNames.splashNotifyRTBLoss,args);
+
+  ///获取ecpm
+  Future<Map<String, dynamic>?> addPreGetMediaExtraInfo() async {
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.splashAddPreGetMediaExtraInfo);
   }
 }

@@ -92,11 +92,13 @@ object AMPSAdSdkMethodNames {
     const val INIT = "AMPSAdSdk_init"
 
     // Splash ad related methods
+    const val SPLASH_CREATE = "AMPSSplashAd_create"
     const val SPLASH_LOAD = "AMPSSplashAd_load"
     const val SPLASH_SHOW_AD = "AMPSSplashAd_showAd"
     const val SPLASH_GET_ECPM = "AMPSSplashAd_getECPM"
-    const val SPLASH_NOTIFY_RTB_WIN = "AMPSSplashAd_notifyRTBWin"
-    const val SPLASH_NOTIFY_RTB_LOSS = "AMPSSplashAd_notifyRTBLoss"
+    const val SPLASH_PRE_LOAD = "AMPSSplashAd_preLoad"
+    const val SPLASH_ADD_PRE_LOAD_AD_INFO = "AMPSSplashAd_addPreLoadAdInfo"
+    const val SPLASH_ADD_PRE_GET_MEDIA_EXTRA_INFO = "AMPSSplashAd_getMediaExtraInfo"
     const val SPLASH_IS_READY_AD = "AMPSSplashAd_isReadyAd"
 
     // Interstitial ad related methods
@@ -145,11 +147,13 @@ val InitMethodNames: Set<String> = setOf(
 )
 
 val SplashMethodNames: Set<String> = setOf(
+    AMPSAdSdkMethodNames.SPLASH_CREATE,
     AMPSAdSdkMethodNames.SPLASH_LOAD,
     AMPSAdSdkMethodNames.SPLASH_SHOW_AD,
     AMPSAdSdkMethodNames.SPLASH_GET_ECPM,
-    AMPSAdSdkMethodNames.SPLASH_NOTIFY_RTB_WIN,
-    AMPSAdSdkMethodNames.SPLASH_NOTIFY_RTB_LOSS,
+    AMPSAdSdkMethodNames.SPLASH_PRE_LOAD,
+    AMPSAdSdkMethodNames.SPLASH_ADD_PRE_LOAD_AD_INFO,
+    AMPSAdSdkMethodNames.SPLASH_ADD_PRE_GET_MEDIA_EXTRA_INFO,
     AMPSAdSdkMethodNames.SPLASH_IS_READY_AD
 )
 

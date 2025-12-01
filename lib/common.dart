@@ -77,12 +77,14 @@ class AMPSAdSdkMethodNames {
   /// 初始化AMPS广告SDK的方法名
   static const String init = 'AMPSAdSdk_init';
   /// 开屏相关方法
+  static const String splashCreate = 'AMPSSplashAd_create';
   static const String splashLoad = 'AMPSSplashAd_load';
   static const String splashShowAd = 'AMPSSplashAd_showAd';
   static const String splashGetECPM = 'AMPSSplashAd_getECPM';
-  static const String splashNotifyRTBWin = 'AMPSSplashAd_notifyRTBWin';
-  static const String splashNotifyRTBLoss = 'AMPSSplashAd_notifyRTBLoss';
   static const String splashIsReadyAd = 'AMPSSplashAd_isReadyAd';
+  static const String splashPreLoad = "AMPSSplashAd_preLoad";
+  static const String splashAddPreLoadAdInfo = "AMPSSplashAd_addPreLoadAdInfo";
+  static const String splashAddPreGetMediaExtraInfo = "AMPSSplashAd_getMediaExtraInfo";
   /// 插屏相关方法
   static const String interstitialLoad = 'AMPSInterstitial_load';
   static const String interstitialShowAd = 'AMPSSInterstitial_showAd';
