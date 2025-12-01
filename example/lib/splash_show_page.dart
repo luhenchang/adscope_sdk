@@ -124,12 +124,12 @@ class _SplashShowPageState extends State<SplashShowPage> {
                     ButtonWidget(
                         buttonText: '上报竞胜',
                         callBack: () async {
-                          _splashAd?.notifyRTBWin(11, 3);
+                          // _splashAd?.notifyRTBWin(11, 3);
                         }),
                     ButtonWidget(
                         buttonText: '上报竞价失败',
                         callBack: () async {
-                          _splashAd?.notifyRTBLoss(11, 3,"给的价格太低");
+                          // _splashAd?.notifyRTBLoss(11, 3,"给的价格太低");
                         }),
                   ],
                 )

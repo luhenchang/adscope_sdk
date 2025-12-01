@@ -88,9 +88,6 @@ class _InterstitialPageState extends State<InterstitialPage> {
     return  PopScope(
         canPop: true,
         child:  Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
       body: Stack(alignment: AlignmentDirectional.center, children: [
         Column(
             children:[
@@ -128,7 +125,7 @@ class _InterstitialPageState extends State<InterstitialPage> {
 
             ]
         ),
-        if(visibleAd) InterstitialWidget(_interAd)
+        if(visibleAd) const InterstitialWidget()
       ],)
     ));
   }

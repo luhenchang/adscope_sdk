@@ -15,12 +15,9 @@ import { StringConstants } from '../common/StringConstants';
 
 @Observed
 export class OhosPlatformInterstitialView extends PlatformView {
-
   constructor() {
     super();
   }
-
-
   getView(): WrappedBuilder<[Params]> {
     return new WrappedBuilder(AMPSInterstitialBuilder);
   }
@@ -30,7 +27,7 @@ export class OhosPlatformInterstitialView extends PlatformView {
 
 @Builder
 export function AMPSInterstitialBuilder(params: Params) {
-    AMPSInterstitialComponent({params: params})
+    AMPSInterstitialComponent()
 }
 
 
