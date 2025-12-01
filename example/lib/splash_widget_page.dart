@@ -53,6 +53,7 @@ class _SplashWidgetPageState extends State<SplashWidgetPage> {
 
     AdOptions options = AdOptions(spaceId: splashSpaceId, splashAdBottomBuilderHeight: 100);
     _splashAd = AMPSSplashAd(config: options, mCallBack: _adCallBack);
+    _splashAd?.load();
   }
 
   @override
@@ -70,6 +71,8 @@ class _SplashWidgetPageState extends State<SplashWidgetPage> {
                 ButtonWidget(
                     buttonText: '点击加载开屏页面',
                     callBack: () {
+                      AdOptions options = AdOptions(spaceId: splashSpaceId, splashAdBottomBuilderHeight: 100);
+                      _splashAd = AMPSSplashAd(config: options, mCallBack: _adCallBack);
                       // 点击再次刷新，加载广告。
                       _splashAd?.load();
                     }),

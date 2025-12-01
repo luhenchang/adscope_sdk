@@ -14,6 +14,7 @@ class AMPSSplashAd {
       AMPSAdSdkMethodNames.splashCreate,
       config.toMap(),
     );
+    setMethodCallHandler(null);
   }
 
   void setMethodCallHandler(AdWidgetNeedCloseCall? closeWidgetCall) {

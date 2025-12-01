@@ -85,6 +85,7 @@ class _SplashShowPageState extends State<SplashShowPage> {
 
     AdOptions options = AdOptions(spaceId: splashSpaceId, splashAdBottomBuilderHeight: 100);
     _splashAd = AMPSSplashAd(config: options, mCallBack: _adCallBack);
+    _splashAd?.load();
   }
 
   @override
@@ -105,7 +106,8 @@ class _SplashShowPageState extends State<SplashShowPage> {
                     ButtonWidget(
                         buttonText: '点击加载开屏页面',
                         callBack: () {
-                          // 使用命名路由跳转
+                          AdOptions options = AdOptions(spaceId: splashSpaceId, splashAdBottomBuilderHeight: 100);
+                          _splashAd = AMPSSplashAd(config: options, mCallBack: _adCallBack);
                           _splashAd?.load();
                         }),
                     ButtonWidget(
@@ -120,17 +122,7 @@ class _SplashShowPageState extends State<SplashShowPage> {
                               eCpm = ecPmResult;
                             });
                           }
-                        }),
-                    ButtonWidget(
-                        buttonText: '上报竞胜',
-                        callBack: () async {
-                          // _splashAd?.notifyRTBWin(11, 3);
-                        }),
-                    ButtonWidget(
-                        buttonText: '上报竞价失败',
-                        callBack: () async {
-                          // _splashAd?.notifyRTBLoss(11, 3,"给的价格太低");
-                        }),
+                        })
                   ],
                 )
               ],
