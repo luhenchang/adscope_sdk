@@ -28,7 +28,7 @@ class _NativeWidgetState extends State<NativeWidget> with AutomaticKeepAliveClie
   /// 创建参数
   late Map<String, dynamic> creationParams;
   /// 宽高
-  double width = 375, height = 128;
+  double width = 375, height = 528;
   bool widgetNeedClose = false;
   @override
   void initState() {
@@ -64,13 +64,13 @@ class _NativeWidgetState extends State<NativeWidget> with AutomaticKeepAliveClie
           onPlatformViewCreated: _onPlatformViewCreated,
           creationParamsCodec: const StandardMessageCodec());
     }
-    // else if (Platform.isOhos) {
-    //   view =  OhosView(
-    //       viewType: AMPSPlatformViewRegistry.ampsSdkNativeViewId,
-    //       onPlatformViewCreated: _onPlatformViewCreated,
-    //       creationParams: creationParams,
-    //       creationParamsCodec: const StandardMessageCodec());
-    // }
+    else if (Platform.isOhos) {
+      view =  OhosView(
+          viewType: AMPSPlatformViewRegistry.ampsSdkNativeViewId,
+          onPlatformViewCreated: _onPlatformViewCreated,
+          creationParams: creationParams,
+          creationParamsCodec: const StandardMessageCodec());
+    }
     else {
       view =  const Center(child: Text("暂不支持此平台"));
     }
@@ -90,6 +90,13 @@ class _NativeWidgetState extends State<NativeWidget> with AutomaticKeepAliveClie
     widget.adNative?.setAdCloseCallBack((){
       setState(() {
         widgetNeedClose = true;
+      });
+    });
+    widget.adNative?.setSizeUpdate((w,h){
+      setState(() {
+        // debugPrint("nativeSizeUpdate11111-w:${w}h:$h");
+        width = w;
+        height = h;
       });
     });
   }

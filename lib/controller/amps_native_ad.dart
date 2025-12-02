@@ -1,11 +1,16 @@
+import 'package:flutter/widgets.dart';
+
 import '../adscope_sdk.dart';
 import '../common.dart';
 import '../data/amps_ad_video_play_config.dart';
 import '../data/amps_native_interactive_listener.dart';
 import '../data/amps_ad.dart';
+
 ///原生广告类
 class AMPSNativeAd {
-  NativeType nativeType = NativeType.native;///默认原生模式【鸿蒙中原生和自渲染是一样的调用入口；Android是两个不同的入口，所以这里需要说明文档说明】
+  NativeType nativeType = NativeType.native;
+
+  ///默认原生模式【鸿蒙中原生和自渲染是一样的调用入口；Android是两个不同的入口，所以这里需要说明文档说明】
   AdOptions config;
   AmpsNativeAdListener? mCallBack;
   AMPSNativeRenderListener? mRenderCallBack;
@@ -13,6 +18,8 @@ class AMPSNativeAd {
   AmpsVideoPlayListener? mVideoPlayerCallBack;
   AdWidgetNeedCloseCall? mCloseWidgetCall;
   AMPSUnifiedDownloadListener? mDownloadListener;
+  AdWidgetSizeCall? updateSize;
+
   AMPSNativeAd(
       {required this.config,
       this.nativeType = NativeType.native,
@@ -124,6 +131,57 @@ class AMPSNativeAd {
             var adId = argMap["adId"] ?? "";
             mDownloadListener?.onDownloadPaused?.call(position, adId);
             break;
+          case AMPSNativeCallBackChannelMethod.nativeSizeUpdate:
+            // debugPrint("nativeSizeUpdate-${call.arguments}");
+            // var argMap = call.arguments;
+            // final param = Map<String, dynamic>.from(argMap);
+            // var width = param["width"] ?? 0.0;
+            // var height = param["height"] ?? 0.0;
+            // debugPrint("nativeSizeUpdate-w:${width}h:$height -$updateSize");
+            // updateSize?.call(width,height);
+
+// 改进版本
+            try {
+              debugPrint("nativeSizeUpdate-${call.arguments}");
+
+              // 检查 arguments 是否为 Map
+              if (call.arguments is Map) {
+                var argMap = call.arguments as Map;
+                final param = Map<String, dynamic>.from(argMap);
+
+                // 安全地获取并转换为 double
+                double width = 00;
+                double height = 00;
+
+                if (param.containsKey("width")) {
+                  width = param["width"] is num
+                      ? (param["width"] as num).toDouble()
+                      : 00;
+                }
+
+                if (param.containsKey("height")) {
+                  height = param["height"] is num
+                      ? (param["height"] as num).toDouble()
+                      : 00;
+                }
+
+                // 验证参数合理性
+                width = width >= 0 ? width : 00;
+                height = height >= 0 ? height : 00;
+
+                debugPrint("nativeSizeUpdate-w:${width}h:$height -$updateSize");
+
+                // 安全调用回调
+                updateSize?.call(width, height);
+              } else {
+                debugPrint(
+                    "nativeSizeUpdate-Invalid arguments type: ${call.arguments.runtimeType}");
+              }
+            } catch (e, stackTrace) {
+              debugPrint("nativeSizeUpdate-Error: $e");
+              debugPrint("Stack trace: $stackTrace");
+            }
+            break;
         }
       },
     );
@@ -132,24 +190,24 @@ class AMPSNativeAd {
       config.toMap(nativeType: nativeType),
     );
   }
+
   ///获取是否有预加载
   Future<bool> isReadyAd(String adId) async {
-    final Map<String, dynamic> args = {
-      adNativeType: nativeType,
-      adAdId: adId
-    };
-    return await AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.nativeIsReadyAd,args);
+    final Map<String, dynamic> args = {adNativeType: nativeType, adAdId: adId};
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.nativeIsReadyAd, args);
   }
+
   ///获取ecpm
   Future<num> getECPM(String adId) async {
-    final Map<String, dynamic> args = {
-      adNativeType: nativeType,
-      adAdId: adId
-    };
-    return await AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.nativeGetECPM,args);
+    final Map<String, dynamic> args = {adNativeType: nativeType, adAdId: adId};
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.nativeGetECPM, args);
   }
+
   ///上报竞胜
-  notifyRTBWin(double winPrice, double secPrice, String adId, {String? winAdnId}) {
+  notifyRTBWin(double winPrice, double secPrice, String adId,
+      {String? winAdnId}) {
     final Map<String, dynamic> args = {
       adWinPrice: winPrice,
       adSecPrice: secPrice,
@@ -157,11 +215,14 @@ class AMPSNativeAd {
       adWinAdnId: winAdnId,
       adNativeType: nativeType
     };
-    AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.nativeNotifyRTBWin, args);
+    AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.nativeNotifyRTBWin, args);
   }
 
   ///上报竞败
-  notifyRTBLoss(double winPrice, double secPrice, String lossReason,String adId, {String? winAdnId}) {
+  notifyRTBLoss(
+      double winPrice, double secPrice, String lossReason, String adId,
+      {String? winAdnId}) {
     final Map<String, dynamic> args = {
       adWinPrice: winPrice,
       adSecPrice: secPrice,
@@ -170,30 +231,30 @@ class AMPSNativeAd {
       adWinAdnId: winAdnId,
       adNativeType: nativeType
     };
-    AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.nativeNotifyRTBLoss,args);
-  }
-  ///获取是否是自渲染
-  Future<bool> isNativeExpress(String adId) async{
-    final Map<String, dynamic> args = {
-      adNativeType: nativeType,
-      adAdId: adId
-    };
-    return await AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.nativeIsNativeExpress, args);
-  }
-  ///获取视频播放时长
-  Future<num> getVideoDuration(String adId) async{
-    final Map<String, dynamic> args = {
-      adNativeType: nativeType,
-      adAdId: adId
-    };
-    return await AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.nativeGetVideoDuration, args);
-  }
-  ///设置视频播放配置
-  void setVideoPlayConfig(AMPSAdVideoPlayConfig videoPlayConfig) {
-    AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.nativeSetVideoPlayConfig,
-        videoPlayConfig.toJson());
+    AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.nativeNotifyRTBLoss, args);
   }
 
+  ///获取是否是自渲染
+  Future<bool> isNativeExpress(String adId) async {
+    final Map<String, dynamic> args = {adNativeType: nativeType, adAdId: adId};
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.nativeIsNativeExpress, args);
+  }
+
+  ///获取视频播放时长
+  Future<num> getVideoDuration(String adId) async {
+    final Map<String, dynamic> args = {adNativeType: nativeType, adAdId: adId};
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.nativeGetVideoDuration, args);
+  }
+
+  ///设置视频播放配置
+  void setVideoPlayConfig(AMPSAdVideoPlayConfig videoPlayConfig) {
+    AdscopeSdk.channel.invokeMethod(
+        AMPSAdSdkMethodNames.nativeSetVideoPlayConfig,
+        videoPlayConfig.toJson());
+  }
 
   void setAdCloseCallBack(AdWidgetNeedCloseCall? closeWidgetCall) {
     mCloseWidgetCall = closeWidgetCall;
@@ -201,5 +262,9 @@ class AMPSNativeAd {
 
   void setDownloadListener(AMPSUnifiedDownloadListener? downloadListener) {
     mDownloadListener = downloadListener;
+  }
+
+  void setSizeUpdate(AdWidgetSizeCall func) {
+    updateSize = func;
   }
 }

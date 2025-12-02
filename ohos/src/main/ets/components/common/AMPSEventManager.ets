@@ -48,7 +48,7 @@ export class AMPSEventManager {
     }
   }
 
-  sendMessageToFlutter(method: string, args: undefined) {
+  sendMessageToFlutter(method: string, args: ESObject) {
     this.channel?.invokeMethod(method, args)
   }
 

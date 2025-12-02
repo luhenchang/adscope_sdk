@@ -47,6 +47,7 @@ export class AMPSAdCallBackChannelMethod {
 //原生和原生自渲染标识
 export class AMPSNativeCallBackChannelMethod {
   //广告加载回调标识
+  static readonly nativeSizeUpdate = 'AMPSNative_SizeUpdate';
   static readonly loadOk = "loadOk";
   static readonly loadFail = "loadFail";
   static readonly renderSuccess = "renderSuccess";

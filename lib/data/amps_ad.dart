@@ -84,3 +84,4 @@ class AdCallBack {
 }
 ///组件关闭通知接口
 typedef AdWidgetNeedCloseCall = void Function();
+typedef AdWidgetSizeCall = void Function(double width,double height);

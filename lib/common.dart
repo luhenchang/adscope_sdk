@@ -52,6 +52,7 @@ class AMPSNativeCallBackChannelMethod {
   static const String onAdExposure = "onAdExposure";
   static const String onAdClicked = "onAdClicked";
   static const String onAdClosed = "onAdClosed"; // 广告关闭
+  static const String nativeSizeUpdate = 'AMPSNative_SizeUpdate';
   ///视频组件回调
   static const String onVideoInit = "onVideoInit"; // 视频初始化
   static const String onVideoLoading = "onVideoLoading"; // 视频加载中正在
@@ -92,6 +93,7 @@ class AMPSAdSdkMethodNames {
   static const String interstitialNotifyRTBWin = 'AMPSInterstitial_notifyRTBWin';
   static const String interstitialNotifyRTBLoss = 'AMPSInterstitial_notifyRTBLoss';
   static const String interstitialIsReadyAd = 'AMPSInterstitial_isReadyAd';
+
   /// 原生与自渲染相关方法
   static const String nativeLoad = 'AMPSNative_load';
   static const String nativeShowAd = 'AMPSNative_showAd';
@@ -102,6 +104,7 @@ class AMPSAdSdkMethodNames {
   static const String nativeIsNativeExpress = 'AMPSNative_isNativeExpress';
   static const String nativeGetVideoDuration = 'AMPSNative_getVideoDuration';
   static const String nativeSetVideoPlayConfig = 'AMPSNative_setVideoPlayConfig';
+
 }
 ///Error对应的key
 class AMPSSdkCallBackErrorKey {
