@@ -142,7 +142,7 @@ class AMPSNativeAd {
 
 // 改进版本
             try {
-              debugPrint("nativeSizeUpdate-${call.arguments}");
+              // debugPrint("nativeSizeUpdate-${call.arguments}");
 
               // 检查 arguments 是否为 Map
               if (call.arguments is Map) {
@@ -174,8 +174,7 @@ class AMPSNativeAd {
                 // 安全调用回调
                 updateSize?.call(width, height);
               } else {
-                debugPrint(
-                    "nativeSizeUpdate-Invalid arguments type: ${call.arguments.runtimeType}");
+                // debugPrint("nativeSizeUpdate-Invalid arguments type: ${call.arguments.runtimeType}");
               }
             } catch (e, stackTrace) {
               debugPrint("nativeSizeUpdate-Error: $e");
