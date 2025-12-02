@@ -1,6 +1,5 @@
 package xyz.adscope.adscope_sdk.manager
 
-import android.app.Activity
 import android.content.Context
 import android.view.View
 import xyz.adscope.adscope_sdk.data.AD_ID
@@ -18,6 +17,7 @@ import xyz.adscope.adscope_sdk.data.VIDEO_PLAY_TYPE
 import xyz.adscope.adscope_sdk.data.VIDEO_SOUND
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import xyz.adscope.amps.ad.nativead.AMPSNativeAd
 import xyz.adscope.amps.ad.nativead.AMPSNativeLoadEventListener
 import xyz.adscope.amps.ad.nativead.adapter.AMPSNativeAdExpressListener
@@ -37,10 +37,6 @@ class AMPSNativeManager {
 
     //自渲染广告
     private var mUnifiedAd: AMPSUnifiedNativeAd? = null
-    private var currentActivityRef: WeakReference<Activity>? =
-        WeakReference(AMPSEventManager.getInstance().getContext())
-
-    private fun getCurrentActivity(): Activity? = currentActivityRef?.get()
 
     // 用于存储广告项与唯一ID的映射关系
     private val adIdMap = mutableMapOf<AMPSNativeAdExpressInfo, String>()
@@ -285,7 +281,7 @@ class AMPSNativeManager {
         call: MethodCall,
         result: MethodChannel.Result
     ) {
-        val activity = getCurrentActivity()
+        val activity = FlutterPluginUtil.getActivity()
         if (activity == null) {
             result.error("LOAD_FAILED", "Activity not available for loading native ad.", null)
             return

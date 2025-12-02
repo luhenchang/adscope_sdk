@@ -1,11 +1,9 @@
-package xyz.adscope.adscope_sdk.manager // 根据你的项目结构调整包名
+package xyz.adscope.adscope_sdk.manager
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
-
-//import com.example.amps_sdk.view.SplashFactory
-//import com.example.amps_sdk.view.InterstitialFactory
-//import com.example.amps_sdk.view.NativeFactory
-//import com.example.amps_sdk.view.UnifiedFactory
+import io.flutter.plugin.common.StandardMessageCodec
+import xyz.adscope.adscope_sdk.data.AMPSPlatformViewRegistry
+import xyz.adscope.adscope_sdk.view.SplashFactory
 
 class AMPSPlatformViewManager private constructor() {
     companion object {
@@ -30,11 +28,11 @@ class AMPSPlatformViewManager private constructor() {
         val binaryMessenger = binding.binaryMessenger
 
         // 注册 Splash 视图工厂
-//        platformViewRegistry.registerViewFactory(
-//            AMPSPlatformViewRegistry.AMPS_SDK_SPLASH_VIEW_ID,
-//            SplashFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
-//        )
-//
+        platformViewRegistry.registerViewFactory(
+            AMPSPlatformViewRegistry.AMPS_SDK_SPLASH_VIEW_ID,
+            SplashFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
+        )
+
 //        // 注册 Interstitial 视图工厂
 //        platformViewRegistry.registerViewFactory(
 //            AMPSPlatformViewRegistry.AMPS_SDK_INTERSTITIAL_VIEW_ID,

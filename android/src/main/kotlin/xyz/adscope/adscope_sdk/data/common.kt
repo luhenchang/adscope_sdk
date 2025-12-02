@@ -7,7 +7,7 @@ object StringConstants {
 data class AdOptions(val spaceId: String)
 
 object AMPSChannels {
-    private const val CHANNEL_DOMAIN = "biz.beizi.adn"
+    private const val CHANNEL_DOMAIN = "xyz.adscope.amps"
 
     const val AMPS_SDK_INIT = "$CHANNEL_DOMAIN/sdk"
     const val AMPS_SDK_SPLASH = "$CHANNEL_DOMAIN/splash"
@@ -17,7 +17,7 @@ object AMPSChannels {
 }
 
 object AMPSPlatformViewRegistry {
-    private const val CHANNEL_DOMAIN = "biz.beizi.adn" // Or use AMPSChannels.CHANNEL_DOMAIN if accessible
+    private const val CHANNEL_DOMAIN = "xyz.adscope.amps"
 
     const val AMPS_SDK_SPLASH_VIEW_ID = "$CHANNEL_DOMAIN/splash_view_id"
     const val AMPS_SDK_INTERSTITIAL_VIEW_ID = "$CHANNEL_DOMAIN/interstitial_view_id"

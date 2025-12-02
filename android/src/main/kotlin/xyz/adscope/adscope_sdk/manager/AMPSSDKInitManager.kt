@@ -8,6 +8,7 @@ import xyz.adscope.adscope_sdk.data.AMPSInitConfigConverter
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel.Result
 import xyz.adscope.adscope_sdk.data.AMPSInitConfigKey
+import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import xyz.adscope.amps.AMPSSDK
 import xyz.adscope.amps.common.AMPSError
 import xyz.adscope.amps.init.AMPSInitConfig
@@ -36,7 +37,7 @@ class AMPSSDKInitManager private constructor() {
 
         when (method) {
             AMPSAdSdkMethodNames.INIT -> {
-                val context = AMPSEventManager.getInstance().getContext()
+                val context = FlutterPluginUtil.getActivity()
                 if (context != null && flutterParams != null) {
                     val isMediation = flutterParams[AMPSInitConfigKey.IS_MEDIATION] as? Boolean ?: false
                     val ampsConfig = AMPSInitConfigConverter().convert(flutterParams)

@@ -10,6 +10,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import java.lang.ref.WeakReference
 
 class AMPSEventManager private constructor() : MethodCallHandler {
@@ -24,14 +25,6 @@ class AMPSEventManager private constructor() : MethodCallHandler {
                 sInstance ?: AMPSEventManager().also { sInstance = it }
             }
         }
-    }
-
-    fun setContext(context: Activity) {
-        this.mContext = WeakReference(context) // 存储 application context 避免内存泄漏
-    }
-
-    fun getContext(): Activity? {
-        return this.mContext?.get()
     }
 
     /**
@@ -74,7 +67,9 @@ class AMPSEventManager private constructor() : MethodCallHandler {
      * @param args 参数，可以是 null 或任何 Flutter 支持的类型
      */
     fun sendMessageToFlutter(method: String, args: Any?) { // args 类型改为 Any? 更灵活
-        channel?.invokeMethod(method, args)
+        FlutterPluginUtil.runOnUiThread {
+            channel?.invokeMethod(method, args)
+        }
     }
 
     /**
