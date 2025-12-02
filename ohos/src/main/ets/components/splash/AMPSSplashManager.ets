@@ -16,7 +16,7 @@ export class AMPSSplashManager {
   private mWindowStage?: window.WindowStage;
   private mSplashAd?: AMPSSplashAd;
   private mWindow?: window.Window;
-  static splashBottomModule: SplashBottomModule | null | undefined = null
+  static splashBottomModule?: SplashBottomModule
 
   public static getInstance(): AMPSSplashManager {
     if (!AMPSSplashManager.instance) {
@@ -29,6 +29,13 @@ export class AMPSSplashManager {
     return this.mSplashAd
   }
 
+  private cleanUp(){
+    this.mWindowStage = undefined
+    this.mSplashAd = undefined
+    this.mWindow = undefined
+
+  }
+
   // 优化回调定义，减少重复代码
   private callback: ampsAd.CallBack = {
     onLoadSuccess: () => this.sendMessage(AMPSAdCallBackChannelMethod.onLoadSuccess),
@@ -38,7 +45,10 @@ export class AMPSSplashManager {
     onAdShow: () => this.sendMessage(AMPSAdCallBackChannelMethod.onAdShow),
     onAdExposure: () => this.sendMessage(AMPSAdCallBackChannelMethod.onAdExposure),
     onAdClicked: () => this.sendMessage(AMPSAdCallBackChannelMethod.onAdClicked),
-    onAdClosed: () => this.sendMessage(AMPSAdCallBackChannelMethod.onAdClosed),
+    onAdClosed: () => {
+      this.cleanUp()
+      this.sendMessage(AMPSAdCallBackChannelMethod.onAdClosed)
+    },
     onRenderFailure: () => this.sendMessage(AMPSAdCallBackChannelMethod.onRenderFailure),
     onAdShowError: (code: number, message: string) =>
     this.sendMessage(AMPSAdCallBackChannelMethod.onAdShowError, { code, message }),
@@ -52,7 +62,11 @@ export class AMPSSplashManager {
   };
 
   handleMethodCall(call: MethodCall, result: MethodResult) {
+    let mm89 = call.method
     switch (call.method) {
+      case AMPSAdSdkMethodNames.splashCreate:
+        this.handleSplashCreate(call,result)
+        break
       case AMPSAdSdkMethodNames.splashLoad:
         this.handleSplashLoad(call, result);
         break;
@@ -92,6 +106,17 @@ export class AMPSSplashManager {
   // 处理开屏广告加载
   private handleSplashLoad(call: MethodCall, result: MethodResult): void {
     try {
+      if (!this.mSplashAd) {
+        this.handleSplashLoad(call,result)
+      }
+      this.mSplashAd?.load();
+      result.success(true);
+    } catch (error) {
+      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
+    }
+  }
+  private handleSplashCreate(call: MethodCall, result: MethodResult): void {
+    try {
       const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(call.args);
       adOption.adCount = 1
       let context = AMPSEventManager.getInstance().getContext()
@@ -100,8 +125,8 @@ export class AMPSSplashManager {
         this.mWindow = this.mWindowStage.getMainWindowSync();
         if (this.mWindow) {
           this.mSplashAd = new AMPSSplashAd(adOption, this.callback, this.mWindow.getUIContext());
-          this.mSplashAd.load();
-          result.success(true);
+
+
         } else {
           result.error('LOAD_FAILED', '获取窗口或UI上下文失败', undefined);
         }
@@ -111,6 +136,7 @@ export class AMPSSplashManager {
     } catch (error) {
       result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
     }
+    result.success(true);
   }
 
   // 处理开屏广告显示

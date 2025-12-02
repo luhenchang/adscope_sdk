@@ -70,6 +70,7 @@ export class AMPSAdSdkMethodNames {
   static readonly testMode = 'testMode'
   static readonly init = 'AMPSAdSdk_init';
   // 开屏相关方法
+  static readonly splashCreate = 'AMPSSplashAd_create';
   static readonly splashLoad = 'AMPSSplashAd_load';
   static readonly splashShowAd = 'AMPSSplashAd_showAd';
   static readonly splashGetECPM = 'AMPSSplashAd_getECPM';
@@ -113,6 +114,7 @@ export let InitMethodNames: string[] = [AMPSAdSdkMethodNames.init];
 
 export let SplashMethodNames: string[] =
   [
+    AMPSAdSdkMethodNames.splashCreate,
     AMPSAdSdkMethodNames.splashLoad,
     AMPSAdSdkMethodNames.splashShowAd,
     AMPSAdSdkMethodNames.splashGetECPM,

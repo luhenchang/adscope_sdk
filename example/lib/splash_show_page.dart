@@ -22,7 +22,9 @@ class _SplashShowPageState extends State<SplashShowPage> {
   @override
   void initState() {
     super.initState();
-    _adCallBack = AdCallBack(onRenderOk: () {
+    _adCallBack = AdCallBack(onLoadSuccess: () {
+      debugPrint("ad load onLoadSuccess");
+    }, onRenderOk: () {
       debugPrint("Flutter==onAmpsAdLoaded=renderOK");
       _splashAd?.showAd(
           splashBottomWidget: SplashBottomWidget(
