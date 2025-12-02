@@ -18,7 +18,7 @@ class _SplashWidgetPageState extends State<SplashWidgetPage> {
   late AdCallBack _adCallBack;
   bool splashVisible = false;
   bool couldBack = true;
-
+  bool isLoading = false;
   num eCpm = -1;
 
   @override
@@ -36,14 +36,17 @@ class _SplashWidgetPageState extends State<SplashWidgetPage> {
     },onAdExposure: () {
       debugPrint("ad load onAdExposure");
     },onLoadFailure: (code, msg) {
+      isLoading = false;
       debugPrint("ad load failure=$code;$msg");
     },onAdClicked: () {
+      isLoading = false;
       setState(() {
         couldBack = true;
         splashVisible = false;
       });
       debugPrint("ad load onAdClicked");
     }, onAdClosed: () {
+      isLoading = false;
       setState(() {
         couldBack = true;
         splashVisible = false;
@@ -71,6 +74,10 @@ class _SplashWidgetPageState extends State<SplashWidgetPage> {
                 ButtonWidget(
                     buttonText: '点击加载开屏页面',
                     callBack: () {
+                      if(isLoading) {
+                        return;
+                      }
+                      isLoading = true;
                       AdOptions options = AdOptions(spaceId: splashSpaceId, splashAdBottomBuilderHeight: 100);
                       _splashAd = AMPSSplashAd(config: options, mCallBack: _adCallBack);
                       // 点击再次刷新，加载广告。

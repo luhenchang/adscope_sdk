@@ -16,12 +16,9 @@ import xyz.adscope.adscope_sdk.view.SplashBottomViewFactory
 import xyz.adscope.amps.ad.splash.AMPSSplashAd
 import xyz.adscope.amps.ad.splash.AMPSSplashLoadEventListener
 import xyz.adscope.amps.common.AMPSError
-import java.lang.ref.WeakReference
 
 class AMPSSplashManager private constructor() {
     private var mSplashAd: AMPSSplashAd? = null
-
-
     companion object {
         @Volatile
         private var instance: AMPSSplashManager? = null
@@ -49,11 +46,12 @@ class AMPSSplashManager private constructor() {
         }
 
         override fun onAmpsAdDismiss() {
-            cleanupViewsAfterAdClosed() // false表示非点击关闭
+            cleanupViewsAfterAdClosed()
             sendMessage(AMPSAdCallBackChannelMethod.ON_AD_CLOSED)
         }
 
         override fun onAmpsAdFailed(error: AMPSError?) {
+            cleanupViewsAfterAdClosed()
             sendMessage(
                 AMPSAdCallBackChannelMethod.ON_LOAD_FAILURE,
                 mapOf("code" to error?.code, "message" to error?.message)
@@ -62,9 +60,11 @@ class AMPSSplashManager private constructor() {
 
     }
 
+
     fun getSplashAd(): AMPSSplashAd? {
         return this.mSplashAd
     }
+
     /**
      * 清理广告关闭后相关的视图和资源。
      * @param
@@ -75,7 +75,6 @@ class AMPSSplashManager private constructor() {
         contentView?.findViewWithTag<View>("splash_main_container_tag")?.let { viewToRemove ->
             contentView.removeView(viewToRemove)
         }
-
         mSplashAd = null
         SplashBottomModule.current = null
     }
@@ -86,19 +85,23 @@ class AMPSSplashManager private constructor() {
             AMPSAdSdkMethodNames.SPLASH_CREATE -> {
                 splashAdCreate(call, result)
             }
-            AMPSAdSdkMethodNames.SPLASH_LOAD -> handleSplashLoad( result)
+
+            AMPSAdSdkMethodNames.SPLASH_LOAD -> handleSplashLoad(result)
             AMPSAdSdkMethodNames.SPLASH_SHOW_AD -> handleSplashShowAd(call, result) // 更改了参数传递
             AMPSAdSdkMethodNames.SPLASH_GET_ECPM -> {
                 result.success(mSplashAd?.ecpm ?: 0)
             }
+
             AMPSAdSdkMethodNames.SPLASH_PRE_LOAD -> {
                 mSplashAd?.preLoad()
                 result.success(null)
             }
+
             AMPSAdSdkMethodNames.SPLASH_ADD_PRE_LOAD_AD_INFO -> {
                 mSplashAd?.addPreLoadAdInfo()
                 result.success(null)
             }
+
             AMPSAdSdkMethodNames.SPLASH_ADD_PRE_GET_MEDIA_EXTRA_INFO -> {
                 val extraInfo = mSplashAd?.mediaExtraInfo
                 if (extraInfo != null) {
@@ -107,6 +110,7 @@ class AMPSSplashManager private constructor() {
                     result.success(null)
                 }
             }
+
             AMPSAdSdkMethodNames.SPLASH_IS_READY_AD -> {
                 result.success(mSplashAd?.isReady ?: false)
             }
