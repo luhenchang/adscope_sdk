@@ -54,7 +54,7 @@ class AMPSSplashView(
             mSplashAd?.show(adContainerInPlatformView)
         } else {
             rootPlatformView = FrameLayout(context).apply {
-                layoutParams = ViewGroup.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT)
+                layoutParams = ViewGroup.LayoutParams(0, 0)
             }
             AMPSEventManager.getInstance().sendMessageToFlutter(
                 AMPSAdCallBackChannelMethod.ON_AD_CLOSED,null)
