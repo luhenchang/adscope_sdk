@@ -55,23 +55,6 @@ export class AMPSInterstitialManager {
         const mEcpm = this.interstitialAd?.getECPM() ?? 0
         result.success(mEcpm);
         break;
-      case AMPSAdSdkMethodNames.interstitialNotifyRTBWin:
-        const params: HashMap<String, number> = call.args;
-        const winPrice: number = params.get(AD_WIN_PRICE) ?? 0
-        const secPrice: number = params.get(AD_SEC_PRICE) ?? 0
-        if (winPrice != undefined && secPrice != undefined) {
-          //this.interstitialAd?.notifyRTBWin(winPrice, secPrice)
-        }
-        break;
-      case AMPSAdSdkMethodNames.interstitialNotifyRTBLoss:
-        const lossParams: HashMap<String, Any> = call.args;
-        const lossWinPrice: number = lossParams.get(AD_WIN_PRICE) ?? 0
-        const lossSecPrice: number = lossParams.get(AD_SEC_PRICE) ?? 0
-        const lossReason: string = lossParams.get(AD_LOSS_REASON) ?? StringConstants.EMPTY_STRING
-        if (lossWinPrice != undefined  && lossSecPrice != undefined  && lossReason != undefined ) {
-          //this.interstitialAd?.notifyRTBLoss(lossWinPrice, lossSecPrice, lossReason)
-        }
-        break;
       case AMPSAdSdkMethodNames.interstitialIsReadyAd:
         result.success(this.interstitialAd?.isReadyAd() ?? false);
         break;
@@ -89,6 +72,7 @@ export class AMPSInterstitialManager {
     } catch (error) {
       result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`,undefined);
     }
+    result.success(true)
   }
 
   // 处理开屏广告显示
@@ -97,13 +81,13 @@ export class AMPSInterstitialManager {
       let context = AMPSEventManager.getInstance().getContext()
       if (this.interstitialAd && context) {
         this.interstitialAd?.showAd({windowStage:context.windowStage,uiContext:context.windowStage.getMainWindowSync().getUIContext()})
-        result.success(true);
       } else {
         result.error('SHOW_FAILED', '广告未加载或WindowStage不存在',undefined);
       }
     } catch (error) {
       result.error('SHOW_EXCEPTION', `显示广告异常: ${error instanceof Error ? error.message : error}`,undefined);
     }
+    result.success(true);
   }
 
   public sendMessage = (method: string, args?: Any) => {

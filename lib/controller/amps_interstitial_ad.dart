@@ -13,11 +13,6 @@ class AMPSInterstitialAd {
 
   AMPSInterstitialAd({required this.config, this.mCallBack});
 
-  void registerChannel(int id,AdWidgetNeedCloseCall? closeWidgetCall) {
-    _channel = MethodChannel('${AMPSPlatformViewRegistry.ampsSdkInterstitialViewId}$id');
-    setMethodCallHandler(closeWidgetCall);
-  }
-
   void setMethodCallHandler(AdWidgetNeedCloseCall? closeWidgetCall) {
     _channel?.setMethodCallHandler(
       (call) async {

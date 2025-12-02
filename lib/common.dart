@@ -105,6 +105,15 @@ class AMPSAdSdkMethodNames {
   static const String nativeGetVideoDuration = 'AMPSNative_getVideoDuration';
   static const String nativeSetVideoPlayConfig = 'AMPSNative_setVideoPlayConfig';
 
+  //激励视频
+  static const String rewardVideoCreate = 'AMPSRewardVideo_create';
+  static const String rewardVideoLoad = 'AMPSRewardVideo_load';
+  static const String rewardVideoPreLoad = "AMPSRewardVideo_preLoad";
+  static const String rewardVideoShowAd = 'AMPSRewardVideo_showAd';
+  static const String rewardVideoGetECPM = 'AMPSRewardVideo_getECPM';
+  static const String rewardVideoIsReadyAd = 'AMPSRewardVideo_isReadyAd';
+
+
 }
 ///Error对应的key
 class AMPSSdkCallBackErrorKey {

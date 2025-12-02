@@ -95,6 +95,14 @@ export class AMPSAdSdkMethodNames {
   static readonly nativeIsNativeExpress = 'AMPSNative_isNativeExpress';
   static readonly nativeGetVideoDuration = 'AMPSNative_getVideoDuration';
   static readonly nativeSetVideoPlayConfig = 'AMPSNative_setVideoPlayConfig';
+
+
+  static readonly rewardVideoCreate = 'AMPSRewardVideo_create';
+  static readonly rewardVideoLoad = 'AMPSRewardVideo_load';
+  static readonly rewardVideoPreLoad = 'AMPSRewardVideo_preLoad';
+  static readonly rewardVideoShowAd = 'AMPSRewardVideo_showAd';
+  static readonly rewardVideoGetECPM = 'AMPSRewardVideo_getECPM';
+  static readonly rewardVideoIsReadyAd = 'AMPSRewardVideo_isReadyAd';
 }
 
 export const AD_WIN_PRICE = 'winPrice'
@@ -144,5 +152,14 @@ export let NativeMethodNames: string[] = [
   AMPSAdSdkMethodNames.nativeIsNativeExpress,
   AMPSAdSdkMethodNames.nativeGetVideoDuration,
   AMPSAdSdkMethodNames.nativeSetVideoPlayConfig
+];
+
+export let RewardVideoMethodNames: string[] = [
+  AMPSAdSdkMethodNames.rewardVideoCreate,
+  AMPSAdSdkMethodNames.rewardVideoLoad,
+  AMPSAdSdkMethodNames.rewardVideoPreLoad,
+  AMPSAdSdkMethodNames.rewardVideoShowAd,
+  AMPSAdSdkMethodNames.rewardVideoGetECPM,
+  AMPSAdSdkMethodNames.rewardVideoIsReadyAd
 ];
 

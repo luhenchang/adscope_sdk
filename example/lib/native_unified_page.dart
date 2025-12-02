@@ -26,7 +26,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
   List<String> feedList = [];
   List<String> feedAdList = [];
   late double expressWidth = 350;
-  late double expressHeight = 128;
+  late double expressHeight = 228;
 
   @override
   void initState() {
@@ -154,13 +154,13 @@ class _SplashPageState extends State<NativeUnifiedPage> {
                           height: 20,
                           fontColor: '#FF00FF',
                           backgroundColor: '#FFFF33',
-                          x: 280,
-                          y: 100),
+                          x: expressWidth - 60,
+                          y: expressHeight - 20),
                       UnifiedAppIconWidget(
                           width: 25,
                           height: 25,
-                          x: 320,
-                          y: 100),
+                          x: 10,
+                          y: expressHeight - 25),
                       DownLoadWidget(
                           width: 200,
                           x: 22,
@@ -172,16 +172,16 @@ class _SplashPageState extends State<NativeUnifiedPage> {
                           downloadListener: _downloadListener
                       ),
                       UnifiedVideoWidget(
-                          width: 100,
-                          height: 0,
-                          x: 200,
-                          y: 0
+                          width: expressWidth-40,
+                          height: expressHeight-40,
+                          x: 20,
+                          y: 20
                       ),
                       UnifiedCloseWidget(
                           imagePath: 'assets/images/close.png',
                           width: 16,
                           height: 16,
-                          x: 330,
+                          x: expressWidth-20,
                           y: 5)
                     ]
                 ),

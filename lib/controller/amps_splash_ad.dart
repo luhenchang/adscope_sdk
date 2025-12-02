@@ -7,17 +7,16 @@ import '../widget/splash_bottom_widget.dart';
 class AMPSSplashAd {
   AdOptions config;
   AdCallBack? mCallBack;
-  AdCallBack? mViewCallBack;
 
   AMPSSplashAd({required this.config, this.mCallBack}) {
     AdscopeSdk.channel.invokeMethod(
       AMPSAdSdkMethodNames.splashCreate,
       config.toMap(),
     );
-    setMethodCallHandler(null);
+    setMethodCallHandler();
   }
 
-  void setMethodCallHandler(AdWidgetNeedCloseCall? closeWidgetCall) {
+  void setMethodCallHandler() {
     AdscopeSdk.channel.setMethodCallHandler(
       (call) async {
         switch (call.method) {
@@ -39,11 +38,9 @@ class AMPSSplashAd {
             mCallBack?.onAdExposure?.call();
             break;
           case AMPSAdCallBackChannelMethod.onAdClicked:
-            closeWidgetCall?.call();
             mCallBack?.onAdClicked?.call();
             break;
           case AMPSAdCallBackChannelMethod.onAdClosed:
-            closeWidgetCall?.call();
             mCallBack?.onAdClosed?.call();
             break;
           case AMPSAdCallBackChannelMethod.onRenderFailure:

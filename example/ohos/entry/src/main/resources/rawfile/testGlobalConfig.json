@@ -195,7 +195,7 @@
         "cachedOffersNum": 0,
         "cachedOffersTimeout": 900000,
         "floorDelayTime": 1000,
-        "c2sAdSourceList": [
+        "c2sAdSourceList12": [
           {
             "orientation": "0",
             "biddingType": "C2S",
@@ -221,21 +221,20 @@
           {
             "orientation": "0",
             "biddingType": "WF",
-            "videoAutoPlay": 1,
-            "zoomout": "0",
+            "videoAutoPlay": 0,
             "prioritySort": 1,
             "floorEcpm": 0,
-            "spaceId": "103415720",
-            "adapterManagerClass": "amps_gm_adapter.AMPSGMSDKManagerAdapter",
+            "spaceId": "4000001377",
+            "adapterManagerClass": "amps_ks_adapter.AMPSKSSDKManagerAdapter",
             "adType": "7",
-            "videoSound": 1,
-            "ecpm": 4000,
-            "endWeight": 334,
-            "appId": "5666741",
-            "seatId": "1022",
+            "videoSound": 0,
+            "ecpm": 3000,
+            "endWeight": 501,
+            "appId": "90009",
+            "seatId": "1019",
             "isFloor": 0,
-            "startWeight": 168,
-            "adapterClass": "amps_gm_adapter.AMPSGMUnifiedNativeAdapter",
+            "startWeight": 335,
+            "adapterClass": "amps_ks_adapter.AMPSKSUnifiedNativeAdapter",
             "renderType": "0",
             "videoMaxTime": 0
           }
@@ -272,12 +271,6 @@
             "adapterManagerClass": "amps_asnp_adapter.AMPSASNPSDKManagerAdapter",
             "adType": "7",
             "videoSound": 1,
-            "templateTypes": [
-              0,
-              1,
-              2,
-              3
-            ],
             "ecpm": 3000,
             "endWeight": 835,
             "appId": "12379",
@@ -299,12 +292,6 @@
             "adapterManagerClass": "amps_csj_adapter.AMPSCSJSDKManagerAdapter",
             "adType": "7",
             "videoSound": 1,
-            "templateTypes": [
-              0,
-              1,
-              2,
-              3
-            ],
             "ecpm": 2000,
             "endWeight": 1000,
             "appId": "5666741",
@@ -326,12 +313,6 @@
             "adapterManagerClass": "amps_gm_adapter.AMPSGMSDKManagerAdapter",
             "adType": "7",
             "videoSound": 1,
-            "templateTypes": [
-              0,
-              1,
-              2,
-              3
-            ],
             "ecpm": 4000,
             "endWeight": 334,
             "appId": "5666741",
