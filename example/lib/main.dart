@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'package:adscope_sdk_example/data/common.dart';
 import 'package:adscope_sdk_example/interstitial_show_page.dart';
+import 'package:adscope_sdk_example/reward_video_page.dart';
 import 'package:adscope_sdk_example/splash_show_page.dart';
 import 'package:adscope_sdk_example/widgets/blurred_background.dart';
 import 'package:adscope_sdk/amps_sdk_export.dart';
@@ -33,7 +34,8 @@ class MyApp extends StatelessWidget {
          'InterstitialShowPage':(context)=> const InterstitialShowPage(title: '插屏show页面'),
          'InterstitialPage':(context)=> const InterstitialPage(title: '插屏组件页面'),
          'NativePage':(context)=> const NativePage(title: '原生页面'),
-         'NativeUnifiedPage':(context)=> const NativeUnifiedPage(title: '原生自渲染页面')
+         'NativeUnifiedPage':(context)=> const NativeUnifiedPage(title: '原生自渲染页面'),
+         'RewardVideoPage':(context)=> const RewardVideoPage(title: '激励视频页面')
        },
     );
   }
@@ -184,6 +186,14 @@ class _SplashPageState extends State<SplashPage> {
               callBack: () {
                 // 使用命名路由跳转
                 Navigator.pushNamed(context, 'NativeUnifiedPage');
+              }
+          ),
+          const SizedBox(height: 20,width: 0),
+          ButtonWidget(
+              buttonText: '点击跳转激励视频',
+              callBack: () {
+                // 使用命名路由跳转
+                Navigator.pushNamed(context, 'RewardVideoPage');
               }
           )
         ],),

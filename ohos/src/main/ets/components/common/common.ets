@@ -99,6 +99,7 @@ export class AMPSAdSdkMethodNames {
 
   static readonly rewardVideoCreate = 'AMPSRewardVideo_create';
   static readonly rewardVideoLoad = 'AMPSRewardVideo_load';
+  static readonly rewardVideoPreLoad = 'AMPSRewardVideo_preLoad';
   static readonly rewardVideoShowAd = 'AMPSRewardVideo_showAd';
   static readonly rewardVideoGetECPM = 'AMPSRewardVideo_getECPM';
   static readonly rewardVideoIsReadyAd = 'AMPSRewardVideo_isReadyAd';
@@ -156,6 +157,7 @@ export let NativeMethodNames: string[] = [
 export let RewardVideoMethodNames: string[] = [
   AMPSAdSdkMethodNames.rewardVideoCreate,
   AMPSAdSdkMethodNames.rewardVideoLoad,
+  AMPSAdSdkMethodNames.rewardVideoPreLoad,
   AMPSAdSdkMethodNames.rewardVideoShowAd,
   AMPSAdSdkMethodNames.rewardVideoGetECPM,
   AMPSAdSdkMethodNames.rewardVideoIsReadyAd
