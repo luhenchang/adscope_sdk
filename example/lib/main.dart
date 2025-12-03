@@ -75,7 +75,9 @@ class _SplashPageState extends State<SplashPage> {
           });
         },
         initFailed: (code, msg) {
-          initStatus = InitStatus.failed;
+          setState(() {
+            initStatus = InitStatus.failed;
+          });
           debugPrint("adk is initFailed");
           debugPrint("result callBack=code$code;message=$msg");
         });

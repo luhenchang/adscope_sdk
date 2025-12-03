@@ -144,11 +144,7 @@ class AMPSInitConfigConverter {
             return null
         }
 
-        val mAppId = flutterParams[AMPSInitConfigKey.APP_ID] as? String
-        if (mAppId.isNullOrEmpty()) {
-            println("AMPSInitConfigConverter: App ID is missing or empty.")
-            return null
-        }
+        val mAppId = flutterParams[AMPSInitConfigKey.APP_ID] as? String ?:""
         val ampsInitConfigBuilder = AMPSInitConfig.Builder()
         ampsInitConfigBuilder.setAppId(mAppId)
         (flutterParams[AMPSInitConfigKey.APP_NAME] as? String)?.let { ampsInitConfigBuilder.setAppName(it) }

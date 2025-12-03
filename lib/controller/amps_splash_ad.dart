@@ -7,7 +7,7 @@ import '../widget/splash_bottom_widget.dart';
 class AMPSSplashAd {
   AdOptions config;
   AdCallBack? mCallBack;
-
+  AdWidgetNeedCloseCall? mCloseCallBack;
   AMPSSplashAd({required this.config, this.mCallBack}) {
     AdscopeSdk.channel.invokeMethod(
       AMPSAdSdkMethodNames.splashCreate,
@@ -24,6 +24,7 @@ class AMPSSplashAd {
             mCallBack?.onLoadSuccess?.call();
             break;
           case AMPSAdCallBackChannelMethod.onLoadFailure:
+            mCloseCallBack?.call();
             var map = call.arguments as Map<dynamic, dynamic>;
             mCallBack?.onLoadFailure?.call(map[AMPSSdkCallBackErrorKey.code],
                 map[AMPSSdkCallBackErrorKey.message]);
@@ -38,15 +39,18 @@ class AMPSSplashAd {
             mCallBack?.onAdExposure?.call();
             break;
           case AMPSAdCallBackChannelMethod.onAdClicked:
+            mCloseCallBack?.call();
             mCallBack?.onAdClicked?.call();
             break;
           case AMPSAdCallBackChannelMethod.onAdClosed:
+            mCloseCallBack?.call();
             mCallBack?.onAdClosed?.call();
             break;
           case AMPSAdCallBackChannelMethod.onRenderFailure:
             mCallBack?.onRenderFailure?.call();
             break;
           case AMPSAdCallBackChannelMethod.onAdShowError:
+            mCloseCallBack?.call();
             var map = call.arguments as Map<dynamic, dynamic>;
             mCallBack?.onAdShowError?.call(map[AMPSSdkCallBackErrorKey.code],
                 map[AMPSSdkCallBackErrorKey.message]);
@@ -113,5 +117,9 @@ class AMPSSplashAd {
   Future<Map<String, dynamic>?> addPreGetMediaExtraInfo() async {
     return await AdscopeSdk.channel
         .invokeMethod(AMPSAdSdkMethodNames.splashAddPreGetMediaExtraInfo);
+  }
+
+  void registerChannel(AdWidgetNeedCloseCall callBack) {
+    mCloseCallBack = callBack;
   }
 }

@@ -58,14 +58,14 @@ class _SplashWidgetState extends State<SplashWidget> {
   }
 
   void _onPlatformViewCreated(int id) {
-    // registerChannel(id);
+    registerChannel();
   }
   ///当开屏页面关闭时，在Flutter层开屏组件内部让其开屏组件销毁，避免用户可见。
-  // void registerChannel(int id) {
-  //   widget.adSplash?.registerChannel(id,(){
-  //     setState(() {
-  //       splashNeedClose = true;
-  //     });
-  //   });
-  // }
+  void registerChannel() {
+    widget.adSplash?.registerChannel((){
+      setState(() {
+        splashNeedClose = true;
+      });
+    });
+  }
 }

@@ -32,12 +32,6 @@ class AMPSPlatformViewManager private constructor() {
             AMPSPlatformViewRegistry.AMPS_SDK_SPLASH_VIEW_ID,
             SplashFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
         )
-
-//        // 注册 Interstitial 视图工厂
-//        platformViewRegistry.registerViewFactory(
-//            AMPSPlatformViewRegistry.AMPS_SDK_INTERSTITIAL_VIEW_ID,
-//            InterstitialFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
-//        )
 //
 //        // 注册 Native 视图工厂
 //        platformViewRegistry.registerViewFactory(

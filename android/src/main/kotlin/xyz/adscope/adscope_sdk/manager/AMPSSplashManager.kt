@@ -9,6 +9,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 import xyz.adscope.adscope_sdk.data.AMPSAdCallBackChannelMethod
 import xyz.adscope.adscope_sdk.data.AMPSAdSdkMethodNames
 import xyz.adscope.adscope_sdk.data.AdOptionsModule
+import xyz.adscope.adscope_sdk.data.ErrorModel
 import xyz.adscope.adscope_sdk.data.SplashBottomModule
 import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import xyz.adscope.adscope_sdk.utils.dpToPx
@@ -54,7 +55,10 @@ class AMPSSplashManager private constructor() {
             cleanupViewsAfterAdClosed()
             sendMessage(
                 AMPSAdCallBackChannelMethod.ON_LOAD_FAILURE,
-                mapOf("code" to error?.code, "message" to error?.message)
+                mapOf(
+                    ErrorModel.CODE to (error?.code?.toInt() ?: -1),
+                    ErrorModel.MESSAGE to error?.message
+                )
             )
         }
 

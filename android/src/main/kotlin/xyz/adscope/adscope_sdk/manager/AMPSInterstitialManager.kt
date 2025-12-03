@@ -1,14 +1,11 @@
 package xyz.adscope.adscope_sdk.manager
 
-import xyz.adscope.adscope_sdk.data.AD_LOSS_REASON
-import xyz.adscope.adscope_sdk.data.AD_SEC_PRICE
-import xyz.adscope.adscope_sdk.data.AD_WIN_PRICE
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel.Result
 import xyz.adscope.adscope_sdk.data.AMPSAdCallBackChannelMethod
 import xyz.adscope.adscope_sdk.data.AMPSAdSdkMethodNames
 import xyz.adscope.adscope_sdk.data.AdOptionsModule
-import xyz.adscope.adscope_sdk.data.StringConstants
-import io.flutter.plugin.common.MethodCall
-import io.flutter.plugin.common.MethodChannel.Result
+import xyz.adscope.adscope_sdk.data.ErrorModel
 import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import xyz.adscope.amps.ad.interstitial.AMPSInterstitialAd
 import xyz.adscope.amps.ad.interstitial.AMPSInterstitialLoadEventListener
@@ -54,10 +51,13 @@ class AMPSInterstitialManager private constructor() {
             interstitialAd?.destroy()
         }
 
-        override fun onAmpsAdFailed(p0: AMPSError?) {
+        override fun onAmpsAdFailed(error: AMPSError?) {
             sendMessage(
                 AMPSAdCallBackChannelMethod.ON_LOAD_FAILURE,
-                mapOf("code" to p0?.code, "message" to p0?.message)
+                mapOf(
+                    ErrorModel.CODE to (error?.code?.toInt() ?: -1),
+                    ErrorModel.MESSAGE to error?.message
+                )
             )
         }
 
@@ -76,7 +76,6 @@ class AMPSInterstitialManager private constructor() {
     }
 
     fun handleMethodCall(call: MethodCall, result: Result) {
-        val args = call.arguments<Map<String, Any>?>()
         when (call.method) {
             AMPSAdSdkMethodNames.INTERSTITIAL_CREATE -> interstitialAdCreate(call, result)
             AMPSAdSdkMethodNames.INTERSTITIAL_LOAD -> handleInterstitialLoad(call, result)

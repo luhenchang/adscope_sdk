@@ -1,13 +1,16 @@
 package xyz.adscope.adscope_sdk.manager
+
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import xyz.adscope.adscope_sdk.data.AMPSAdSdkMethodNames
 import xyz.adscope.adscope_sdk.data.AMPSInitChannelMethod
 import xyz.adscope.adscope_sdk.data.AMPSInitConfigConverter
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel.Result
 import xyz.adscope.adscope_sdk.data.AMPSInitConfigKey
+import xyz.adscope.adscope_sdk.data.ErrorModel
 import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import xyz.adscope.amps.AMPSSDK
 import xyz.adscope.amps.common.AMPSError
@@ -17,6 +20,7 @@ import xyz.adscope.common.v2.log.SDKLog
 import kotlin.synchronized
 
 private val mainThreadHandler = Handler(Looper.getMainLooper())
+
 class AMPSSDKInitManager private constructor() {
 
     companion object {
@@ -39,18 +43,28 @@ class AMPSSDKInitManager private constructor() {
             AMPSAdSdkMethodNames.INIT -> {
                 val context = FlutterPluginUtil.getActivity()
                 if (context != null && flutterParams != null) {
-                    val isMediation = flutterParams[AMPSInitConfigKey.IS_MEDIATION] as? Boolean ?: false
+                    val isMediation =
+                        flutterParams[AMPSInitConfigKey.IS_MEDIATION] as? Boolean ?: false
                     val ampsConfig = AMPSInitConfigConverter().convert(flutterParams)
-                    initAMPSSDK(ampsConfig, context ,isMediation)
+                    initAMPSSDK(ampsConfig, context, isMediation)
                     result.success(true)
                 } else {
                     if (context == null) {
-                        result.error("CONTEXT_UNAVAILABLE", "Android context is not available.", null)
+                        result.error(
+                            "CONTEXT_UNAVAILABLE",
+                            "Android context is not available.",
+                            null
+                        )
                     } else {
-                        result.error("INVALID_ARGUMENTS", "Initialization arguments are missing or invalid.", null)
+                        result.error(
+                            "INVALID_ARGUMENTS",
+                            "Initialization arguments are missing or invalid.",
+                            null
+                        )
                     }
                 }
             }
+
             else -> result.notImplemented()
         }
     }
@@ -64,19 +78,25 @@ class AMPSSDKInitManager private constructor() {
             }
 
             override fun failCallback(p0: AMPSError?) {
-                mainThreadHandler.post {
-                    sendMessage(AMPSInitChannelMethod.INIT_FAILED, mapOf("code" to p0?.code, "message" to p0?.message))
-                }
+                sendMessage(
+                    AMPSInitChannelMethod.INIT_FAILED,
+                    mapOf(
+                        ErrorModel.CODE to (p0?.code?.toInt() ?: -1),
+                        ErrorModel.MESSAGE to p0?.message
+                    )
+                )
             }
         }
 
         if (ampsInitConfig != null) {
             SDKLog.setLogLevel(SDKLog.LOG_LEVEL.LOG_LEVEL_ALL)
-            AMPSSDK.init(context, ampsInitConfig,callback)
+            AMPSSDK.init(context, ampsInitConfig, callback)
         }
     }
 
     fun sendMessage(method: String, args: Any? = null) {
-        AMPSEventManager.getInstance().sendMessageToFlutter(method, args)
+        FlutterPluginUtil.runOnUiThread {
+            AMPSEventManager.getInstance().sendMessageToFlutter(method, args)
+        }
     }
 }

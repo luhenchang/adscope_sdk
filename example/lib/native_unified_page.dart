@@ -36,7 +36,9 @@ class _SplashPageState extends State<NativeUnifiedPage> {
     }
     setState(() {});
     _adCallBack = AmpsNativeAdListener(
-        loadOk: (adIds) {}, loadFail: (code, message) => {});
+        loadOk: (adIds) {}, loadFail: (code, message) => {
+          debugPrint("自渲染广告加载失败")
+    });
 
     _renderCallBack = AMPSNativeRenderListener(renderSuccess: (adId) {
       setState(() {
