@@ -87,12 +87,14 @@ class AMPSAdSdkMethodNames {
   static const String splashAddPreLoadAdInfo = "AMPSSplashAd_addPreLoadAdInfo";
   static const String splashAddPreGetMediaExtraInfo = "AMPSSplashAd_getMediaExtraInfo";
   /// 插屏相关方法
-  static const String interstitialLoad = 'AMPSInterstitial_load';
-  static const String interstitialShowAd = 'AMPSSInterstitial_showAd';
-  static const String interstitialGetECPM = 'AMPSSInterstitial_getECPM';
-  static const String interstitialNotifyRTBWin = 'AMPSInterstitial_notifyRTBWin';
-  static const String interstitialNotifyRTBLoss = 'AMPSInterstitial_notifyRTBLoss';
-  static const String interstitialIsReadyAd = 'AMPSInterstitial_isReadyAd';
+  static const String interstitialCreate = "AMPSInterstitial_create";
+  static const String interstitialLoad = "AMPSInterstitial_load";
+  static const String interstitialPreLoad = "AMPSInterstitial_preLoad";
+  static const String interstitialShowAd = "AMPSInterstitial_showAd";
+  static const String interstitialGetEcpm = "AMPSInterstitial_getECPM";
+  static const String interstitialIsReadyAd = "AMPSInterstitial_isReadyAd";
+  static const String interstitialAddPreLoadAdInfo = "AMPSInterstitial_addPreLoadAdInfo";
+  static const String interstitialGetMediaExtraInfo = "AMPSInterstitial_getMediaExtraInfo";
 
   /// 原生与自渲染相关方法
   static const String nativeLoad = 'AMPSNative_load';

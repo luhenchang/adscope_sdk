@@ -7,14 +7,17 @@ import '../data/amps_ad.dart';
 class AMPSInterstitialAd {
   AdOptions config;
   AdCallBack? mCallBack;
-  bool needLoad = false;
 
-  MethodChannel? _channel;
-
-  AMPSInterstitialAd({required this.config, this.mCallBack});
+  AMPSInterstitialAd({required this.config, this.mCallBack}) {
+    AdscopeSdk.channel.invokeMethod(
+      AMPSAdSdkMethodNames.interstitialCreate,
+      config.toMap(),
+    );
+    setMethodCallHandler(null);
+  }
 
   void setMethodCallHandler(AdWidgetNeedCloseCall? closeWidgetCall) {
-    _channel?.setMethodCallHandler(
+    AdscopeSdk.channel.setMethodCallHandler(
       (call) async {
         switch (call.method) {
           case AMPSAdCallBackChannelMethod.onLoadSuccess:
@@ -74,42 +77,40 @@ class AMPSInterstitialAd {
   }
   ///广告加载调用方法
   void load() async {
-    _channel = AdscopeSdk.channel;
     setMethodCallHandler(null);
     await AdscopeSdk.channel.invokeMethod(
-      AMPSAdSdkMethodNames.interstitialLoad,
-      config.toMap(),
+      AMPSAdSdkMethodNames.interstitialLoad
     );
   }
+
+  ///广预加载
+  void  preLoad() async {
+    await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.interstitialPreLoad);
+  }
+
   ///插屏广告显示调用方法
   void showAd() async {
-    await _channel?.invokeMethod(AMPSAdSdkMethodNames.interstitialShowAd);
+    await AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.interstitialShowAd);
   }
   ///是否有预加载
   Future<bool> isReadyAd() async {
-    return await _channel?.invokeMethod(AMPSAdSdkMethodNames.interstitialIsReadyAd);
+    return await AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.interstitialIsReadyAd);
   }
   ///获取ecpm
   Future<num> getECPM() async {
-    return await _channel?.invokeMethod(AMPSAdSdkMethodNames.interstitialGetECPM);
+    return await AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.interstitialGetEcpm);
   }
-  ///上报竞胜
-  notifyRTBWin(double winPrice, double secPrice,{String? winAdnId}) {
-    final Map<String, dynamic> args = {
-      adWinPrice: winPrice,
-      adSecPrice: secPrice,
-      adWinAdnId: winAdnId
-    };
-    _channel?.invokeMethod(AMPSAdSdkMethodNames.interstitialNotifyRTBWin, args);
+  
+  ///调用addPreLoadAdInfo
+  void addPreLoadAdInfo() async {
+    await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.interstitialAddPreLoadAdInfo);
   }
-  ///上报竞败
-  notifyRTBLoss(double winPrice, double secPrice, String lossReason,{String? winAdnId}) {
-    final Map<String, dynamic> args = {
-      adWinPrice: winPrice,
-      adSecPrice: secPrice,
-      adLossReason: lossReason,
-      adWinAdnId: winAdnId
-    };
-    _channel?.invokeMethod(AMPSAdSdkMethodNames.interstitialNotifyRTBLoss,args);
+
+  ///调用addPreGetMediaExtraInfo
+  Future<Map<String, dynamic>?> addPreGetMediaExtraInfo() async {
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.interstitialGetMediaExtraInfo);
   }
 }

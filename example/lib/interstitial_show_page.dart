@@ -73,7 +73,6 @@ class _InterstitialShowPageState extends State<InterstitialShowPage> {
   }
   @override
   void dispose() {
-    debugPrint("差评调用来了11");
     super.dispose();
   }
   @override
@@ -91,7 +90,8 @@ class _InterstitialShowPageState extends State<InterstitialShowPage> {
             child: const Text('点击展示插屏'),
             onPressed: () {
               // 返回上一页
-              debugPrint("差评调用来了11");
+              AdOptions options = AdOptions(spaceId: interstitialSpaceId);
+              _interAd = AMPSInterstitialAd(config: options, mCallBack: _adCallBack);
               _interAd?.load();
             },
           ),
@@ -107,18 +107,7 @@ class _InterstitialShowPageState extends State<InterstitialShowPage> {
                       debugPrint("ecPm请求结果=$eCpm");
                     });
                   }
-                }),
-            ButtonWidget(
-                buttonText: '上报竞胜',
-                callBack: () async {
-                  _interAd?.notifyRTBWin(11, 3);
-                }),
-            ButtonWidget(
-                buttonText: '上报竞价失败',
-                callBack: () async {
-                  _interAd?.notifyRTBLoss(11, 3,"给的价格太低");
-                }),
-            
+                })
           ]
         ),
       ],)

@@ -102,12 +102,14 @@ object AMPSAdSdkMethodNames {
     const val SPLASH_IS_READY_AD = "AMPSSplashAd_isReadyAd"
 
     // Interstitial ad related methods
+    const val INTERSTITIAL_CREATE = "AMPSInterstitial_create"
     const val INTERSTITIAL_LOAD = "AMPSInterstitial_load"
-    const val INTERSTITIAL_SHOW_AD = "AMPSSInterstitial_showAd"
-    const val INTERSTITIAL_GET_ECPM = "AMPSSInterstitial_getECPM"
-    const val INTERSTITIAL_NOTIFY_RTB_WIN = "AMPSInterstitial_notifyRTBWin"
-    const val INTERSTITIAL_NOTIFY_RTB_LOSS = "AMPSInterstitial_notifyRTBLoss"
+    const val INTERSTITIAL_PRE_LOAD = "AMPSInterstitial_preLoad"
+    const val INTERSTITIAL_SHOW_AD = "AMPSInterstitial_showAd"
+    const val INTERSTITIAL_GET_ECPM = "AMPSInterstitial_getECPM"
     const val INTERSTITIAL_IS_READY_AD = "AMPSInterstitial_isReadyAd"
+    const val INTERSTITIAL_ADD_PRE_LOAD_AD_INFO = "AMPSInterstitial_addPreLoadAdInfo"
+    const val INTERSTITIAL_ADD_PRE_GET_MEDIA_EXTRA_INFO = "AMPSInterstitial_getMediaExtraInfo"
 
     // Native ad related methods
     const val NATIVE_LOAD = "AMPSNative_load"
@@ -158,20 +160,20 @@ val SplashMethodNames: Set<String> = setOf(
 )
 
 val InterstitialMethodNames: Set<String> = setOf(
+    AMPSAdSdkMethodNames.INTERSTITIAL_CREATE,
     AMPSAdSdkMethodNames.INTERSTITIAL_LOAD,
+    AMPSAdSdkMethodNames.INTERSTITIAL_PRE_LOAD,
     AMPSAdSdkMethodNames.INTERSTITIAL_SHOW_AD,
     AMPSAdSdkMethodNames.INTERSTITIAL_GET_ECPM,
-    AMPSAdSdkMethodNames.INTERSTITIAL_NOTIFY_RTB_WIN,
-    AMPSAdSdkMethodNames.INTERSTITIAL_NOTIFY_RTB_LOSS,
-    AMPSAdSdkMethodNames.INTERSTITIAL_IS_READY_AD
+    AMPSAdSdkMethodNames.INTERSTITIAL_IS_READY_AD,
+    AMPSAdSdkMethodNames.INTERSTITIAL_ADD_PRE_LOAD_AD_INFO,
+    AMPSAdSdkMethodNames.INTERSTITIAL_ADD_PRE_GET_MEDIA_EXTRA_INFO
 )
 
 val NativeMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.NATIVE_LOAD,
     AMPSAdSdkMethodNames.NATIVE_SHOW_AD,
     AMPSAdSdkMethodNames.NATIVE_GET_ECPM,
-    AMPSAdSdkMethodNames.NATIVE_NOTIFY_RTB_WIN,
-    AMPSAdSdkMethodNames.NATIVE_NOTIFY_RTB_LOSS,
     AMPSAdSdkMethodNames.NATIVE_IS_READY_AD,
     AMPSAdSdkMethodNames.NATIVE_IS_NATIVE_EXPRESS,
     AMPSAdSdkMethodNames.NATIVE_GET_VIDEO_DURATION,

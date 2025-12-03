@@ -1,6 +1,5 @@
 package xyz.adscope.adscope_sdk.manager
 
-import android.app.Activity
 import xyz.adscope.adscope_sdk.data.AD_LOSS_REASON
 import xyz.adscope.adscope_sdk.data.AD_SEC_PRICE
 import xyz.adscope.adscope_sdk.data.AD_WIN_PRICE
@@ -15,7 +14,6 @@ import xyz.adscope.amps.ad.interstitial.AMPSInterstitialAd
 import xyz.adscope.amps.ad.interstitial.AMPSInterstitialLoadEventListener
 import xyz.adscope.amps.common.AMPSError
 import xyz.adscope.amps.config.AMPSRequestParameters
-import java.lang.ref.WeakReference
 
 /**
  * 插屏广告管理器 (单例)
@@ -80,56 +78,61 @@ class AMPSInterstitialManager private constructor() {
     fun handleMethodCall(call: MethodCall, result: Result) {
         val args = call.arguments<Map<String, Any>?>()
         when (call.method) {
-            AMPSAdSdkMethodNames.INTERSTITIAL_LOAD -> handleSplashLoad(call, result)
-            AMPSAdSdkMethodNames.INTERSTITIAL_SHOW_AD -> handleSplashShowAd(call, result) // 更改了参数传递
+            AMPSAdSdkMethodNames.INTERSTITIAL_CREATE -> interstitialAdCreate(call, result)
+            AMPSAdSdkMethodNames.INTERSTITIAL_LOAD -> handleInterstitialLoad(call, result)
+            AMPSAdSdkMethodNames.INTERSTITIAL_SHOW_AD -> handleInterstitialShowAd(call, result) // 更改了参数传递
             AMPSAdSdkMethodNames.INTERSTITIAL_GET_ECPM -> {
                 result.success(interstitialAd?.ecpm ?: 0)
             }
-
-            AMPSAdSdkMethodNames.INTERSTITIAL_NOTIFY_RTB_WIN -> {
-                val winPrice = args?.get(AD_WIN_PRICE) as? Number ?: 0
-                val secPrice = args?.get(AD_SEC_PRICE) as? Number ?: 0
-                //interstitialAd?.notifyRTBWin(winPrice.toInt(), secPrice.toInt())
-                result.success(null)
-            }
-
-            AMPSAdSdkMethodNames.INTERSTITIAL_NOTIFY_RTB_LOSS -> {
-                val lossWinPrice = args?.get(AD_WIN_PRICE) as? Number ?: 0
-                val lossSecPrice = args?.get(AD_SEC_PRICE) as? Number ?: 0
-                val lossReason =
-                    args?.get(AD_LOSS_REASON) as? String ?: StringConstants.EMPTY_STRING
-                //interstitialAd?.notifyRTBLoss(lossWinPrice.toInt(), lossSecPrice.toInt(), lossReason)
-                result.success(null)
-            }
-
             AMPSAdSdkMethodNames.INTERSTITIAL_IS_READY_AD -> {
                 result.success(interstitialAd?.isReady ?: false)
+            }
+            AMPSAdSdkMethodNames.INTERSTITIAL_PRE_LOAD -> {
+                interstitialAd?.preLoad()
+                result.success(null)
+            }
+
+            AMPSAdSdkMethodNames.INTERSTITIAL_ADD_PRE_LOAD_AD_INFO -> {
+                interstitialAd?.addPreLoadAdInfo()
+                result.success(null)
+            }
+
+            AMPSAdSdkMethodNames.INTERSTITIAL_ADD_PRE_GET_MEDIA_EXTRA_INFO -> {
+                val extraInfo = interstitialAd?.mediaExtraInfo
+                if (extraInfo != null) {
+                    result.success(extraInfo)
+                } else {
+                    result.success(null)
+                }
             }
 
             else -> result.notImplemented()
         }
     }
-
-    private fun handleSplashLoad(call: MethodCall, result: Result) {
-        val activity =  FlutterPluginUtil.getActivity()
+    
+    private fun interstitialAdCreate(call: MethodCall, result: Result) {
+        val activity = FlutterPluginUtil.getActivity()
         if (activity == null) {
-            result.error("LOAD_FAILED", "Activity not available for loading interstitia ad.", null)
+            result.error("LOAD_FAILED", "Activity not available for loading Interstitial ad.", null)
             return
         }
-
         try {
             val adOptionsMap = call.arguments<Map<String, Any>?>()
             val adOption: AMPSRequestParameters = AdOptionsModule.getAdOptionFromMap(adOptionsMap, activity)
             interstitialAd = AMPSInterstitialAd(activity, adOption, adCallback)
-            interstitialAd?.loadAd()
             result.success(true)
         } catch (e: Exception) {
-            result.error("LOAD_EXCEPTION", "Error loading interstitiaAd ad: ${e.message}", e.toString())
+            result.error("LOAD_EXCEPTION", "Error loading Interstitial ad: ${e.message}", e.toString())
         }
     }
+    
+    private fun handleInterstitialLoad(call: MethodCall, result: Result) {
+        interstitialAd?.loadAd()
+        result.success(true)
+    }
 
-    // handleSplashShowAd 现在也接收 MethodCall 和 Result，以便统一错误处理和参数获取
-    private fun handleSplashShowAd(call: MethodCall, result: Result) {
+    // handleInterstitialShowAd 现在也接收 MethodCall 和 Result，以便统一错误处理和参数获取
+    private fun handleInterstitialShowAd(call: MethodCall, result: Result) {
         val activity = FlutterPluginUtil.getActivity()
         if (interstitialAd == null) {
             result.error("SHOW_FAILED", "InterstitiaAd ad not loaded.", null)

@@ -115,17 +115,7 @@ class _InterstitialPageState extends State<InterstitialPage> {
                             debugPrint("ecPm请求结果=$eCpm");
                           });
                         }
-                      }),
-                  ButtonWidget(
-                      buttonText: '上报竞胜',
-                      callBack: () async {
-                        _interAd?.notifyRTBWin(11, 3);
-                      }),
-                  ButtonWidget(
-                      buttonText: '上报竞价失败',
-                      callBack: () async {
-                        _interAd?.notifyRTBLoss(11, 3, "给的价格太低");
-                      }),
+                      })
                 ]),
                 if (visibleAd) const InterstitialWidget()
               ],
