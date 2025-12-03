@@ -51,9 +51,5 @@ export function MyBuilder() {
 
 @Builder
 export function AMPSSplashWrappedBuilder(params: Params) {
-  AMPSSplashComponent(
-    {
-      params: params
-    }
-  )
+  AMPSSplashComponent()
 }

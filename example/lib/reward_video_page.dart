@@ -67,6 +67,8 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
     }, onVideoSkipToEnd: (duration) {
       debugPrint("ad load onVideoSkipToEnd=$duration");
     });
+    AdOptions options = AdOptions(spaceId: rewardVideoSpaceId);
+    _rewardVideoAd = AMPSRewardVideoAd(config: options,adCallBack: _adCallBack);
   }
 
   @override
@@ -87,8 +89,6 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
                     ButtonWidget(
                         buttonText: '点击加载激励视频',
                         callBack: () {
-                          AdOptions options = AdOptions(spaceId: rewardVideoSpaceId);
-                          _rewardVideoAd = AMPSRewardVideoAd(config: options,adCallBack: _adCallBack);
                           _rewardVideoAd?.load();
                         }),
                     ButtonWidget(

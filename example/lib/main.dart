@@ -192,7 +192,7 @@ class _SplashPageState extends State<SplashPage> {
           ),
           const SizedBox(height: 20,width: 0),
           ButtonWidget(
-              buttonText: '点击跳转激励视频',
+              buttonText: '点击跳转激励视频页面',
               callBack: () {
                 // 使用命名路由跳转
                 Navigator.pushNamed(context, 'RewardVideoPage');

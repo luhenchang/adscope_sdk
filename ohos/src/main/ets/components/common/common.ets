@@ -103,6 +103,15 @@ export class AMPSAdSdkMethodNames {
   static readonly rewardVideoShowAd = 'AMPSRewardVideo_showAd';
   static readonly rewardVideoGetECPM = 'AMPSRewardVideo_getECPM';
   static readonly rewardVideoIsReadyAd = 'AMPSRewardVideo_isReadyAd';
+
+
+  static readonly bannerCreate = 'AMPSBanner_create';
+  static readonly bannerLoad = 'AMPSBanner_load';
+  static readonly bannerPreLoad = 'AMPSBanner_preLoad';
+  static readonly bannerSetSlideTime = 'AMPSBanner_setSlideTime';
+  static readonly bannerGetECPM = 'AMPSBanner_getECPM';
+  static readonly bannerIsReadyAd = 'AMPSBanner_isReadyAd';
+
 }
 
 export const AD_WIN_PRICE = 'winPrice'

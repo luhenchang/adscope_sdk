@@ -7,8 +7,6 @@ import { AMPSSplashManager } from './AMPSSplashManager';
 @Component
 struct AMPSSplashComponent {
 
-  @Prop params: Params
-  customView: OhosPlatformSplashView = this.params.platformView as OhosPlatformSplashView
   splashAd?: AMPSSplashAd
 
   aboutToAppear(): void {

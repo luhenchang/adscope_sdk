@@ -76,7 +76,8 @@ export class AMPSRewardVideoManager{
   }
   private handleCreate(call: MethodCall, result: MethodResult): void {
     try {
-      const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(call.args);
+      let adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(call.args);
+
       this.rewardVideo = new AMPSRewardVideoAd(adOption,this.callBack)
     } catch (error) {
       result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`,undefined);
