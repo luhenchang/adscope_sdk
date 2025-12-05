@@ -66,7 +66,7 @@ class AMPSEventManager private constructor() : MethodCallHandler {
      * @param method 方法名
      * @param args 参数，可以是 null 或任何 Flutter 支持的类型
      */
-    fun sendMessageToFlutter(method: String, args: Any?) { // args 类型改为 Any? 更灵活
+    fun sendMessageToFlutter(method: String, args: Any?) {
         FlutterPluginUtil.runOnUiThread {
             channel?.invokeMethod(method, args)
         }

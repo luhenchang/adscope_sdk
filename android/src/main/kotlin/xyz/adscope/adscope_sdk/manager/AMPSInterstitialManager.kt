@@ -96,13 +96,8 @@ class AMPSInterstitialManager private constructor() {
                 result.success(null)
             }
 
-            AMPSAdSdkMethodNames.INTERSTITIAL_ADD_PRE_GET_MEDIA_EXTRA_INFO -> {
-                val extraInfo = interstitialAd?.mediaExtraInfo
-                if (extraInfo != null) {
-                    result.success(extraInfo)
-                } else {
-                    result.success(null)
-                }
+            AMPSAdSdkMethodNames.INTERSTITIAL_GET_MEDIA_EXTRA_INFO -> {
+                result.success(interstitialAd?.mediaExtraInfo)
             }
 
             else -> result.notImplemented()

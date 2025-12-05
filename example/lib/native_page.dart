@@ -13,7 +13,7 @@ class NativePage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<NativePage> {
-  late AmpsNativeAdListener _adCallBack;
+  late AMPSNativeAdListener _adCallBack;
   late AMPSNativeRenderListener _renderCallBack;
   late AmpsNativeInteractiveListener _interactiveCallBack;
   late AmpsVideoPlayListener _videoPlayerCallBack;
@@ -30,7 +30,7 @@ class _SplashPageState extends State<NativePage> {
       feedList.add("item name =$i");
     }
     setState(() {});
-    _adCallBack = AmpsNativeAdListener(
+    _adCallBack = AMPSNativeAdListener(
         loadOk: (adIds) {
         },
         loadFail: (code, message) => {
@@ -81,7 +81,7 @@ class _SplashPageState extends State<NativePage> {
     AdOptions options = AdOptions(
         spaceId: nativeSpaceId,
         adCount: 2,
-       // expressSize: [expressWidth, expressHeight]
+        expressSize: [expressWidth, expressHeight]
     );
     _nativeAd = AMPSNativeAd(
         config: options,

@@ -37,11 +37,7 @@ class _SplashWidgetState extends State<SplashWidget> {
           onPlatformViewCreated: _onPlatformViewCreated,
           creationParamsCodec: const StandardMessageCodec());
     } else if (Platform.isIOS) {
-      view =  UiKitView(
-          viewType: AMPSPlatformViewRegistry.ampsSdkSplashViewId,
-          creationParams: splashParam,
-          onPlatformViewCreated: _onPlatformViewCreated,
-          creationParamsCodec: const StandardMessageCodec());
+      view =  const Center(child: Text("IOS端暂不支持组件方式"));
     }
     // else if (Platform.isOhos) {
     //   view =  OhosView(

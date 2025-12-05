@@ -3,6 +3,7 @@ import 'package:adscope_sdk_example/data/common.dart';
 import 'package:adscope_sdk_example/interstitial_show_page.dart';
 import 'package:adscope_sdk_example/reward_video_page.dart';
 import 'package:adscope_sdk_example/splash_show_page.dart';
+import 'package:adscope_sdk_example/union_download_app_info_page.dart';
 import 'package:adscope_sdk_example/widgets/blurred_background.dart';
 import 'package:adscope_sdk/amps_sdk_export.dart';
 import 'package:adscope_sdk_example/widgets/button_widget.dart';
@@ -35,7 +36,8 @@ class MyApp extends StatelessWidget {
          'InterstitialPage':(context)=> const InterstitialPage(title: '插屏组件页面'),
          'NativePage':(context)=> const NativePage(title: '原生页面'),
          'NativeUnifiedPage':(context)=> const NativeUnifiedPage(title: '原生自渲染页面'),
-         'RewardVideoPage':(context)=> const RewardVideoPage(title: '激励视频页面')
+         'RewardVideoPage':(context)=> const RewardVideoPage(title: '激励视频页面'),
+         'UnionDownloadAppInfoPage': (context) => const UnionDownloadAppInfoPage()
        },
     );
   }

@@ -61,7 +61,8 @@ object AMPSNativeCallBackChannelMethod {
     const val ON_AD_EXPOSURE = "onAdExposure"
     const val ON_AD_EXPOSURE_FAIL = "onAdExposureFail"
     const val ON_AD_CLICKED = "onAdClicked"
-    const val ON_AD_CLOSED = "onAdClosed" // Ad closed
+    const val ON_AD_CLOSED = "onAdClosed"
+    const val ON_COMPLAIN_SUCCESS = "onComplainSuccess"
 
     // Video component callbacks
     const val ON_VIDEO_INIT = "onVideoInit"; // 视频初始化
@@ -78,12 +79,12 @@ object AMPSNativeCallBackChannelMethod {
 }
 
 object DownLoadCallBackChannelMethod {
-    const val onDownloadPaused = "onDownloadPaused"
-    const val onDownloadStarted = "onDownloadStarted"
-    const val onDownloadProgressUpdate = "onDownloadProgressUpdate"
-    const val onDownloadFinished = "onDownloadFinished"
-    const val onDownloadFailed = "onDownloadFailed"
-    const val onInstalled = "onInstalled"
+    const val ON_DOWNLOAD_PAUSED = "onDownloadPaused"
+    const val ON_DOWNLOAD_STARTED = "onDownloadStarted"
+    const val ON_DOWNLOAD_PROGRESS_UPDATE = "onDownloadProgressUpdate"
+    const val ON_DOWNLOAD_FINISHED = "onDownloadFinished"
+    const val ON_DOWNLOAD_FAILED = "onDownloadFailed"
+    const val ON_INSTALLED = "onInstalled"
 }
 
 object AMPSAdSdkMethodNames {
@@ -98,7 +99,7 @@ object AMPSAdSdkMethodNames {
     const val SPLASH_GET_ECPM = "AMPSSplashAd_getECPM"
     const val SPLASH_PRE_LOAD = "AMPSSplashAd_preLoad"
     const val SPLASH_ADD_PRE_LOAD_AD_INFO = "AMPSSplashAd_addPreLoadAdInfo"
-    const val SPLASH_ADD_PRE_GET_MEDIA_EXTRA_INFO = "AMPSSplashAd_getMediaExtraInfo"
+    const val SPLASH_GET_MEDIA_EXTRA_INFO = "AMPSSplashAd_getMediaExtraInfo"
     const val SPLASH_IS_READY_AD = "AMPSSplashAd_isReadyAd"
 
     // Interstitial ad related methods
@@ -109,22 +110,25 @@ object AMPSAdSdkMethodNames {
     const val INTERSTITIAL_GET_ECPM = "AMPSInterstitial_getECPM"
     const val INTERSTITIAL_IS_READY_AD = "AMPSInterstitial_isReadyAd"
     const val INTERSTITIAL_ADD_PRE_LOAD_AD_INFO = "AMPSInterstitial_addPreLoadAdInfo"
-    const val INTERSTITIAL_ADD_PRE_GET_MEDIA_EXTRA_INFO = "AMPSInterstitial_getMediaExtraInfo"
+    const val INTERSTITIAL_GET_MEDIA_EXTRA_INFO = "AMPSInterstitial_getMediaExtraInfo"
 
     // Native ad related methods
+    const val NATIVE_CREATE = "AMPSNative_create"
     const val NATIVE_LOAD = "AMPSNative_load"
     const val NATIVE_SHOW_AD = "AMPSNative_showAd"
+    const val NATIVE_SIZE_UPDATE = "AMPSNative_SizeUpdate"
     const val NATIVE_GET_ECPM = "AMPSNative_getECPM"
-    const val NATIVE_NOTIFY_RTB_WIN = "AMPSNative_notifyRTBWin"
-    const val NATIVE_NOTIFY_RTB_LOSS = "AMPSNative_notifyRTBLoss"
     const val NATIVE_IS_READY_AD = "AMPSNative_isReadyAd"
     const val NATIVE_IS_NATIVE_EXPRESS = "AMPSNative_isNativeExpress"
-    const val NATIVE_GET_VIDEO_DURATION = "AMPSNative_getVideoDuration"
-    const val NATIVE_SET_VIDEO_PLAY_CONFIG = "AMPSNative_setVideoPlayConfig"
+    const val NATIVE_RESUME = "AMPSNative_resume"
+    const val NATIVE_PAUSE = "AMPSNative_pause"
+    const val NATIVE_DESTROY = "AMPSNative_destroy"
+    const val NATIVE_GET_MEDIA_EXTRA_INFO = "AMPSNative_getMediaExtraInfo"
 }
 
 // Constants for argument keys or other string values
 const val NATIVE_WIDTH = "width"
+const val NATIVE_HEIGHT = "height"
 const val NATIVE_TYPE = "nativeType"
 const val AD_WIN_PRICE = "winPrice"
 const val AD_SEC_PRICE = "secPrice"
@@ -155,7 +159,7 @@ val SplashMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.SPLASH_GET_ECPM,
     AMPSAdSdkMethodNames.SPLASH_PRE_LOAD,
     AMPSAdSdkMethodNames.SPLASH_ADD_PRE_LOAD_AD_INFO,
-    AMPSAdSdkMethodNames.SPLASH_ADD_PRE_GET_MEDIA_EXTRA_INFO,
+    AMPSAdSdkMethodNames.SPLASH_GET_MEDIA_EXTRA_INFO,
     AMPSAdSdkMethodNames.SPLASH_IS_READY_AD
 )
 
@@ -167,16 +171,19 @@ val InterstitialMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.INTERSTITIAL_GET_ECPM,
     AMPSAdSdkMethodNames.INTERSTITIAL_IS_READY_AD,
     AMPSAdSdkMethodNames.INTERSTITIAL_ADD_PRE_LOAD_AD_INFO,
-    AMPSAdSdkMethodNames.INTERSTITIAL_ADD_PRE_GET_MEDIA_EXTRA_INFO
+    AMPSAdSdkMethodNames.INTERSTITIAL_GET_MEDIA_EXTRA_INFO
 )
 
 val NativeMethodNames: Set<String> = setOf(
+    AMPSAdSdkMethodNames.NATIVE_CREATE,
     AMPSAdSdkMethodNames.NATIVE_LOAD,
     AMPSAdSdkMethodNames.NATIVE_SHOW_AD,
     AMPSAdSdkMethodNames.NATIVE_GET_ECPM,
     AMPSAdSdkMethodNames.NATIVE_IS_READY_AD,
     AMPSAdSdkMethodNames.NATIVE_IS_NATIVE_EXPRESS,
-    AMPSAdSdkMethodNames.NATIVE_GET_VIDEO_DURATION,
-    AMPSAdSdkMethodNames.NATIVE_SET_VIDEO_PLAY_CONFIG
-)
+    AMPSAdSdkMethodNames.NATIVE_RESUME,
+    AMPSAdSdkMethodNames.NATIVE_PAUSE,
+    AMPSAdSdkMethodNames.NATIVE_DESTROY,
+    AMPSAdSdkMethodNames.NATIVE_GET_MEDIA_EXTRA_INFO
 
+)

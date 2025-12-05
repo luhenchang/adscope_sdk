@@ -2,12 +2,19 @@
 ///原生广告加载回调
 typedef AdLoadCallback = void Function(List<String> adIds);
 typedef AdLoadErrorCallback = void Function(int code, String message);
+typedef OnComplainSuccess = void Function(String adId);
 
-class AmpsNativeAdListener {
+class AMPSNativeAdListener {
   final AdLoadCallback? loadOk;
   final AdLoadErrorCallback? loadFail;
 
-  const AmpsNativeAdListener({this.loadOk, this.loadFail});
+  const AMPSNativeAdListener({this.loadOk, this.loadFail});
+}
+
+
+class AMPSNegativeFeedbackListener {
+   final OnComplainSuccess onComplainSuccess;
+   const AMPSNegativeFeedbackListener({required this.onComplainSuccess});
 }
 
 /// 渲染回调

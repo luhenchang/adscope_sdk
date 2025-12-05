@@ -77,12 +77,39 @@ enum AMPSAdItemClickIdType {
   const AMPSAdItemClickIdType(this.value);
 }
 
+///问题结尾样式
+enum Ellipsize {
+  /// 1. 无省略（默认行为，文本会自动换行或溢出显示）
+  /// 对应 Android 中 ellipsize="none"
+  none(0),
+
+  /// 2. 文本末尾显示省略号（...）
+  /// 对应 Android 中 ellipsize="end"（最常用，单行/多行均支持）
+  end(1),
+
+  /// 3. 文本开头显示省略号（...）
+  /// 对应 Android 中 ellipsize="start"（仅单行有效）
+  start(2),
+
+  /// 4. 文本中间显示省略号（...）
+  /// 对应 Android 中 ellipsize="middle"（仅单行有效）
+  middle(3),
+
+  /// 5. 文本滚动显示（跑马灯效果）
+  /// 对应 Android 中 ellipsize="marquee"（需配合 focusable 等属性启用）
+  marquee(4);
+  final int value;
+  const Ellipsize(this.value);
+}
+
 ///自渲染主题
 class UnifiedTitleWidget extends LayoutWidget {
   final double fontSize;
   final String color;
   final double x;
   final double y;
+  int maxLines;
+  Ellipsize ellipsize;
   AMPSAdItemClickType clickType;
   AMPSAdItemClickIdType clickIdType;
 
@@ -91,6 +118,8 @@ class UnifiedTitleWidget extends LayoutWidget {
     required this.color,
     required this.x,
     required this.y,
+    this.maxLines = 0,
+    this.ellipsize = Ellipsize.none,
     this.clickType = AMPSAdItemClickType.none,
     this.clickIdType = AMPSAdItemClickIdType.click,
   });
@@ -103,6 +132,8 @@ class UnifiedTitleWidget extends LayoutWidget {
       'color': color,
       'x': x,
       'y': y,
+      'maxLines': maxLines,
+      'ellipsize': ellipsize.value,
       'clickType': clickType.value,
       'clickIdType': clickIdType.value
     };
@@ -116,6 +147,8 @@ class UnifiedDescWidget extends LayoutWidget {
   final double width;
   final double x;
   final double y;
+  int maxLines;
+  Ellipsize ellipsize;
   AMPSAdItemClickType clickType;
   AMPSAdItemClickIdType clickIdType;
 
@@ -125,6 +158,8 @@ class UnifiedDescWidget extends LayoutWidget {
     required this.color,
     required this.x,
     required this.y,
+    this.maxLines = 0,
+    this.ellipsize = Ellipsize.none,
     this.clickType = AMPSAdItemClickType.none,
     this.clickIdType = AMPSAdItemClickIdType.click,
   });
@@ -138,6 +173,8 @@ class UnifiedDescWidget extends LayoutWidget {
       'width': width,
       'x': x,
       'y': y,
+      'maxLines': maxLines,
+      'ellipsize': ellipsize.value,
       'clickType': clickType.value,
       'clickIdType': clickIdType.value
     };
@@ -325,35 +362,30 @@ class ShakeWidget extends LayoutWidget {
 
 }
 
-///下载六要素，android独有
-class DownLoadWidget extends LayoutWidget {
+///滑动组件，android有
+class SlideWidget extends LayoutWidget {
   final double width;
+  final double height;
   final double x;
   final double y;
-  final double fontSize;
-  final String fontColor;
-  final String content;
-  final AMPSUnifiedDownloadListener? downloadListener;
-  DownLoadWidget({
+  final int repeatCount;
+  SlideWidget({
     required this.width,
+    required this.height,
     required this.x,
     required this.y,
-    required this.fontSize,
-    required this.fontColor,
-    required this.content,
-    this.downloadListener
+    required this.repeatCount
   });
 
   @override
   Map<String, dynamic> toMap() {
     return {
-      'type': 'downloadInfo',
+      'type': 'slide',
       'width': width,
-      'fontSize': fontSize,
+      'height': height,
       'x': x,
       'y': y,
-      'fontColor': fontColor,
-      'content': content
+      'repeatCount': repeatCount
     };
   }
 }

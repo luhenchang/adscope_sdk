@@ -106,13 +106,8 @@ class AMPSSplashManager private constructor() {
                 result.success(null)
             }
 
-            AMPSAdSdkMethodNames.SPLASH_ADD_PRE_GET_MEDIA_EXTRA_INFO -> {
-                val extraInfo = mSplashAd?.mediaExtraInfo
-                if (extraInfo != null) {
-                    result.success(extraInfo)
-                } else {
-                    result.success(null)
-                }
+            AMPSAdSdkMethodNames.SPLASH_GET_MEDIA_EXTRA_INFO -> {
+                result.success(mSplashAd?.mediaExtraInfo)
             }
 
             AMPSAdSdkMethodNames.SPLASH_IS_READY_AD -> {

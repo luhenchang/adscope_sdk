@@ -52,6 +52,7 @@ class AMPSNativeCallBackChannelMethod {
   static const String onAdExposure = "onAdExposure";
   static const String onAdClicked = "onAdClicked";
   static const String onAdClosed = "onAdClosed"; // 广告关闭
+  static const String onComplainSuccess = "onComplainSuccess";
   static const String nativeSizeUpdate = 'AMPSNative_SizeUpdate';
   ///视频组件回调
   static const String onVideoInit = "onVideoInit"; // 视频初始化
@@ -97,6 +98,7 @@ class AMPSAdSdkMethodNames {
   static const String interstitialGetMediaExtraInfo = "AMPSInterstitial_getMediaExtraInfo";
 
   /// 原生与自渲染相关方法
+  static const String nativeCreate = 'AMPSNative_create';
   static const String nativeLoad = 'AMPSNative_load';
   static const String nativeShowAd = 'AMPSNative_showAd';
   static const String nativeGetECPM = 'AMPSNative_getECPM';

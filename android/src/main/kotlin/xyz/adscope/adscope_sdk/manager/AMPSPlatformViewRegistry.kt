@@ -3,7 +3,9 @@ package xyz.adscope.adscope_sdk.manager
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.plugin.common.StandardMessageCodec
 import xyz.adscope.adscope_sdk.data.AMPSPlatformViewRegistry
+import xyz.adscope.adscope_sdk.view.NativeFactory
 import xyz.adscope.adscope_sdk.view.SplashFactory
+import xyz.adscope.adscope_sdk.view.UnifiedFactory
 
 class AMPSPlatformViewManager private constructor() {
     companion object {
@@ -32,18 +34,18 @@ class AMPSPlatformViewManager private constructor() {
             AMPSPlatformViewRegistry.AMPS_SDK_SPLASH_VIEW_ID,
             SplashFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
         )
-//
-//        // 注册 Native 视图工厂
-//        platformViewRegistry.registerViewFactory(
-//            AMPSPlatformViewRegistry.AMPS_SDK_NATIVE_VIEW_ID,
-//            NativeFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
-//        )
-//
-//        // 注册 Unified 视图工厂
-//        platformViewRegistry.registerViewFactory(
-//            AMPSPlatformViewRegistry.AMPS_SDK_UNIFIED_VIEW_ID,
-//            UnifiedFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
-//        )
+
+        // 注册 Native 视图工厂
+        platformViewRegistry.registerViewFactory(
+            AMPSPlatformViewRegistry.AMPS_SDK_NATIVE_VIEW_ID,
+            NativeFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
+        )
+
+        // 注册 Unified 视图工厂
+        platformViewRegistry.registerViewFactory(
+            AMPSPlatformViewRegistry.AMPS_SDK_UNIFIED_VIEW_ID,
+            UnifiedFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
+        )
     }
 }
 

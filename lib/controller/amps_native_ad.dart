@@ -12,12 +12,13 @@ class AMPSNativeAd {
 
   ///默认原生模式【鸿蒙中原生和自渲染是一样的调用入口；Android是两个不同的入口，所以这里需要说明文档说明】
   AdOptions config;
-  AmpsNativeAdListener? mCallBack;
+  AMPSNativeAdListener? mCallBack;
   AMPSNativeRenderListener? mRenderCallBack;
   AmpsNativeInteractiveListener? mInteractiveCallBack;
   AmpsVideoPlayListener? mVideoPlayerCallBack;
   AdWidgetNeedCloseCall? mCloseWidgetCall;
   AMPSUnifiedDownloadListener? mDownloadListener;
+  AMPSNegativeFeedbackListener? mNegativeFeedbackListener;
   AdWidgetSizeCall? updateSize;
 
   AMPSNativeAd(
@@ -26,9 +27,8 @@ class AMPSNativeAd {
       this.mCallBack,
       this.mRenderCallBack,
       this.mInteractiveCallBack,
-      this.mVideoPlayerCallBack});
-
-  void load() async {
+      this.mVideoPlayerCallBack,
+      this.mNegativeFeedbackListener}) {
     AdscopeSdk.channel.setMethodCallHandler(
       (call) async {
         switch (call.method) {
@@ -65,6 +65,9 @@ class AMPSNativeAd {
           case AMPSNativeCallBackChannelMethod.onAdClosed:
             mCloseWidgetCall?.call();
             mInteractiveCallBack?.toCloseAd?.call(call.arguments);
+            break;
+          case AMPSNativeCallBackChannelMethod.onComplainSuccess:
+            mNegativeFeedbackListener?.onComplainSuccess.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onVideoInit:
             mVideoPlayerCallBack?.onVideoInit?.call(call.arguments);
@@ -132,18 +135,7 @@ class AMPSNativeAd {
             mDownloadListener?.onDownloadPaused?.call(position, adId);
             break;
           case AMPSNativeCallBackChannelMethod.nativeSizeUpdate:
-            // debugPrint("nativeSizeUpdate-${call.arguments}");
-            // var argMap = call.arguments;
-            // final param = Map<String, dynamic>.from(argMap);
-            // var width = param["width"] ?? 0.0;
-            // var height = param["height"] ?? 0.0;
-            // debugPrint("nativeSizeUpdate-w:${width}h:$height -$updateSize");
-            // updateSize?.call(width,height);
-
-// 改进版本
             try {
-              // debugPrint("nativeSizeUpdate-${call.arguments}");
-
               // 检查 arguments 是否为 Map
               if (call.arguments is Map) {
                 var argMap = call.arguments as Map;
@@ -164,13 +156,9 @@ class AMPSNativeAd {
                       ? (param["height"] as num).toDouble()
                       : 00;
                 }
-
                 // 验证参数合理性
                 width = width >= 0 ? width : 00;
                 height = height >= 0 ? height : 00;
-
-                debugPrint("nativeSizeUpdate-w:${width}h:$height -$updateSize");
-
                 // 安全调用回调
                 updateSize?.call(width, height);
               } else {
@@ -185,8 +173,15 @@ class AMPSNativeAd {
       },
     );
     AdscopeSdk.channel.invokeMethod(
-      AMPSAdSdkMethodNames.nativeLoad,
+      AMPSAdSdkMethodNames.nativeCreate,
       config.toMap(nativeType: nativeType),
+    );
+  }
+
+  void load() async {
+    AdscopeSdk.channel.invokeMethod(
+      AMPSAdSdkMethodNames.nativeLoad,
+      nativeType.value,
     );
   }
 

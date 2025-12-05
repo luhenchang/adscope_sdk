@@ -28,7 +28,9 @@ sealed class NativeUnifiedChild : Serializable {
         val clickType: Int? = null,
         val clickIdType: Int? = null,
         val fontSize: Double? = null,
-        val color: String? = null
+        val color: String? = null,
+        val maxLines: Int?,
+        val ellipsize: Int?
     ) : NativeUnifiedChild()
 
     // 3. 描述组件
@@ -39,7 +41,9 @@ sealed class NativeUnifiedChild : Serializable {
         val clickIdType: Int? = null,
         val fontSize: Double? = null,
         val color: String? = null,
-        val width: Double? = null
+        val width: Double? = null,
+        val maxLines: Int?,
+        val ellipsize: Int?
     ) : NativeUnifiedChild()
 
     // 4. 动作按钮
@@ -102,6 +106,14 @@ sealed class NativeUnifiedChild : Serializable {
         val height: Double? = null
     ): NativeUnifiedChild()
 
+    data class SlideView(
+        override val x: Double? = null,
+        override val y: Double? = null,
+        val width: Double? = null,
+        val height: Double? = null,
+        val repeatCount: Int? = null
+    ): NativeUnifiedChild()
+
     // 7. 关闭按钮
     data class CloseIcon(
         override val x: Double? = null,
@@ -146,6 +158,8 @@ class NativeUnifiedModule(map: Map<String, Any>?) : Serializable {
         private set
      var shakeChild: NativeUnifiedChild.ShakeView? = null
         private set
+    var slideChild: NativeUnifiedChild.SlideView? = null
+        private set
      var closeIconChild: NativeUnifiedChild.CloseIcon? = null
         private set
 
@@ -187,6 +201,7 @@ class NativeUnifiedModule(map: Map<String, Any>?) : Serializable {
                 "downloadInfo" -> downloadInfoChild = createDownloadInfoChild(childMap)
                 "video" -> videoChild = createVideoChild(childMap)
                 "shake" -> shakeChild = createShakeChild(childMap)
+                "slide" -> slideChild = createSlideChild(childMap)
                 "closeIcon" -> closeIconChild = createCloseIconChild(childMap)
                 else -> {
                     Log.d("NativeUnifiedModule", "Unknown child type found")
@@ -220,7 +235,9 @@ class NativeUnifiedModule(map: Map<String, Any>?) : Serializable {
             clickType = map["clickType"].asInt(),
             clickIdType = map["clickIdType"].asInt(),
             fontSize = map["fontSize"].asDouble(),
-            color = map["color"].asString()
+            color = map["color"].asString(),
+            maxLines = map["maxLines"].asInt(),
+            ellipsize = map["ellipsize"].asInt(),
         )
     }
 
@@ -232,7 +249,9 @@ class NativeUnifiedModule(map: Map<String, Any>?) : Serializable {
             clickIdType = map["clickIdType"].asInt(),
             fontSize = map["fontSize"].asDouble(),
             color = map["color"].asString(),
-            width = map["width"].asDouble()
+            width = map["width"].asDouble(),
+            maxLines =  map["maxLines"].asInt(),
+            ellipsize = map["ellipsize"].asInt(),
         )
     }
 
@@ -315,6 +334,20 @@ class NativeUnifiedModule(map: Map<String, Any>?) : Serializable {
             height = map["height"].asDouble()
         )
     }
+
+    /**
+     * 创建滑动组件
+     */
+    private fun createSlideChild(map: Map<*, *>): NativeUnifiedChild.SlideView {
+        return NativeUnifiedChild.SlideView(
+            x = map["x"].asDouble(),
+            y = map["y"].asDouble(),
+            width = map["width"].asDouble(),
+            height = map["height"].asDouble(),
+            repeatCount = map["repeatCount"].asInt()
+        )
+    }
+
     /**
      * 创建关闭按钮（CloseIcon）组件
      */

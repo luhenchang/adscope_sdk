@@ -2,21 +2,17 @@ package xyz.adscope.adscope_sdk.manager
 
 import android.content.Context
 import android.view.View
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
 import xyz.adscope.adscope_sdk.data.AD_ID
-import xyz.adscope.adscope_sdk.data.AD_LOSS_REASON
-import xyz.adscope.adscope_sdk.data.AD_SEC_PRICE
-import xyz.adscope.adscope_sdk.data.AD_WIN_PRICE
 import xyz.adscope.adscope_sdk.data.AMPSAdSdkMethodNames
 import xyz.adscope.adscope_sdk.data.AMPSNativeCallBackChannelMethod
 import xyz.adscope.adscope_sdk.data.AdOptionsModule
+import xyz.adscope.adscope_sdk.data.DownLoadCallBackChannelMethod
+import xyz.adscope.adscope_sdk.data.ErrorModel.CODE
+import xyz.adscope.adscope_sdk.data.ErrorModel.MESSAGE
 import xyz.adscope.adscope_sdk.data.NATIVE_TYPE
 import xyz.adscope.adscope_sdk.data.NativeType
-import xyz.adscope.adscope_sdk.data.StringConstants
-import xyz.adscope.adscope_sdk.data.VIDEO_LOOP_REPLAY
-import xyz.adscope.adscope_sdk.data.VIDEO_PLAY_TYPE
-import xyz.adscope.adscope_sdk.data.VIDEO_SOUND
-import io.flutter.plugin.common.MethodCall
-import io.flutter.plugin.common.MethodChannel
 import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import xyz.adscope.amps.ad.nativead.AMPSNativeAd
 import xyz.adscope.amps.ad.nativead.AMPSNativeLoadEventListener
@@ -25,12 +21,13 @@ import xyz.adscope.amps.ad.nativead.inter.AMPSNativeAdExpressInfo
 import xyz.adscope.amps.ad.unified.AMPSUnifiedNativeAd
 import xyz.adscope.amps.ad.unified.AMPSUnifiedNativeLoadEventListener
 import xyz.adscope.amps.ad.unified.inter.AMPSUnifiedAdEventListener
+import xyz.adscope.amps.ad.unified.inter.AMPSUnifiedDownloadListener
 import xyz.adscope.amps.ad.unified.inter.AMPSUnifiedNativeItem
 import xyz.adscope.amps.common.AMPSError
 import xyz.adscope.amps.config.AMPSRequestParameters
-import java.lang.ref.WeakReference
 import java.util.UUID
-
+import kotlin.collections.mapOf
+@Suppress("UNCHECKED_CAST")
 class AMPSNativeManager {
     //原生广告
     private var mNativeAd: AMPSNativeAd? = null
@@ -75,7 +72,11 @@ class AMPSNativeManager {
                         override fun onRenderFail(p0: View?, p1: String?, p2: Int) {
                             sendMessage(
                                 AMPSNativeCallBackChannelMethod.RENDER_FAILED,
-                                mapOf("adId" to uniqueId, "code" to p2, "message" to p1)
+                                mapOf(
+                                    AD_ID to uniqueId,
+                                    CODE to p2,
+                                    MESSAGE to p1
+                                )
                             )
                         }
 
@@ -92,10 +93,13 @@ class AMPSNativeManager {
             }
         }
 
-        override fun onAmpsAdFailed(p0: AMPSError?) {
+        override fun onAmpsAdFailed(error: AMPSError?) {
             sendMessage(
                 AMPSNativeCallBackChannelMethod.LOAD_FAIL,
-                mapOf("code" to p0?.code, "message" to p0?.message)
+                mapOf(
+                    CODE to (error?.code?.toInt() ?: -1),
+                    MESSAGE to error?.message
+                )
             )
         }
     }
@@ -115,36 +119,129 @@ class AMPSNativeManager {
             sendMessage(AMPSNativeCallBackChannelMethod.LOAD_OK, adIdList)
             adItems?.filterNotNull()?.forEach { item ->
                 // 从映射中获取当前广告项的唯一ID
-                val uniqueId = adUnifiedIdMap[item]
-                if (uniqueId != null) {
-                    item.setNativeAdEventListener(object : AMPSUnifiedAdEventListener {
-                        override fun onADExposed() {
+                val uniqueId = adUnifiedIdMap[item] ?: return
+                setDownLoadListener(item, uniqueId)
+                item.setNegativeFeedbackListener{
+                    sendMessage(AMPSNativeCallBackChannelMethod.ON_COMPLAIN_SUCCESS, uniqueId)
+                }
+                if (item.isExpressAd) {
+                    item.setNativeAdExpressListener(object : AMPSNativeAdExpressListener() {
+                        override fun onAdShow() {
                             sendMessage(AMPSNativeCallBackChannelMethod.ON_AD_SHOW, uniqueId)
-                            sendMessage(AMPSNativeCallBackChannelMethod.ON_AD_EXPOSURE, uniqueId)
                         }
 
-                        override fun onADClicked() {
+                        override fun onAdClicked() {
                             sendMessage(AMPSNativeCallBackChannelMethod.ON_AD_CLICKED, uniqueId)
                         }
 
-                        override fun onADExposeError(p0: Int, p1: String?) {
+                        override fun onAdClosed(p0: View?) {
+                            adUnifiedIdMap.remove(item)
+                            AdWrapperManager.getInstance().removeAdItem(uniqueId)
+                            AdWrapperManager.getInstance().removeAdView(uniqueId)
+                            sendMessage(AMPSNativeCallBackChannelMethod.ON_AD_CLOSED, uniqueId)
+                        }
+
+                        override fun onRenderFail(p0: View?, p1: String?, p2: Int) {
                             sendMessage(
-                                AMPSNativeCallBackChannelMethod.ON_AD_EXPOSURE_FAIL,
-                                mapOf("adId" to uniqueId, "code" to p0, "message" to p1)
+                                AMPSNativeCallBackChannelMethod.RENDER_FAILED,
+                                mapOf(
+                                    AD_ID to uniqueId,
+                                    CODE to p2,
+                                    MESSAGE to p1
+                                )
                             )
                         }
+
+                        override fun onRenderSuccess(p0: View?, p1: Float, p2: Float) {
+                            if (p0 != null) {
+                                AdWrapperManager.getInstance().addAdView(uniqueId, p0)
+                            }
+                            sendMessage(AMPSNativeCallBackChannelMethod.RENDER_SUCCESS, uniqueId)
+                        }
                     })
-                    AdUnifiedWrapperManager.getInstance().addAdItem(uniqueId, item)
-                    sendMessage(AMPSNativeCallBackChannelMethod.RENDER_SUCCESS, uniqueId)
+                    item.render()
+                    return
                 }
+                setNoExpressAdListener(uniqueId, item)
             }
         }
 
         override fun onAmpsAdFailed(p0: AMPSError?) {
             sendMessage(
                 AMPSNativeCallBackChannelMethod.LOAD_FAIL,
-                mapOf("code" to p0?.code, "message" to p0?.message)
+                mapOf(
+                    CODE to (p0?.code?.toInt() ?: -1),
+                    MESSAGE to p0?.message
+                )
             )
+        }
+    }
+
+    private fun setDownLoadListener(
+        item: AMPSUnifiedNativeItem,
+        uniqueId: String?
+    ) {
+        item.setDownloadListener(object : AMPSUnifiedDownloadListener {
+            override fun onDownloadPaused(position: Int) {
+                sendMessage(
+                    DownLoadCallBackChannelMethod.ON_DOWNLOAD_PAUSED,
+                    mapOf("position" to position, "adId" to uniqueId)
+                )
+            }
+
+            override fun onDownloadStarted() {
+                sendMessage(DownLoadCallBackChannelMethod.ON_DOWNLOAD_STARTED, uniqueId)
+            }
+
+            override fun onDownloadProgressUpdate(position: Int) {
+                sendMessage(
+                    DownLoadCallBackChannelMethod.ON_DOWNLOAD_PROGRESS_UPDATE,
+                    mapOf("position" to position, "adId" to uniqueId)
+
+                )
+            }
+
+            override fun onDownloadFinished() {
+                sendMessage(
+                    DownLoadCallBackChannelMethod.ON_DOWNLOAD_FINISHED,
+                    uniqueId
+                )
+            }
+
+            override fun onDownloadFailed() {
+                sendMessage(DownLoadCallBackChannelMethod.ON_DOWNLOAD_FAILED, uniqueId)
+            }
+
+            override fun onInstalled() {
+                sendMessage(DownLoadCallBackChannelMethod.ON_INSTALLED, uniqueId)
+            }
+        })
+    }
+
+    private fun setNoExpressAdListener(
+        uniqueId: String?,
+        item: AMPSUnifiedNativeItem
+    ) {
+        if (uniqueId != null) {
+            item.setNativeAdEventListener(object : AMPSUnifiedAdEventListener {
+                override fun onADExposed() {
+                    sendMessage(AMPSNativeCallBackChannelMethod.ON_AD_SHOW, uniqueId)
+                    sendMessage(AMPSNativeCallBackChannelMethod.ON_AD_EXPOSURE, uniqueId)
+                }
+
+                override fun onADClicked() {
+                    sendMessage(AMPSNativeCallBackChannelMethod.ON_AD_CLICKED, uniqueId)
+                }
+
+                override fun onADExposeError(p0: Int, p1: String?) {
+                    sendMessage(
+                        AMPSNativeCallBackChannelMethod.ON_AD_EXPOSURE_FAIL,
+                        mapOf(AD_ID to uniqueId, CODE to p0, MESSAGE to p1)
+                    )
+                }
+            })
+            AdUnifiedWrapperManager.getInstance().addAdItem(uniqueId, item)
+            sendMessage(AMPSNativeCallBackChannelMethod.RENDER_SUCCESS, uniqueId)
         }
     }
 
@@ -162,6 +259,10 @@ class AMPSNativeManager {
     fun handleMethodCall(call: MethodCall, result: MethodChannel.Result) {
         val args = call.arguments
         when (call.method) {
+            AMPSAdSdkMethodNames.NATIVE_CREATE -> {
+                createAd(call, result)
+            }
+
             AMPSAdSdkMethodNames.NATIVE_LOAD -> {
                 handleLoadAd(call, result)
             }
@@ -181,51 +282,12 @@ class AMPSNativeManager {
                 }
             }
 
-            AMPSAdSdkMethodNames.NATIVE_NOTIFY_RTB_WIN -> {
-                val params = args as HashMap<String, Any>
-                val winPrice = params[AD_WIN_PRICE] as? Number ?: 0
-                val secPrice = params[AD_SEC_PRICE] as? Number ?: 0
-                val nativeType = params[NATIVE_TYPE] as? Int ?: 0
-                val mAdId = params[AD_ID] as? String ?: ""
-                if (nativeType == 0) {
-                    val foundWrapper = getAdWrapperByAdId(mAdId)
-                    //foundWrapper?.notifyRTBWin(winPrice.toInt(), secPrice.toInt())
-                } else {
-                    val foundWrapper = getAdUnifiedByAdId(mAdId)
-                    //foundWrapper?.notifyRTBWin(winPrice.toInt(), secPrice.toInt())
-                }
-                result.success(null)
-            }
-
-            AMPSAdSdkMethodNames.NATIVE_NOTIFY_RTB_LOSS -> {
-                val lossParams = args as HashMap<String, Any>
-                val lossWinPrice = lossParams[AD_WIN_PRICE] as? Number ?: 0
-                val lossSecPrice = lossParams[AD_SEC_PRICE] as? Number ?: 0
-                val lossReason =
-                    lossParams[AD_LOSS_REASON] as? String ?: StringConstants.EMPTY_STRING
-                val nativeType = lossParams[NATIVE_TYPE] as? Int ?: 0
-                val lossAdId = lossParams[AD_ID] as? String ?: ""
-                if (nativeType == 0) {
-                    val foundWrapper = getAdWrapperByAdId(lossAdId)
-//                    foundWrapper?.notifyRTBLoss(
-//                        lossWinPrice.toInt(),
-//                        lossSecPrice.toInt(),
-//                        lossReason
-//                    )
-                } else {
-                    val foundWrapper = getAdUnifiedByAdId(lossAdId)
-//                    foundWrapper?.notifyRTBLoss(
-//                        lossWinPrice.toInt(),
-//                        lossSecPrice.toInt(),
-//                        lossReason
-//                    )
-                }
-                result.success(null)
-            }
-
             AMPSAdSdkMethodNames.NATIVE_IS_READY_AD -> {
-                // 原代码中未实现
-                result.success(false)
+                if ((call.arguments as Int) == NativeType.NATIVE.value) {
+                    result.success(mNativeAd?.isReady ?: false)
+                } else {
+                    result.success(mUnifiedAd?.isReady ?: false)
+                }
             }
 
             AMPSAdSdkMethodNames.NATIVE_IS_NATIVE_EXPRESS -> {
@@ -240,32 +302,71 @@ class AMPSNativeManager {
                 }
             }
 
-            AMPSAdSdkMethodNames.NATIVE_GET_VIDEO_DURATION -> {
-                val wrapperByAdId = getAdWrapperByAdId(call.arguments as String)
-                //val foundWrapper = getAdUnifiedByAdId(call.arguments as String)
-                //TODO 获取视频播放时长【目前不支持】
-                //val duration = wrapperByAdId?.videoDuration ?: 0
-                //result.success(duration)
-                result.success(0)
+            AMPSAdSdkMethodNames.NATIVE_RESUME -> {
+                if ((call.arguments as Int) == NativeType.NATIVE.value) {
+                    mNativeAd?.resume()
+                } else {
+                    mUnifiedAd?.resume()
+                }
+                result.success(null)
             }
 
-            AMPSAdSdkMethodNames.NATIVE_SET_VIDEO_PLAY_CONFIG -> {
-                val vdConfigParams = args as HashMap<String, Any>
-                val videoSound = vdConfigParams[VIDEO_SOUND] as? Boolean ?: false
-                val videoPlayType = vdConfigParams[VIDEO_PLAY_TYPE] as? Number ?: 0
-                val videoLoopReplay = vdConfigParams[VIDEO_LOOP_REPLAY] as? Boolean ?: false
-                //TODO 视频设置[目前不支持]
-                //mVideoConfig = VideoConfig(
-                //    videoSoundEnable = videoSound,
-                //    videoAutoPlayType = videoPlayType.toInt(),
-                //    videoLoopReplay = videoLoopReplay
-                //)
+            AMPSAdSdkMethodNames.NATIVE_PAUSE -> {
+                if ((call.arguments as Int) == NativeType.NATIVE.value) {
+                    mNativeAd?.pause()
+                } else {
+                    mUnifiedAd?.pause()
+                }
                 result.success(null)
+            }
+
+            AMPSAdSdkMethodNames.NATIVE_DESTROY -> {
+                if ((call.arguments as Int) == NativeType.NATIVE.value) {
+                    mNativeAd?.destroy()
+                } else {
+                    mUnifiedAd?.destroy()
+                }
+                result.success(null)
+            }
+
+            AMPSAdSdkMethodNames.NATIVE_GET_MEDIA_EXTRA_INFO -> {
+                val vdConfigParams = args as HashMap<String, Any>
+                val nativeType = vdConfigParams[NATIVE_TYPE] as? Int ?: 0
+                if (nativeType == 0) {
+                    result.success(mNativeAd?.mediaExtraInfo)
+                } else {
+                    result.success(mUnifiedAd?.mediaExtraInfo)
+                }
             }
 
             else -> {
                 result.notImplemented()
             }
+        }
+    }
+
+    private fun createAd(
+        call: MethodCall,
+        result: MethodChannel.Result
+    ) {
+        val activity = FlutterPluginUtil.getActivity()
+        if (activity == null) {
+            result.error("LOAD_FAILED", "Activity not available for loading native ad.", null)
+            return
+        }
+        try {
+            val adOptionsMap = call.arguments<Map<String, Any>?>()
+            val nativeType = (adOptionsMap?.get(NATIVE_TYPE) ?: NativeType.NATIVE.value) as Int
+            val adOption: AMPSRequestParameters =
+                AdOptionsModule.getNativeAdOptionFromMap(adOptionsMap, activity)
+            if (nativeType == NativeType.NATIVE.value) {
+                mNativeAd = AMPSNativeAd(activity as Context, adOption, adCallback)
+            } else {
+                mUnifiedAd = AMPSUnifiedNativeAd(activity as Context, adOption, adUnifiedCallback)
+            }
+            result.success(true)
+        } catch (e: Exception) {
+            result.error("LOAD_EXCEPTION", "Error loading native ad: ${e.message}", e.toString())
         }
     }
 
@@ -281,26 +382,12 @@ class AMPSNativeManager {
         call: MethodCall,
         result: MethodChannel.Result
     ) {
-        val activity = FlutterPluginUtil.getActivity()
-        if (activity == null) {
-            result.error("LOAD_FAILED", "Activity not available for loading native ad.", null)
-            return
+        if ((call.arguments as Int) == NativeType.NATIVE.value) {
+            mNativeAd?.loadAd()
+        } else {
+            mUnifiedAd?.loadAd()
         }
-        try {
-            val adOptionsMap = call.arguments<Map<String, Any>?>()
-            val nativeType = (adOptionsMap?.get(NATIVE_TYPE) ?: NativeType.NATIVE.value) as Int
-            val adOption: AMPSRequestParameters = AdOptionsModule.getNativeAdOptionFromMap(adOptionsMap, activity)
-            if (nativeType == NativeType.NATIVE.value) {
-                mNativeAd = AMPSNativeAd(activity as Context, adOption, adCallback)
-                mNativeAd?.loadAd()
-            } else {
-                mUnifiedAd = AMPSUnifiedNativeAd(activity as Context, adOption, adUnifiedCallback)
-                mUnifiedAd?.loadAd()
-            }
-            result.success(true)
-        } catch (e: Exception) {
-            result.error("LOAD_EXCEPTION", "Error loading native ad: ${e.message}", e.toString())
-        }
+        result.success(null)
     }
 
     private fun sendMessage(method: String, args: Any? = null) {

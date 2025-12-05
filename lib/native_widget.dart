@@ -8,28 +8,25 @@ class NativeWidget extends StatefulWidget {
   // 返回的广告 id，这里不是广告位id
   final String adId;
 
-  // 是否显示广告
-  final bool show;
 
   final AMPSNativeAd? adNative;
 
-  const NativeWidget(
-    this.adNative, {
-    super.key,
-    required this.adId,
-    this.show = true
-  });
+  const NativeWidget(this.adNative,
+      {super.key, required this.adId});
 
   @override
   State<StatefulWidget> createState() => _NativeWidgetState();
 }
 
-class _NativeWidgetState extends State<NativeWidget> with AutomaticKeepAliveClientMixin{
+class _NativeWidgetState extends State<NativeWidget>
+    with AutomaticKeepAliveClientMixin {
   /// 创建参数
   late Map<String, dynamic> creationParams;
+
   /// 宽高
   double width = 375, height = 528;
   bool widgetNeedClose = false;
+
   @override
   void initState() {
     final expressSizeList = widget.adNative?.config.expressSize;
@@ -37,17 +34,14 @@ class _NativeWidgetState extends State<NativeWidget> with AutomaticKeepAliveClie
       width = expressSizeList[0]?.toDouble() ?? width;
       height = expressSizeList[1]?.toDouble() ?? height;
     }
-    creationParams = <String, dynamic>{
-      "adId": widget.adId,
-      "width": width
-    };
+    creationParams = <String, dynamic>{"adId": widget.adId, "width": width};
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (!widget.show || width <= 0 || height <= 0 || widgetNeedClose) {
+    if (width <= 0 || height <= 0 || widgetNeedClose) {
       return const SizedBox.shrink();
     }
     Widget view;
@@ -58,7 +52,7 @@ class _NativeWidgetState extends State<NativeWidget> with AutomaticKeepAliveClie
           onPlatformViewCreated: _onPlatformViewCreated,
           creationParamsCodec: const StandardMessageCodec());
     } else if (Platform.isIOS) {
-      view =  UiKitView(
+      view = UiKitView(
           viewType: AMPSPlatformViewRegistry.ampsSdkNativeViewId,
           creationParams: creationParams,
           onPlatformViewCreated: _onPlatformViewCreated,
@@ -72,32 +66,35 @@ class _NativeWidgetState extends State<NativeWidget> with AutomaticKeepAliveClie
     //       creationParamsCodec: const StandardMessageCodec());
     // }
     else {
-      view =  const Center(child: Text("暂不支持此平台"));
+      view = const Center(child: Text("暂不支持此平台"));
     }
+
     /// 有宽高信息了（渲染成功了）设置对应宽高
     return SizedBox.fromSize(
       size: Size(width, height),
       child: view,
     );
   }
+
   @override
   bool get wantKeepAlive => true;
 
-  Future<void> callBack(MethodCall call) async {
+  Future<void> callBack(MethodCall call) async {}
 
-  }
   void _onPlatformViewCreated(int id) {
-    widget.adNative?.setAdCloseCallBack((){
+    widget.adNative?.setAdCloseCallBack(() {
       setState(() {
         widgetNeedClose = true;
       });
     });
-    widget.adNative?.setSizeUpdate((w,h){
-      setState(() {
-        // debugPrint("nativeSizeUpdate11111-w:${w}h:$h");
-        width = w;
-        height = h;
+    final expressSizeList = widget.adNative?.config.expressSize;
+    if (expressSizeList == null || expressSizeList.isEmpty) {
+      widget.adNative?.setSizeUpdate((w, h) {
+        setState(() {
+          width = w;
+          height = h;
+        });
       });
-    });
+    }
   }
 }
