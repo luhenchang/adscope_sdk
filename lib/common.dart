@@ -101,13 +101,15 @@ class AMPSAdSdkMethodNames {
   static const String nativeCreate = 'AMPSNative_create';
   static const String nativeLoad = 'AMPSNative_load';
   static const String nativeShowAd = 'AMPSNative_showAd';
+  static const String nativePattern = 'AMPSNative_getUnifiedPattern';
   static const String nativeGetECPM = 'AMPSNative_getECPM';
-  static const String nativeNotifyRTBWin = 'AMPSNative_notifyRTBWin';
-  static const String nativeNotifyRTBLoss = 'AMPSNative_notifyRTBLoss';
   static const String nativeIsReadyAd = 'AMPSNative_isReadyAd';
   static const String nativeIsNativeExpress = 'AMPSNative_isNativeExpress';
+  static const String nativeUnifiedMaterialType = "AMPSNative_materialType";
+  static const String nativeUnifiedGetDownLoad = "AMPSNative_getDownLoad";
   static const String nativeGetVideoDuration = 'AMPSNative_getVideoDuration';
   static const String nativeSetVideoPlayConfig = 'AMPSNative_setVideoPlayConfig';
+  static const String nativeGetMediaExtraInfo = "AMPSNative_getMediaExtraInfo";
 
   //激励视频
   static const String rewardVideoCreate = 'AMPSRewardVideo_create';

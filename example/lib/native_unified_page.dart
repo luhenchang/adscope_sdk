@@ -2,7 +2,6 @@ import 'package:adscope_sdk/amps_sdk_export.dart';
 import 'package:adscope_sdk/common.dart';
 import 'package:adscope_sdk/widget/native_unified_widget.dart';
 import 'package:adscope_sdk_example/data/common.dart';
-import 'package:adscope_sdk_example/widgets/button_widget.dart';
 import 'package:flutter/material.dart';
 
 import 'union_download_app_info_page.dart';
@@ -29,6 +28,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
   late double expressWidth = 350;
   late double expressHeight = 180;
   UnifiedAdDownloadAppInfo? downLoadAppInfo;
+  AMPSUnifiedPattern adPattern = AMPSUnifiedPattern.adPatternUnknown;
 
   @override
   void initState() {
@@ -44,10 +44,20 @@ class _SplashPageState extends State<NativeUnifiedPage> {
 
         });
     _renderCallBack = AMPSNativeRenderListener(renderSuccess: (adId) {
+      _nativeAd?.getUnifiedPattern(adId).then((pattern){
+        setState(() {
+          debugPrint("pattern==$pattern");
+          adPattern = pattern;
+        });
+      });
+      _nativeAd?.getDownLoadInfo(adId).then((info){
+        setState(() {
+          downLoadAppInfo = info;
+        });
+      });
       setState(() {
         debugPrint("adId renderCallBack=$adId");
         feedAdList.add(adId);
-        _nativeAd?.notifyRTBWin(11, 12, adId);
       });
     }, renderFailed: (adId, code, message) {
       debugPrint("渲染失败=$code,$message");
@@ -88,7 +98,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
         onDownloadStarted: (adId) {},
         onInstalled: (adId) {});
     AdOptions options = AdOptions(
-        spaceId: unifiedSpaceId,
+        spaceId: nativeSpaceId,
         adCount: 1,
         expressSize: [expressWidth, expressHeight]);
     _nativeAd = AMPSNativeAd(
@@ -117,56 +127,15 @@ class _SplashPageState extends State<NativeUnifiedPage> {
               debugPrint(adId);
               return SizedBox.fromSize(
                   size: Size(expressWidth, expressHeight),
-                  child:
-                      Stack(alignment: AlignmentDirectional.center, children: [
+                  child:Container(color: Colors.red,child: Stack(alignment: AlignmentDirectional.center, children: [
                     UnifiedWidget(
                       _nativeAd,
                       key: ValueKey(adId),
                       adId: adId,
                       unifiedContent: NativeUnifiedWidget(
                           height: expressHeight,
-                          backgroundColor: '#F8F9FA',
-                          children: [
-                            UnifiedMainImgWidget(
-                                width: expressWidth,
-                                height: expressHeight - 60,
-                                x: 0,
-                                y: 28,
-                                backgroundColor: '#FFFFFF'),
-                            UnifiedTitleWidget(
-                                fontSize: 18,
-                                color: "#1D2129",
-                                x: 2,
-                                y: 3),
-                            UnifiedDescWidget(
-                                fontSize: 14,
-                                width: 180,
-                                color: "#4E5969",
-                                ellipsize: Ellipsize.end,
-                                maxLines: 1,
-                                x: 2,
-                                y: expressHeight - 30),
-                            UnifiedActionButtonWidget(
-                                fontSize: 12,
-                                width: 50,
-                                height: 20,
-                                fontColor: '#FFFFFF',
-                                backgroundColor: '#2F80ED',
-                                x: expressWidth - 60,
-                                y: expressHeight - 32),
-                            UnifiedAppIconWidget(
-                                width: 25,
-                                height: 25,
-                                x: 10,
-                                y: expressHeight - 30),
-                            UnifiedVideoWidget(
-                              width: expressWidth,
-                              height: expressHeight - 60,
-                              x: 0,
-                              y: 30,
-                            ),
-                            ShakeWidget(width: 100, height: 100, x: 100, y: 50)
-                          ]),
+                          backgroundColor: '#80F7FF',
+                          children:_getChildrenByType(adPattern.value)),
                       downloadListener: _downloadListener,
                     ),
                     Positioned(
@@ -182,8 +151,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
                           child: Image.asset('assets/images/close.png',
                               width: 18, height: 18)),
                     ),
-                    if (downLoadAppInfo != null &&
-                        downLoadAppInfo?.appName != null)
+                    if (downLoadAppInfo != null && downLoadAppInfoIsOk(downLoadAppInfo))
                       Positioned(
                         left: 28,
                         top: 100,
@@ -194,9 +162,9 @@ class _SplashPageState extends State<NativeUnifiedPage> {
                                 arguments: AppInfoArguments(
                                   titleContent: downLoadAppInfo?.appName ?? "",
                                   permissionContent:
-                                      downLoadAppInfo?.appPermission ?? "",
+                                  downLoadAppInfo?.appPermission ?? "",
                                   privacyContent:
-                                      downLoadAppInfo?.appPrivacy ?? "",
+                                  downLoadAppInfo?.appPrivacy ?? "",
                                   introContent: downLoadAppInfo?.appIntro ?? "",
                                 ).toMap());
                           },
@@ -208,7 +176,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
                                   backgroundColor: Colors.white)),
                         ),
                       )
-                  ]));
+                  ]),));
             }
             return Column(
               children: [
@@ -227,4 +195,192 @@ class _SplashPageState extends State<NativeUnifiedPage> {
           },
         ));
   }
+// 根据类型获取对应的子组件列表
+  List<LayoutWidget> _getChildrenByType(int type) {
+    debugPrint("type=$type");
+    switch (type) {
+      case 0:
+      // 类型0：基础组合（标题 + 图片 + 描述 + 操作按钮）
+        return [
+          UnifiedTitleWidget(
+            fontSize: 18,
+            color: "#1D2129",
+            x: 2,
+            y: 3,
+          ),
+          UnifiedMainImgWidget(
+            width: expressWidth,
+            height: expressHeight - 60,
+            x: 0,
+            y: 28,
+            backgroundColor: '#FFFFFF',
+          ),
+          UnifiedDescWidget(
+            fontSize: 14,
+            width: 180,
+            color: "#4E5969",
+            ellipsize: Ellipsize.end,
+            maxLines: 1,
+            x: 2,
+            y: expressHeight - 30,
+          ),
+          UnifiedActionButtonWidget(
+            fontSize: 12,
+            width: 50,
+            height: 20,
+            fontColor: '#FFFFFF',
+            backgroundColor: '#2F80ED',
+            x: expressWidth - 60,
+            y: expressHeight - 32,
+          ),
+        ];
+      case 1:
+      // 类型1：视频组合（标题 + 视频 + 应用图标 + 操作按钮）
+        return [
+          UnifiedTitleWidget(
+            fontSize: 18,
+            color: "#1D2129",
+            x: 2,
+            y: 3,
+          ),
+          UnifiedVideoWidget(
+            width: expressWidth,
+            height: expressHeight - 60,
+            x: 0,
+            y: 30,
+          ),
+          UnifiedAppIconWidget(
+            width: 25,
+            height: 25,
+            x: 10,
+            y: expressHeight - 30,
+          ),
+          UnifiedActionButtonWidget(
+            fontSize: 12,
+            width: 50,
+            height: 20,
+            fontColor: '#FFFFFF',
+            backgroundColor: '#2F80ED',
+            x: expressWidth - 60,
+            y: expressHeight - 32,
+          ),
+        ];
+      case 2:
+      // 类型2：抖动效果组合（标题 + 图片 + 抖动组件 + 描述）
+        return [
+          UnifiedTitleWidget(
+            fontSize: 18,
+            color: "#1D2129",
+            x: 2,
+            y: 3,
+          ),
+          UnifiedMainImgWidget(
+            width: expressWidth,
+            height: expressHeight - 60,
+            x: 0,
+            y: 28,
+            backgroundColor: '#FFFFFF',
+          ),
+          ShakeWidget(
+            width: 100,
+            height: 100,
+            x: 100,
+            y: 50,
+          ),
+          UnifiedDescWidget(
+            fontSize: 14,
+            width: 180,
+            color: "#4E5969",
+            ellipsize: Ellipsize.end,
+            maxLines: 1,
+            x: 2,
+            y: expressHeight - 30,
+          ),
+        ];
+      case 3:
+      // 类型3：全量组合（所有组件都包含）
+        return [
+          UnifiedTitleWidget(
+            fontSize: 18,
+            color: "#1D2129",
+            x: 2,
+            y: 3,
+          ),
+          UnifiedMainImgWidget(
+            width: expressWidth,
+            height: expressHeight - 60,
+            x: 0,
+            y: 28,
+            backgroundColor: '#FFFFFF',
+          ),
+          UnifiedVideoWidget(
+            width: expressWidth,
+            height: expressHeight - 60,
+            x: 0,
+            y: 30,
+          ),
+          UnifiedDescWidget(
+            fontSize: 14,
+            width: 180,
+            color: "#4E5969",
+            ellipsize: Ellipsize.end,
+            maxLines: 1,
+            x: 2,
+            y: expressHeight - 30,
+          ),
+          UnifiedActionButtonWidget(
+            fontSize: 12,
+            width: 50,
+            height: 20,
+            fontColor: '#FFFFFF',
+            backgroundColor: '#2F80ED',
+            x: expressWidth - 60,
+            y: expressHeight - 32,
+          ),
+          UnifiedAppIconWidget(
+            width: 25,
+            height: 25,
+            x: 10,
+            y: expressHeight - 30,
+          ),
+          ShakeWidget(
+            width: 100,
+            height: 100,
+            x: 100,
+            y: 50,
+          ),
+        ];
+      default:
+      // 默认返回基础组合（类型0）
+        return [];
+    }
+  }
+
+  bool downLoadAppInfoIsOk(UnifiedAdDownloadAppInfo? downLoadAppInfo) {
+    if(downLoadAppInfo == null) return false;
+    bool result = true;
+    if(downLoadAppInfo.appName == null){
+      result =  false;
+    }
+    if(downLoadAppInfo.appPermission == null) {
+      result =  false;
+    }
+    if(downLoadAppInfo.appDeveloper == null) {
+      result =  false;
+    }
+    if(downLoadAppInfo.appVersion == null) {
+      result =  false;
+    }
+    if(downLoadAppInfo.appPrivacy == null) {
+      result =  false;
+    }
+    if(downLoadAppInfo.appIntro == null) {
+      result =  false;
+    }
+    if(downLoadAppInfo.appPackageName == null) {
+      result =  false;
+    }
+    return result;
+  }
+
 }

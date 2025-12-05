@@ -108,7 +108,7 @@ class AMPSUnifiedView(
         return AMPSUnifiedRootContainer(context).apply {
             val containerLayout = FrameLayout.LayoutParams(
                 adViewWidthPx,
-                FrameLayout.LayoutParams.WRAP_CONTENT
+                FrameLayout.LayoutParams.MATCH_PARENT
             ).apply {
                 gravity = Gravity.CENTER_HORIZONTAL
             }
@@ -133,7 +133,7 @@ class AMPSUnifiedView(
             // FrameLayout 本身填充父容器
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT
+                FrameLayout.LayoutParams.MATCH_PARENT
             )
 
             val adViewWidth = nativeWidth?.toInt()?.dpToPx(context)

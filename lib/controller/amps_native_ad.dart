@@ -1,10 +1,9 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../adscope_sdk.dart';
+import '../amps_sdk_export.dart';
 import '../common.dart';
-import '../data/amps_ad_video_play_config.dart';
-import '../data/amps_native_interactive_listener.dart';
-import '../data/amps_ad.dart';
 
 ///原生广告类
 class AMPSNativeAd {
@@ -187,58 +186,50 @@ class AMPSNativeAd {
 
   ///获取是否有预加载
   Future<bool> isReadyAd(String adId) async {
-    final Map<String, dynamic> args = {adNativeType: nativeType, adAdId: adId};
     return await AdscopeSdk.channel
-        .invokeMethod(AMPSAdSdkMethodNames.nativeIsReadyAd, args);
+        .invokeMethod(AMPSAdSdkMethodNames.nativeIsReadyAd, nativeType);
+  }
+
+  ///获取ecpm
+  Future<AMPSUnifiedPattern> getUnifiedPattern(String adId) async {
+    final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
+    final pattern = await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.nativePattern, args);
+    return  AMPSUnifiedPattern.fromValue(pattern);
   }
 
   ///获取ecpm
   Future<num> getECPM(String adId) async {
-    final Map<String, dynamic> args = {adNativeType: nativeType, adAdId: adId};
+    final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
     return await AdscopeSdk.channel
         .invokeMethod(AMPSAdSdkMethodNames.nativeGetECPM, args);
   }
 
-  ///上报竞胜
-  notifyRTBWin(double winPrice, double secPrice, String adId,
-      {String? winAdnId}) {
-    final Map<String, dynamic> args = {
-      adWinPrice: winPrice,
-      adSecPrice: secPrice,
-      adAdId: adId,
-      adWinAdnId: winAdnId,
-      adNativeType: nativeType
-    };
-    AdscopeSdk.channel
-        .invokeMethod(AMPSAdSdkMethodNames.nativeNotifyRTBWin, args);
-  }
-
-  ///上报竞败
-  notifyRTBLoss(
-      double winPrice, double secPrice, String lossReason, String adId,
-      {String? winAdnId}) {
-    final Map<String, dynamic> args = {
-      adWinPrice: winPrice,
-      adSecPrice: secPrice,
-      adLossReason: lossReason,
-      adAdId: adId,
-      adWinAdnId: winAdnId,
-      adNativeType: nativeType
-    };
-    AdscopeSdk.channel
-        .invokeMethod(AMPSAdSdkMethodNames.nativeNotifyRTBLoss, args);
-  }
-
   ///获取是否是自渲染
   Future<bool> isNativeExpress(String adId) async {
-    final Map<String, dynamic> args = {adNativeType: nativeType, adAdId: adId};
+    final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
     return await AdscopeSdk.channel
         .invokeMethod(AMPSAdSdkMethodNames.nativeIsNativeExpress, args);
   }
 
+  Future<UnifiedAdDownloadAppInfo?> getDownLoadInfo(String adId) async {
+    try {
+      final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
+      final dynamic appInfo = await AdscopeSdk.channel
+          .invokeMethod(AMPSAdSdkMethodNames.nativeUnifiedGetDownLoad, args);
+      Map<String, dynamic>? dataMap;
+      if (appInfo != null) {
+        dataMap = Map<String, dynamic>.from(appInfo);
+      }
+      return UnifiedAdDownloadAppInfo.fromMap(dataMap);
+    } on PlatformException catch (e) {
+      throw Exception('调用getDownLoadInfo失败: ${e.message}');
+    }
+  }
+
   ///获取视频播放时长
   Future<num> getVideoDuration(String adId) async {
-    final Map<String, dynamic> args = {adNativeType: nativeType, adAdId: adId};
+    final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
     return await AdscopeSdk.channel
         .invokeMethod(AMPSAdSdkMethodNames.nativeGetVideoDuration, args);
   }
@@ -248,6 +239,20 @@ class AMPSNativeAd {
     AdscopeSdk.channel.invokeMethod(
         AMPSAdSdkMethodNames.nativeSetVideoPlayConfig,
         videoPlayConfig.toJson());
+  }
+
+  ///获取信息
+  Future<Map<String, dynamic>?> getMediaExtraInfo() async {
+    try {
+      final dynamic param = await AdscopeSdk.channel.invokeMethod(
+          AMPSAdSdkMethodNames.nativeGetMediaExtraInfo, nativeType.value);
+      if (param == null) {
+        return null;
+      }
+      return Map<String, dynamic>.from(param);
+    } on PlatformException catch (e) {
+      throw Exception('调用getCustomExtraData失败: ${e.message}');
+    }
   }
 
   void setAdCloseCallBack(AdWidgetNeedCloseCall? closeWidgetCall) {

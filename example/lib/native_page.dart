@@ -124,7 +124,6 @@ class _SplashPageState extends State<NativePage> {
               child:Column(
                 children: [
                   ButtonWidget(buttonText: "buttonText", callBack: ()=>{
-                    _nativeAd?.notifyRTBLoss(2,1,"失败",feedAdList[0])
                   }),
                   Container(
                     height: 128,

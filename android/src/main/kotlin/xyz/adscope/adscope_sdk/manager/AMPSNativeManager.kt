@@ -293,12 +293,42 @@ class AMPSNativeManager {
             AMPSAdSdkMethodNames.NATIVE_IS_NATIVE_EXPRESS -> {
                 val lossParams = args as HashMap<String, Any>
                 val nativeType = lossParams[NATIVE_TYPE] as? Int ?: 0
+                val adId = lossParams[AD_ID] as? String ?: ""
                 if (nativeType == 0) {
                     result.success(true)
                 } else {
-                    val foundWrapper = getAdUnifiedByAdId(call.arguments as String)
+                    val foundWrapper = getAdUnifiedByAdId(adId)
                     val isNativeExpress = foundWrapper?.isExpressAd ?: false
                     result.success(isNativeExpress)
+                }
+            }
+
+            AMPSAdSdkMethodNames.NATIVE_UNIFIED_GET_DOWNLOAD -> {
+                val params = args as HashMap<String, Any>
+                val nativeType = params[NATIVE_TYPE] as? Int ?: 0
+                val adId = params[AD_ID] as? String ?: ""
+                if (nativeType == NativeType.NATIVE.value) {
+                    result.success(null)
+                } else {
+                    val appDetail = getAdUnifiedByAdId(adId)?.appDetail
+                    var infoMap: Map<String, String?>? = null
+                    if (appDetail != null) {
+                        infoMap = mapOf(
+                            "appName" to appDetail.appName,
+                            "appVersion" to appDetail.appVersion,
+                            "appDeveloper" to appDetail.appDeveloper,
+                            "appPermission" to appDetail.appPermissionInfo,
+                            "appPrivacy" to appDetail.appPrivacyPolicy,
+                            "appIntro" to appDetail.appDescription,
+                            "downloadCountDesc" to appDetail.downloadCountDesc,
+                            "appScore" to appDetail.appScore,
+                            "appPrice" to appDetail.appPrice,
+                            "appSize" to appDetail.appSize,
+                            "appPackageName" to appDetail.appPackageName,
+                            "appIconUrl" to appDetail.appIconUrl
+                        )
+                    }
+                    result.success(infoMap)
                 }
             }
 
@@ -327,6 +357,19 @@ class AMPSNativeManager {
                     mUnifiedAd?.destroy()
                 }
                 result.success(null)
+            }
+
+            AMPSAdSdkMethodNames.NATIVE_PATTERN -> {
+                val vdConfigParams = args as HashMap<String, Any>
+                val adId = vdConfigParams[AD_ID] as? String ?: ""
+                val nativeType = vdConfigParams[NATIVE_TYPE] as? Int ?: 0
+                if (nativeType == 0) {
+                    result.success(-1)
+                } else {
+                    val foundWrapper = getAdUnifiedByAdId(adId)
+                    val adPattern = foundWrapper?.adPattern?.ordinal ?: 0
+                    result.success(adPattern)
+                }
             }
 
             AMPSAdSdkMethodNames.NATIVE_GET_MEDIA_EXTRA_INFO -> {

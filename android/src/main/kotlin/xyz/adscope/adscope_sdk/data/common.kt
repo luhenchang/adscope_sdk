@@ -117,9 +117,12 @@ object AMPSAdSdkMethodNames {
     const val NATIVE_LOAD = "AMPSNative_load"
     const val NATIVE_SHOW_AD = "AMPSNative_showAd"
     const val NATIVE_SIZE_UPDATE = "AMPSNative_SizeUpdate"
+    const val NATIVE_PATTERN = "AMPSNative_getUnifiedPattern";
     const val NATIVE_GET_ECPM = "AMPSNative_getECPM"
     const val NATIVE_IS_READY_AD = "AMPSNative_isReadyAd"
     const val NATIVE_IS_NATIVE_EXPRESS = "AMPSNative_isNativeExpress"
+    const val NATIVE_UNIFIED_MATERIAL_TYPE = "AMPSNative_materialType"
+    const val NATIVE_UNIFIED_GET_DOWNLOAD = "AMPSNative_getDownLoad"
     const val NATIVE_RESUME = "AMPSNative_resume"
     const val NATIVE_PAUSE = "AMPSNative_pause"
     const val NATIVE_DESTROY = "AMPSNative_destroy"
@@ -179,11 +182,15 @@ val NativeMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.NATIVE_LOAD,
     AMPSAdSdkMethodNames.NATIVE_SHOW_AD,
     AMPSAdSdkMethodNames.NATIVE_GET_ECPM,
+    AMPSAdSdkMethodNames.NATIVE_PATTERN,
     AMPSAdSdkMethodNames.NATIVE_IS_READY_AD,
     AMPSAdSdkMethodNames.NATIVE_IS_NATIVE_EXPRESS,
     AMPSAdSdkMethodNames.NATIVE_RESUME,
     AMPSAdSdkMethodNames.NATIVE_PAUSE,
     AMPSAdSdkMethodNames.NATIVE_DESTROY,
-    AMPSAdSdkMethodNames.NATIVE_GET_MEDIA_EXTRA_INFO
+    AMPSAdSdkMethodNames.NATIVE_GET_MEDIA_EXTRA_INFO,
+    AMPSAdSdkMethodNames.NATIVE_UNIFIED_MATERIAL_TYPE,
+    AMPSAdSdkMethodNames.NATIVE_UNIFIED_GET_DOWNLOAD
+
 
 )

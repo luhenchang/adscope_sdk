@@ -5,6 +5,12 @@ class UnifiedAdDownloadAppInfo {
   final String? appPermission;
   final String? appPrivacy;
   final String? appIntro;
+  final String? downloadCountDesc;
+  final String? appScore;
+  final String? appPrice;
+  final String? appSize;
+  final String? appPackageName;
+  final String? appIconUrl;
 
   UnifiedAdDownloadAppInfo({
     this.appName,
@@ -13,11 +19,16 @@ class UnifiedAdDownloadAppInfo {
     this.appPermission,
     this.appPrivacy,
     this.appIntro,
+    this.downloadCountDesc,
+    this.appScore,
+    this.appPrice,
+    this.appSize,
+    this.appPackageName,
+    this.appIconUrl,
   });
 
-  // 从Map解析创建实例
+  // 从Map解析创建实例（保持空安全判断）
   static UnifiedAdDownloadAppInfo? fromMap(Map<String, dynamic>? map) {
-    // 如果map为空，返回null
     if (map == null || map.isEmpty) {
       return null;
     }
@@ -29,10 +40,16 @@ class UnifiedAdDownloadAppInfo {
       appPermission: map['appPermission'],
       appPrivacy: map['appPrivacy'],
       appIntro: map['appIntro'],
+      downloadCountDesc: map['downloadCountDesc'],
+      appScore: map['appScore'],
+      appPrice: map['appPrice'],
+      appSize: map['appSize'],
+      appPackageName: map['appPackageName'],
+      appIconUrl: map['appIconUrl'],
     );
   }
 
-  // 可选：转为Map，便于后续处理
+  // 转为Map（完整包含所有属性）
   Map<String, dynamic> toMap() {
     return {
       'appName': appName,
@@ -41,6 +58,31 @@ class UnifiedAdDownloadAppInfo {
       'appPermission': appPermission,
       'appPrivacy': appPrivacy,
       'appIntro': appIntro,
+      'downloadCountDesc': downloadCountDesc,
+      'appScore': appScore,
+      'appPrice': appPrice,
+      'appSize': appSize,
+      'appPackageName': appPackageName,
+      'appIconUrl': appIconUrl,
     };
+  }
+
+  // 可选：重写toString，便于日志打印（按需使用）
+  @override
+  String toString() {
+    return "UnifiedAdDownloadAppInfo("
+        "appName: $appName, "
+        "appVersion: $appVersion, "
+        "appDeveloper: $appDeveloper, "
+        "appPermission: $appPermission, "
+        "appPrivacy: $appPrivacy, "
+        "appIntro: $appIntro, "
+        "downloadCountDesc: $downloadCountDesc, "
+        "appScore: $appScore, "
+        "appPrice: $appPrice, "
+        "appSize: $appSize, "
+        "appPackageName: $appPackageName, "
+        "appIconUrl: $appIconUrl"
+        ")";
   }
 }

@@ -474,18 +474,13 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
         clickType: Int?,
         clickIdType: Int?
     ) {
-        Log.e("clickType==",clickType.toString())
         val finalClickType = clickType ?: AdClickType.NONE
-        Log.e("clickType==end==",finalClickType.toString())
-        Log.e("clickType==endSize==",clickableViews.size.toString())
         if (finalClickType == AdClickType.NONE) {
             return
         }
-        Log.e("clickType==end2==",finalClickType.toString())
-        // 根据 clickIdType 将视图添加到对应的列表中，用于后续的曝光和点击上报
-        if (clickIdType == 0) { // 假设 0 代表 CLICK
+        if (clickIdType == 0) {
             clickableViews.add(view)
-        } else if (clickIdType == 1) { // 假设 1 代表 CREATE
+        } else if (clickIdType == 1) {
             creativeViews.add(view)
         }
     }
