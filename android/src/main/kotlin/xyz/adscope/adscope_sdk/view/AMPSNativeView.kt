@@ -1,6 +1,7 @@
 package xyz.adscope.adscope_sdk.view
 
 import android.content.Context
+import android.graphics.Color
 import android.util.Log
 import android.view.Gravity
 import android.view.View
@@ -18,6 +19,7 @@ import xyz.adscope.adscope_sdk.manager.AMPSEventManager
 import xyz.adscope.adscope_sdk.manager.AdWrapperManager
 import xyz.adscope.adscope_sdk.utils.dpToPx
 import xyz.adscope.adscope_sdk.utils.pxToDp
+import xyz.adscope.common.v2.dev.info.ScreenUtil
 
 
 class AMPSNativeView(
@@ -50,22 +52,30 @@ class AMPSNativeView(
         val nativeWidth = args[NATIVE_WIDTH] as? Double
 
         return FrameLayout(context).apply {
-            // FrameLayout 本身填充父容器
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT
             )
-
-            val adViewWidth = nativeWidth?.toInt()?.dpToPx(context)
-                ?: FrameLayout.LayoutParams.MATCH_PARENT // 默认填充宽度
-
-            val adViewParams = FrameLayout.LayoutParams(
-                adViewWidth,
-                FrameLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                gravity = Gravity.CENTER
+            val screenWidthPx = ScreenUtil.getScreenWidth(context)
+            if (nativeWidth == null) {
+                val adViewParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    gravity = Gravity.CENTER
+                }
+                tag = adViewParams
+            } else {
+                val nativeWidthPx = nativeWidth.toInt().dpToPx(context)
+                val adViewWidth = nativeWidthPx.coerceAtMost(screenWidthPx)
+                val adViewParams = FrameLayout.LayoutParams(
+                    adViewWidth,
+                    FrameLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    gravity = Gravity.CENTER
+                }
+                tag = adViewParams
             }
-            tag = adViewParams
         }
     }
 
@@ -116,7 +126,7 @@ class AMPSNativeView(
 
     override fun dispose() {
         adId?.let {
-            AdWrapperManager.getInstance().removeAdItem(it) // 假设 Manager 有这样的清理方法
+            AdWrapperManager.getInstance().removeAdItem(it)
         }
         rootView.removeAllViews()
     }

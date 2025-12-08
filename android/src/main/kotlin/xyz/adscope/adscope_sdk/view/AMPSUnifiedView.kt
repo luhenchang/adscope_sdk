@@ -6,8 +6,6 @@ import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
 import io.flutter.plugin.common.BinaryMessenger
-import io.flutter.plugin.common.MethodCall
-import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
 import xyz.adscope.adscope_sdk.data.AD_ID
 import xyz.adscope.adscope_sdk.data.NATIVE_WIDTH
@@ -26,7 +24,7 @@ class AMPSUnifiedView(
     viewId: Int,
     binaryMessenger: BinaryMessenger,
     args: Any?
-) : PlatformView, MethodChannel.MethodCallHandler {
+) : PlatformView {
     // 但由于构造函数中需要对 rootView 进行 addView，因此保留非延迟初始化
     private val unifiedView = FrameLayout(context).apply {
         layoutParams = FrameLayout.LayoutParams(
@@ -189,11 +187,5 @@ class AMPSUnifiedView(
             AdWrapperManager.getInstance().removeAdView(id)
         }
         rootView.removeAllViews()
-    }
-
-    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        // 通常在 PlatformView 中，这个方法用于接收来自 Flutter 的方法调用
-        Log.d(TAG, "Received method call: ${call.method}")
-        result.notImplemented()
     }
 }
