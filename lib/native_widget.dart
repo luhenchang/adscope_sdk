@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:adscope_sdk/amps_sdk_export.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,8 +12,19 @@ class NativeWidget extends StatefulWidget {
 
   final AMPSNativeAd? adNative;
 
-  const NativeWidget(this.adNative,
-      {super.key, required this.adId});
+
+  final AmpsNativeInteractiveListener? mInteractiveCallBack;
+  final AmpsVideoPlayListener? mVideoPlayerCallBack;
+  final AMPSUnifiedDownloadListener? mDownloadListener;
+  final AMPSNegativeFeedbackListener? mNegativeFeedbackListener;
+
+  const NativeWidget(
+      this.adNative,
+
+      {required this.adId,super.key,this.mInteractiveCallBack,
+        this.mVideoPlayerCallBack,
+        this.mNegativeFeedbackListener,
+        this.mDownloadListener, });
 
   @override
   State<StatefulWidget> createState() => _NativeWidgetState();
@@ -24,23 +36,40 @@ class _NativeWidgetState extends State<NativeWidget>
   late Map<String, dynamic> creationParams;
 
   /// 宽高
-  double width = 375, height = 528;
+  double width = 0, height = 0;
   bool widgetNeedClose = false;
+  bool _initialized = false;
 
   @override
   void initState() {
-    final expressSizeList = widget.adNative?.config.expressSize;
-    if (expressSizeList != null && expressSizeList.length > 1) {
-      width = expressSizeList[0]?.toDouble() ?? width;
-      height = expressSizeList[1]?.toDouble() ?? height;
-    }
-    creationParams = <String, dynamic>{"adId": widget.adId, "width": width};
     super.initState();
+    widget.adNative?.setAdCloseCallBack(widget.adId,() {
+      setState(() {
+        widgetNeedClose = true;
+      });
+    });
+    widget.adNative?.setDownloadListener(widget.adId, widget.mDownloadListener);
+    widget.adNative?.setInteractiveListener(widget.adId, widget.mInteractiveCallBack);
+    widget.adNative?.setNegativeFeedbackListener(widget.adId, widget.mNegativeFeedbackListener);
+    widget.adNative?.setVideoPlayerListener(widget.adId, widget.mVideoPlayerCallBack);
+
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    if (!_initialized) {
+      _initialized = true;
+      width = MediaQuery.of(context).size.width;
+      height = MediaQuery.of(context).size.height;
+      final expressSizeList = widget.adNative?.config.expressSize;
+      if (expressSizeList != null && expressSizeList.length > 1) {
+        width = expressSizeList[0]?.toDouble() ?? width;
+        height = expressSizeList[1]?.toDouble() ?? height;
+      }
+      creationParams = <String, dynamic>{"adId": widget.adId, "width": width};
+    }
+
     if (width <= 0 || height <= 0 || widgetNeedClose) {
       return const SizedBox.shrink();
     }
@@ -82,19 +111,11 @@ class _NativeWidgetState extends State<NativeWidget>
   Future<void> callBack(MethodCall call) async {}
 
   void _onPlatformViewCreated(int id) {
-    widget.adNative?.setAdCloseCallBack(() {
+    widget.adNative?.setSizeUpdate(widget.adId,(w, h) {
       setState(() {
-        widgetNeedClose = true;
+        width = w;
+        height = h;
       });
     });
-    final expressSizeList = widget.adNative?.config.expressSize;
-    if (expressSizeList == null || expressSizeList.isEmpty) {
-      widget.adNative?.setSizeUpdate((w, h) {
-        setState(() {
-          width = w;
-          height = h;
-        });
-      });
-    }
   }
 }

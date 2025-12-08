@@ -15,7 +15,23 @@ A new Flutter plugin project.
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.platform = :ios, '12.0'
+  s.dependency  'AMPSAdSDK'
+
+  s.dependency 'AMPSASNPAdapter'
+#   s.dependency 'AMPSBZAdapter', '~> 5.1.490700.1'
+#   s.dependency 'AMPSGDTAdapter', '~> 5.1.41560.3'
+  s.dependency 'AMPSKSAdapter' , '~> 5.1.4920.1'
+#   s.dependency 'AMPSGMAdapter'
+#   s.dependency 'AMPSBDAdapter', '~> 5.1.10020.1'
+#   s.dependency 'AMPSSGAdapter', '~> 5.1.4203.0'
+#   s.dependency 'AMPSCSJAdapter'
+  s.dependency 'AMPSJDAdapter'
+#   s.dependency 'AMPSQMAdapter'
+#   s.dependency 'AMPSOCTAdapter'
+#   s.dependency 'AMPSMSAdapter'
+
+  s.platform = :ios, '13.0'
+
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }

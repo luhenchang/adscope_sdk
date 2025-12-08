@@ -21,7 +21,7 @@ class _SplashPageState extends State<NativePage> {
   List<String> feedList = [];
   List<String> feedAdList = [];
   late double expressWidth = 350;
-  late double expressHeight = 128;
+  late double expressHeight = 228;
 
   @override
   void initState() {
@@ -86,15 +86,7 @@ class _SplashPageState extends State<NativePage> {
     _nativeAd = AMPSNativeAd(
         config: options,
         mCallBack: _adCallBack,
-        mRenderCallBack: _renderCallBack,
-        mInteractiveCallBack: _interactiveCallBack,
-        mVideoPlayerCallBack: _videoPlayerCallBack);
-    _nativeAd?.setVideoPlayConfig(
-        const AMPSAdVideoPlayConfig(
-          videoSoundEnable: true, // 启用声音
-          videoAutoPlayType: 3, // 设置自动播放类型
-          videoLoopReplay: true, // 启用循环播放
-        ));
+        mRenderCallBack: _renderCallBack);
     _nativeAd?.load();
   }
   @override
@@ -111,14 +103,18 @@ class _SplashPageState extends State<NativePage> {
         body: ListView.builder(
           itemCount: feedList.length + feedAdList.length, // 列表项总数
           itemBuilder: (BuildContext context, int index) {
-            int adIndex = index ~/ 5;
+            int adIndex = index ~/ 3;
             int feedIndex = index - adIndex;
-            if (index % 5 == 4 && adIndex < feedAdList.length) {
+            if (index % 3 == 2 && adIndex < feedAdList.length) {
               String adId = feedAdList[adIndex];
               debugPrint(adId);
+
               return NativeWidget(_nativeAd,
+                  mInteractiveCallBack: _interactiveCallBack,
+                  mVideoPlayerCallBack: _videoPlayerCallBack,
                   key: ValueKey(adId),
                   adId: adId);
+
             }
             return Center(
               child:Column(

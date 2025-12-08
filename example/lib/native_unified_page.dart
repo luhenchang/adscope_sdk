@@ -17,7 +17,7 @@ class NativeUnifiedPage extends StatefulWidget {
 
 class _SplashPageState extends State<NativeUnifiedPage> {
   late AMPSNativeAdListener _adCallBack;
-  late AMPSNegativeFeedbackListener _negativeFeedBackListener;
+  // late AMPSNegativeFeedbackListener _negativeFeedBackListener;
   late AMPSNativeRenderListener _renderCallBack;
   late AmpsNativeInteractiveListener _interactiveCallBack;
   late AmpsVideoPlayListener _videoPlayerCallBack;
@@ -40,9 +40,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
     _adCallBack = AMPSNativeAdListener(
         loadOk: (adIds) {},
         loadFail: (code, message) => {debugPrint("自渲染广告加载失败")});
-    _negativeFeedBackListener = AMPSNegativeFeedbackListener(onComplainSuccess: (adId) {
 
-        });
     _renderCallBack = AMPSNativeRenderListener(renderSuccess: (adId) {
       _nativeAd?.getUnifiedPattern(adId).then((pattern){
         setState(() {
@@ -105,9 +103,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
         config: options,
         nativeType: NativeType.unified,
         mCallBack: _adCallBack,
-        mRenderCallBack: _renderCallBack,
-        mInteractiveCallBack: _interactiveCallBack,
-        mVideoPlayerCallBack: _videoPlayerCallBack);
+        mRenderCallBack: _renderCallBack);
     _nativeAd?.load();
   }
 
@@ -130,6 +126,8 @@ class _SplashPageState extends State<NativeUnifiedPage> {
                   child:Container(color: Colors.red,child: Stack(alignment: AlignmentDirectional.center, children: [
                     UnifiedWidget(
                       _nativeAd,
+                      mInteractiveCallBack: _interactiveCallBack,
+                      mVideoPlayerCallBack: _videoPlayerCallBack,
                       key: ValueKey(adId),
                       adId: adId,
                       unifiedContent: NativeUnifiedWidget(

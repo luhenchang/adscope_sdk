@@ -15,12 +15,21 @@ class UnifiedWidget extends StatefulWidget {
   final NativeUnifiedWidget? unifiedContent;
   final AMPSUnifiedDownloadListener? downloadListener;
 
+  final AmpsNativeInteractiveListener? mInteractiveCallBack;
+  final AmpsVideoPlayListener? mVideoPlayerCallBack;
+  final AMPSUnifiedDownloadListener? mDownloadListener;
+  final AMPSNegativeFeedbackListener? mNegativeFeedbackListener;
+
   const UnifiedWidget(
     this.adNative, {
     super.key,
     required this.adId,
     required this.unifiedContent,
-    this.downloadListener
+    this.downloadListener,
+    this.mInteractiveCallBack,
+    this.mVideoPlayerCallBack,
+    this.mNegativeFeedbackListener,
+    this.mDownloadListener,
   });
 
   @override
@@ -35,9 +44,7 @@ class _UnifiedWidgetState extends State<UnifiedWidget> with AutomaticKeepAliveCl
   bool widgetNeedClose = false;
   @override
   void initState() {
-    if(widget.downloadListener != null) {
-      widget.adNative?.setDownloadListener(widget.downloadListener);
-    }
+
     final expressSizeList = widget.adNative?.config.expressSize;
     if (expressSizeList != null && expressSizeList.length > 1) {
       width = expressSizeList[0]?.toDouble() ?? width;
@@ -48,6 +55,12 @@ class _UnifiedWidgetState extends State<UnifiedWidget> with AutomaticKeepAliveCl
       'unifiedWidget': widget.unifiedContent?.toMap(width: width)
     };
     super.initState();
+
+    widget.adNative?.setDownloadListener(widget.adId, widget.mDownloadListener);
+    widget.adNative?.setInteractiveListener(widget.adId, widget.mInteractiveCallBack);
+    widget.adNative?.setNegativeFeedbackListener(widget.adId, widget.mNegativeFeedbackListener);
+    widget.adNative?.setVideoPlayerListener(widget.adId, widget.mVideoPlayerCallBack);
+
   }
 
   @override
@@ -93,7 +106,7 @@ class _UnifiedWidgetState extends State<UnifiedWidget> with AutomaticKeepAliveCl
 
   }
   void _onPlatformViewCreated(int id) {
-    widget.adNative?.setAdCloseCallBack((){
+    widget.adNative?.setAdCloseCallBack(widget.adId,(){
       setState(() {
         widgetNeedClose = true;
       });

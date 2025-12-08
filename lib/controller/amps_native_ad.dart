@@ -2,8 +2,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../adscope_sdk.dart';
-import '../amps_sdk_export.dart';
 import '../common.dart';
+import '../data/amps_native_interactive_listener.dart';
+import '../data/amps_ad.dart';
+import '../data/unified_ad_download_app_info.dart';
+import '../data/unified_pattern.dart';
 
 ///原生广告类
 class AMPSNativeAd {
@@ -13,21 +16,21 @@ class AMPSNativeAd {
   AdOptions config;
   AMPSNativeAdListener? mCallBack;
   AMPSNativeRenderListener? mRenderCallBack;
-  AmpsNativeInteractiveListener? mInteractiveCallBack;
-  AmpsVideoPlayListener? mVideoPlayerCallBack;
-  AdWidgetNeedCloseCall? mCloseWidgetCall;
-  AMPSUnifiedDownloadListener? mDownloadListener;
-  AMPSNegativeFeedbackListener? mNegativeFeedbackListener;
   AdWidgetSizeCall? updateSize;
+
+  Map<String,AdWidgetSizeCall> updateSizeMap = {};
+  Map<String,AmpsNativeInteractiveListener> mInteractiveCallBackMap = {};
+  Map<String, AmpsVideoPlayListener> mVideoPlayerCallBackMap = {};
+  Map<String, AdWidgetNeedCloseCall> mCloseWidgetCallMap = {};
+  Map<String, AMPSUnifiedDownloadListener> mDownloadListenerMap = {};
+  Map<String, AMPSNegativeFeedbackListener> mNegativeFeedbackListenerMap = {};
 
   AMPSNativeAd(
       {required this.config,
       this.nativeType = NativeType.native,
       this.mCallBack,
-      this.mRenderCallBack,
-      this.mInteractiveCallBack,
-      this.mVideoPlayerCallBack,
-      this.mNegativeFeedbackListener}) {
+      this.mRenderCallBack}) {
+
     AdscopeSdk.channel.setMethodCallHandler(
       (call) async {
         switch (call.method) {
@@ -53,115 +56,122 @@ class AMPSNativeAd {
                 map[AMPSSdkCallBackErrorKey.message]);
             break;
           case AMPSNativeCallBackChannelMethod.onAdShow:
-            mInteractiveCallBack?.onAdShow?.call(call.arguments);
+            mInteractiveCallBackMap[call.arguments]?.onAdShow?.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onAdExposure:
-            mInteractiveCallBack?.onAdExposure?.call(call.arguments);
+            mInteractiveCallBackMap[call.arguments]?.onAdExposure?.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onAdClicked:
-            mInteractiveCallBack?.onAdClicked?.call(call.arguments);
+            mInteractiveCallBackMap[call.arguments]?.onAdClicked?.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onAdClosed:
-            mCloseWidgetCall?.call();
-            mInteractiveCallBack?.toCloseAd?.call(call.arguments);
+            mCloseWidgetCallMap[call.arguments]?.call();
+            mInteractiveCallBackMap[call.arguments]?.toCloseAd?.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onComplainSuccess:
-            mNegativeFeedbackListener?.onComplainSuccess.call(call.arguments);
+            mNegativeFeedbackListenerMap[call.arguments]?.onComplainSuccess.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onVideoInit:
-            mVideoPlayerCallBack?.onVideoInit?.call(call.arguments);
+            mVideoPlayerCallBackMap[call.arguments]?.onVideoInit?.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onVideoLoading:
-            mVideoPlayerCallBack?.onVideoLoading?.call(call.arguments);
+            mVideoPlayerCallBackMap[call.arguments]?.onVideoLoading?.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onVideoReady:
-            mVideoPlayerCallBack?.onVideoReady?.call(call.arguments);
+            mVideoPlayerCallBackMap[call.arguments]?.onVideoReady?.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onVideoLoaded:
-            mVideoPlayerCallBack?.onVideoLoaded?.call(call.arguments);
+            mVideoPlayerCallBackMap[call.arguments]?.onVideoLoaded?.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onVideoPlayStart:
-            mVideoPlayerCallBack?.onVideoPlayStart?.call(call.arguments);
+            mVideoPlayerCallBackMap[call.arguments]?.onVideoPlayStart?.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onVideoPlayComplete:
-            mVideoPlayerCallBack?.onVideoPlayComplete?.call(call.arguments);
+            mVideoPlayerCallBackMap[call.arguments]?.onVideoPlayComplete?.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onVideoPause:
-            mVideoPlayerCallBack?.onVideoPause?.call(call.arguments);
+            mVideoPlayerCallBackMap[call.arguments]?.onVideoPause?.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onVideoResume:
-            mVideoPlayerCallBack?.onVideoResume?.call(call.arguments);
+            mVideoPlayerCallBackMap[call.arguments]?.onVideoResume?.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onVideoStop:
-            mVideoPlayerCallBack?.onVideoStop?.call(call.arguments);
+            mVideoPlayerCallBackMap[call.arguments]?.onVideoStop?.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onVideoClicked:
-            mVideoPlayerCallBack?.onVideoClicked?.call(call.arguments);
+            mVideoPlayerCallBackMap[call.arguments]?.onVideoClicked?.call(call.arguments);
             break;
           case AMPSNativeCallBackChannelMethod.onVideoPlayError:
             var map = call.arguments as Map<dynamic, dynamic>;
-            mVideoPlayerCallBack?.onVideoPlayError?.call(
+            mVideoPlayerCallBackMap[call.arguments]?.onVideoPlayError?.call(
                 map[AMPSSdkCallBackErrorKey.adId],
                 map[AMPSSdkCallBackErrorKey.code],
                 map[AMPSSdkCallBackErrorKey.extra]);
             break;
           case DownLoadCallBackChannelMethod.onInstalled:
             var adId = call.arguments as String;
-            mDownloadListener?.onInstalled?.call(adId);
+            mDownloadListenerMap[call.arguments]?.onInstalled?.call(adId);
             break;
           case DownLoadCallBackChannelMethod.onDownloadFailed:
             var adId = call.arguments as String;
-            mDownloadListener?.onDownloadFailed?.call(adId);
+            mDownloadListenerMap[call.arguments]?.onDownloadFailed?.call(adId);
             break;
           case DownLoadCallBackChannelMethod.onDownloadStarted:
             var adId = call.arguments as String;
-            mDownloadListener?.onDownloadStarted?.call(adId);
+            mDownloadListenerMap[call.arguments]?.onDownloadStarted?.call(adId);
             break;
           case DownLoadCallBackChannelMethod.onDownloadFinished:
             var adId = call.arguments as String;
-            mDownloadListener?.onDownloadFinished?.call(adId);
+            mDownloadListenerMap[call.arguments]?.onDownloadFinished?.call(adId);
             break;
           case DownLoadCallBackChannelMethod.onDownloadProgressUpdate:
             var argMap = call.arguments as Map<dynamic, dynamic>;
             var position = argMap["position"] ?? 0;
             var adId = argMap["adId"] ?? "";
-            mDownloadListener?.onDownloadProgressUpdate?.call(position, adId);
+            mDownloadListenerMap[call.arguments]?.onDownloadProgressUpdate?.call(position, adId);
             break;
           case DownLoadCallBackChannelMethod.onDownloadPaused:
             var argMap = call.arguments as Map<dynamic, dynamic>;
             var position = argMap["position"] ?? 0;
             var adId = argMap["adId"] ?? "";
-            mDownloadListener?.onDownloadPaused?.call(position, adId);
+            mDownloadListenerMap[call.arguments]?.onDownloadPaused?.call(position, adId);
             break;
           case AMPSNativeCallBackChannelMethod.nativeSizeUpdate:
             try {
+
               // 检查 arguments 是否为 Map
               if (call.arguments is Map) {
                 var argMap = call.arguments as Map;
                 final param = Map<String, dynamic>.from(argMap);
-
+                debugPrint("nativeSizeUpdate:${param["height"]}");
                 // 安全地获取并转换为 double
                 double width = 00;
                 double height = 00;
-
+                debugPrint("nativeSizeUpdate-Error: 1");
                 if (param.containsKey("width")) {
                   width = param["width"] is num
                       ? (param["width"] as num).toDouble()
                       : 00;
                 }
-
+                debugPrint("nativeSizeUpdate-Error: 2");
                 if (param.containsKey("height")) {
                   height = param["height"] is num
                       ? (param["height"] as num).toDouble()
                       : 00;
                 }
                 // 验证参数合理性
+                debugPrint("nativeSizeUpdate-Error: 3");
                 width = width >= 0 ? width : 00;
                 height = height >= 0 ? height : 00;
                 // 安全调用回调
-                updateSize?.call(width, height);
+                debugPrint("nativeSizeUpdate-Error: 4-$updateSize");
+                if (param.containsKey("adId")) {
+                  final adId = param["adId"];
+                      updateSizeMap[adId]?.call(width, height);
+                }
+
               } else {
-                // debugPrint("nativeSizeUpdate-Invalid arguments type: ${call.arguments.runtimeType}");
+                debugPrint("nativeSizeUpdate-Invalid arguments type: ${call.arguments.runtimeType}");
               }
             } catch (e, stackTrace) {
               debugPrint("nativeSizeUpdate-Error: $e");
@@ -184,34 +194,14 @@ class AMPSNativeAd {
     );
   }
 
-  ///获取是否有预加载
-  Future<bool> isReadyAd(String adId) async {
-    return await AdscopeSdk.channel
-        .invokeMethod(AMPSAdSdkMethodNames.nativeIsReadyAd, nativeType);
-  }
-
-  ///获取ecpm
+  //自渲染类型
   Future<AMPSUnifiedPattern> getUnifiedPattern(String adId) async {
     final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
     final pattern = await AdscopeSdk.channel
         .invokeMethod(AMPSAdSdkMethodNames.nativePattern, args);
     return  AMPSUnifiedPattern.fromValue(pattern);
   }
-
-  ///获取ecpm
-  Future<num> getECPM(String adId) async {
-    final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
-    return await AdscopeSdk.channel
-        .invokeMethod(AMPSAdSdkMethodNames.nativeGetECPM, args);
-  }
-
-  ///获取是否是自渲染
-  Future<bool> isNativeExpress(String adId) async {
-    final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
-    return await AdscopeSdk.channel
-        .invokeMethod(AMPSAdSdkMethodNames.nativeIsNativeExpress, args);
-  }
-
+  //下载相关信息
   Future<UnifiedAdDownloadAppInfo?> getDownLoadInfo(String adId) async {
     try {
       final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
@@ -225,20 +215,6 @@ class AMPSNativeAd {
     } on PlatformException catch (e) {
       throw Exception('调用getDownLoadInfo失败: ${e.message}');
     }
-  }
-
-  ///获取视频播放时长
-  Future<num> getVideoDuration(String adId) async {
-    final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
-    return await AdscopeSdk.channel
-        .invokeMethod(AMPSAdSdkMethodNames.nativeGetVideoDuration, args);
-  }
-
-  ///设置视频播放配置
-  void setVideoPlayConfig(AMPSAdVideoPlayConfig videoPlayConfig) {
-    AdscopeSdk.channel.invokeMethod(
-        AMPSAdSdkMethodNames.nativeSetVideoPlayConfig,
-        videoPlayConfig.toJson());
   }
 
   ///获取信息
@@ -255,15 +231,71 @@ class AMPSNativeAd {
     }
   }
 
-  void setAdCloseCallBack(AdWidgetNeedCloseCall? closeWidgetCall) {
-    mCloseWidgetCall = closeWidgetCall;
+  ///获取是否有预加载
+  Future<bool> isReadyAd(String adId) async {
+    final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.nativeIsReadyAd, args);
   }
 
-  void setDownloadListener(AMPSUnifiedDownloadListener? downloadListener) {
-    mDownloadListener = downloadListener;
+  ///获取ecpm
+  Future<num> getECPM(String adId) async {
+    final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.nativeGetECPM, args);
   }
 
-  void setSizeUpdate(AdWidgetSizeCall func) {
-    updateSize = func;
+  ///获取是否是自渲染
+  Future<bool> isNativeExpress(String adId) async {
+    final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.nativeIsNativeExpress, args);
+  }
+
+  ///获取视频播放时长
+  Future<num> getVideoDuration(String adId) async {
+    final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.nativeGetVideoDuration, args);
+  }
+
+
+  void setAdCloseCallBack(String adId, AdWidgetNeedCloseCall? closeWidgetCall) {
+    if (closeWidgetCall != null){
+      mCloseWidgetCallMap[adId] = closeWidgetCall;
+    }
+
+  }
+
+  void setDownloadListener(String adId, AMPSUnifiedDownloadListener? downloadListener) {
+    if (downloadListener != null) {
+      mDownloadListenerMap[adId] = downloadListener;
+    }
+
+  }
+  void setInteractiveListener(String adId, AmpsNativeInteractiveListener? listener) {
+    if (listener != null) {
+      mInteractiveCallBackMap[adId] = listener;
+    }
+  }
+
+  void setVideoPlayerListener(String adId, AmpsVideoPlayListener? listener) {
+    if (listener != null) {
+      mVideoPlayerCallBackMap[adId] = listener;
+    }
+  }
+
+  void setNegativeFeedbackListener(String adId, AMPSNegativeFeedbackListener? listener) {
+    if (listener != null) {
+      mNegativeFeedbackListenerMap[adId] = listener;
+    }
+  }
+
+
+
+  void setSizeUpdate(String adId ,AdWidgetSizeCall? func) {
+    if (func != null){
+      updateSizeMap[adId] = func;
+    }
   }
 }
