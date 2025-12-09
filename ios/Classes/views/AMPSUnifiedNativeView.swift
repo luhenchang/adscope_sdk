@@ -28,7 +28,7 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
     init(frame: CGRect,viewId: Int64,args:Any?) {
         self.iosView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 300))
         super.init()
-        self.iosView.backgroundColor = UIColor.orange
+//        self.iosView.backgroundColor = UIColor.orange
         
         if let param = args as? [String: Any?]{
             let model: FlutterUnifiedParam? = Tools.convertToModel(from: param as [String : Any])
@@ -38,13 +38,15 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
                        self.iosView.addSubview(adView)
                        return
                    }
-                   self.iosView.frame.size.width = UIScreen.main.bounds.width
-                   self.iosView.frame.size.height = model?.unifiedWidget?.height ?? 200
-                   let x =  (UIScreen.main.bounds.width - (model?.unifiedWidget?.width ?? 0))/2
-                   adView.frame  =  CGRect(x:x, y: 0, width: model?.unifiedWidget?.width ?? UIScreen.main.bounds.width, height: self.iosView.frame.size.height)
+                   
+//                   self.iosView.frame.size.width = UIScreen.main.bounds.width
+//                   self.iosView.frame.size.height = model?.unifiedWidget?.height ?? 200
+//                   let x =  (UIScreen.main.bounds.width - (model?.unifiedWidget?.width ?? 0))/2
+                   adView.frame  =  CGRect(x:0, y: 0, width: model?.unifiedWidget?.width ?? UIScreen.main.bounds.width, height: model?.unifiedWidget?.height ?? self.iosView.frame.size.height)
                    if let bgColor = model?.unifiedWidget?.backgroundColor {
                        adView.backgroundColor = UIColor(hexString: bgColor)
                    }
+//                   adView.backgroundColor = UIColor.blue
                    self.iosView.addSubview(adView)
                    self.layoutItems(adView,model!)
                }
@@ -68,7 +70,7 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
             }){
                 adView.mediaView?.resetLayout(with: CGRect(x: videoModel.x ?? 0, y: videoModel.y ?? 0, width:  videoModel.width ?? adView.frame.width, height: videoModel.height ?? 150))
             }
-        } else if ad.imageUrls.count > 0 {
+        } else if ad.imageUrls.count > 1 {
             for i in 0..<ad.imageUrls.count {
                 let width = (adView.frame.width - 10 * CGFloat(ad.imageUrls.count - 1)) / CGFloat(ad.imageUrls.count)
                 let imgView = UIImageView(frame: CGRect(

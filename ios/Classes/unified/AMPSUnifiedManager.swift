@@ -61,6 +61,14 @@ class AmpsIosUnifiedNativeManager: NSObject,AMPSUnifiedNativeManagerDelegate {
                 }
             }
             result(0)
+        case AMPSAdSdkMethodNames.nativeGetUnifiedPattern:
+            if let adId = arguments["adId"] as? String {
+                if  let view = self.getUnifiedNativeAdView(adId) {
+                    result(view.nativeAd.nativeMode.rawValue == 3 ? 2 : 0)
+                return
+                }
+            }
+            result(0)
         case AMPSAdSdkMethodNames.nativeIsNativeExpress:
             if let adId = arguments["adId"] as? String {
                 result(getUnifiedNativeAdView(adId)?.nativeAd.nativeMode == .nativeExpress)
@@ -70,7 +78,7 @@ class AmpsIosUnifiedNativeManager: NSObject,AMPSUnifiedNativeManagerDelegate {
         case AMPSAdSdkMethodNames.nativeIsReadyAd:
             result(unifiedNative?.adArray.count ?? 0 > 0)
         default:
-            result(false)
+            result(nil)
         }
     }
 
@@ -81,7 +89,8 @@ class AmpsIosUnifiedNativeManager: NSObject,AMPSUnifiedNativeManagerDelegate {
             return
         }
         let config = AdOptionModule.getAdConfig(para: param)
-        unifiedNative = AMPSUnifiedNativeManager(adConfiguration: config)
+        config.adCount = 1
+        unifiedNative = AMPSUnifiedNativeManager(spaceId: config.spaceId, adConfiguration: config)
         result(true)
     }
     private func handleNativeLoad(result: FlutterResult) {

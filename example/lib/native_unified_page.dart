@@ -130,6 +130,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
                       key: ValueKey(adId),
                       adId: adId,
                       unifiedContent: NativeUnifiedWidget(
+                          width: expressWidth ,
                           height: expressHeight,
                           backgroundColor: '#80F7FF',
                           children:_getChildrenByType(adPattern.value)),
@@ -231,7 +232,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
             y: expressHeight - 32,
           ),
         ];
-      case 1:
+      case 2:
       // 类型1：视频组合（标题 + 视频 + 应用图标 + 操作按钮）
         return [
           UnifiedTitleWidget(
@@ -262,7 +263,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
             y: expressHeight - 32,
           ),
         ];
-      case 2:
+      case 1:
       // 类型2：抖动效果组合（标题 + 图片 + 抖动组件 + 描述）
         return [
           UnifiedTitleWidget(

@@ -1,19 +1,21 @@
-import '../data/amps_native_interactive_listener.dart';
+
 import 'widget_layout.dart';
 ///自渲染组件自定义内容
 class NativeUnifiedWidget extends LayoutWidget {
   final double height;
+  final double width;
   final String backgroundColor;
   final List<LayoutWidget> children;
 
   NativeUnifiedWidget({
+    required this.width,
     required this.height,
     required this.backgroundColor,
     required this.children,
   });
 
   @override
-  Map<String, dynamic> toMap({double? width}) {
+  Map<String, dynamic> toMap() {
     return {
       'type': 'parent',
       'height': height,

@@ -33,7 +33,7 @@ class AMPSSplashManager: NSObject {
         case AMPSAdSdkMethodNames.splashCreate:
             handleSplashCreate(arguments: arguments, result: result)
         case AMPSAdSdkMethodNames.splashLoad:
-            handleSplashLoad(arguments: arguments, result: result)
+            handleSplashLoad(result: result)
         case AMPSAdSdkMethodNames.splashShowAd:
             handleSplashShowAd(arguments: arguments, result: result)
         case AMPSAdSdkMethodNames.splashGetEcpm:
@@ -61,11 +61,8 @@ class AMPSSplashManager: NSObject {
         result(true)
     }
 //    // MARK: - Private Methods
-    private func handleSplashLoad(arguments: [String: Any]?, result: FlutterResult) {
+    private func handleSplashLoad( result: FlutterResult) {
     
-        guard let param = arguments else {
-            return
-        }
         splashAd?.delegate = self
         splashAd?.load()
         result(true)

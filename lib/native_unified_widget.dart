@@ -52,7 +52,7 @@ class _UnifiedWidgetState extends State<UnifiedWidget> with AutomaticKeepAliveCl
     }
     creationParams = <String, dynamic>{
       "adId": widget.adId,
-      'unifiedWidget': widget.unifiedContent?.toMap(width: width)
+      'unifiedWidget': widget.unifiedContent?.toMap()
     };
     super.initState();
 

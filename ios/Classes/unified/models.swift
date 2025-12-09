@@ -52,5 +52,7 @@ enum FlutterUnifiedChildType:String,Codable {
     case downloadInfo
     case video
     case closeIcon
+    case shake
+    case slide
     
 }

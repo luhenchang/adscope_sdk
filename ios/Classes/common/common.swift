@@ -123,6 +123,8 @@ enum AMPSAdSdkMethodNames {
     static let nativeIsNativeExpress = "AMPSNative_isNativeExpress"
     static let nativeGetVideoDuration = "AMPSNative_getVideoDuration"
     static let nativeSetVideoPlayConfig = "AMPSNative_setVideoPlayConfig"
+    static let nativeGetUnifiedPattern = "AMPSNative_getUnifiedPattern"
+    static let nativeGetDownLoad  = "AMPSNative_getDownLoad"
 }
 enum AdOptionKeys{
     static let keySpaceId = "spaceId"
@@ -195,5 +197,7 @@ let nativeMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.nativeIsReadyAd,
     AMPSAdSdkMethodNames.nativeIsNativeExpress,
     AMPSAdSdkMethodNames.nativeGetVideoDuration,
-    AMPSAdSdkMethodNames.nativeSetVideoPlayConfig
+    AMPSAdSdkMethodNames.nativeSetVideoPlayConfig,
+    AMPSAdSdkMethodNames.nativeGetUnifiedPattern,
+    AMPSAdSdkMethodNames.nativeGetDownLoad
 ]

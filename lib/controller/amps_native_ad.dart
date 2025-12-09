@@ -143,28 +143,24 @@ class AMPSNativeAd {
               if (call.arguments is Map) {
                 var argMap = call.arguments as Map;
                 final param = Map<String, dynamic>.from(argMap);
-                debugPrint("nativeSizeUpdate:${param["height"]}");
+                // debugPrint("nativeSizeUpdate:${param["height"]}");
                 // 安全地获取并转换为 double
                 double width = 00;
                 double height = 00;
-                debugPrint("nativeSizeUpdate-Error: 1");
                 if (param.containsKey("width")) {
                   width = param["width"] is num
                       ? (param["width"] as num).toDouble()
                       : 00;
                 }
-                debugPrint("nativeSizeUpdate-Error: 2");
                 if (param.containsKey("height")) {
                   height = param["height"] is num
                       ? (param["height"] as num).toDouble()
                       : 00;
                 }
                 // 验证参数合理性
-                debugPrint("nativeSizeUpdate-Error: 3");
                 width = width >= 0 ? width : 00;
                 height = height >= 0 ? height : 00;
                 // 安全调用回调
-                debugPrint("nativeSizeUpdate-Error: 4-$updateSize");
                 if (param.containsKey("adId")) {
                   final adId = param["adId"];
                       updateSizeMap[adId]?.call(width, height);

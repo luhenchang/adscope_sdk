@@ -20,6 +20,7 @@ export struct AMPSNativeAdComponent {
     if (this.wrapper && !this.closeAd)
     Column() {
       Column() {
+
         AMPSBuildNativeView(this.wrapper)
       }.onAreaChange((oldValue, size) => {
 

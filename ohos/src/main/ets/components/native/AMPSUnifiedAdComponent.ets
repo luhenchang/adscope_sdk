@@ -4,7 +4,8 @@ import {
   AMPSArrayList,
   AMPSAdItemClickType,
   AMPSBuildNativeAdVideoView,
-  AMPSNativeContainer
+  AMPSNativeContainer,
+  AMPSBuildNativeView
 } from 'xyz.adscope.amps';
 import { AdClickIdType, AdClickType, NativeUnifiedBaseChild, NativeUnifiedModule } from '../native/UnifiedNativeModule';
 import { OhosPlatformUnifiedView } from './OhosPlatformUnifiedView';
@@ -153,15 +154,22 @@ export struct AMPSUnifiedAdComponent {
 
   build() {
     if (this.wrapper) {
-      AMPSNativeContainer({
-        mNativeWrapper: this.wrapper,
-        buildContent: () => {
-          this.buildASNPBody(this.wrapper)
-        }
-      }).id(this.rootComponentId)
-        .onAppear(() => {
-          this.wrapper?.prepare(this.rootComponentId, this.getUIContext(), this.clickIds, this.creativeViewIds)
-        })
+      if (this.wrapper.isNativeExpress()) {
+
+        AMPSBuildNativeView(this.wrapper)
+      }else {
+        AMPSNativeContainer({
+          mNativeWrapper: this.wrapper,
+          buildContent: () => {
+            if (this.wrapper) {
+              this.buildASNPBody(this.wrapper)
+            }
+          }
+        }).id(this.rootComponentId)
+          .onAppear(() => {
+            this.wrapper?.prepare(this.rootComponentId, this.getUIContext(), this.clickIds, this.creativeViewIds)
+          })
+      }
     }
   }
 
