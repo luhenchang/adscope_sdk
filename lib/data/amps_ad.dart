@@ -110,6 +110,32 @@ class RewardVideoCallBack {
     this.onAdReward
   });
 }
+
+class BannerCallBack {
+  final AdSuccessCallback? onLoadSuccess;
+  final AdFailureCallback? onLoadFailure;
+  final AdSuccessCallback? onAdShow;
+  final AdSuccessCallback? onAdClicked;
+  final AdSuccessCallback? onAdClosed;
+  final AdSuccessCallback? onVideoPlayStart;
+  final AdSuccessCallback? onVideoPlayEnd;
+  final AdFailureCallback? onVideoPlayError;
+  final VideoSkipToEndCallback? onVideoSkipToEnd;
+  final AdSuccessCallback? onAdReward;
+
+  const BannerCallBack(
+      {this.onLoadSuccess,
+      this.onLoadFailure,
+      this.onAdShow,
+      this.onAdClicked,
+      this.onAdClosed,
+      this.onVideoPlayStart,
+      this.onVideoPlayEnd,
+      this.onVideoSkipToEnd,
+      this.onVideoPlayError,
+      this.onAdReward});
+}
+
 ///组件关闭通知接口
 typedef AdWidgetNeedCloseCall = void Function();
 typedef AdWidgetSizeCall = void Function(double width,double height);

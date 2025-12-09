@@ -87,9 +87,8 @@ class AMPSRewardVideoAd {
   }
 
   ///销毁视频广告
-  Future<void> destroy() async {
-    await AdscopeSdk.channel
-        .invokeMethod(AMPSAdSdkMethodNames.rewardedVideoDestroyAd);
+  destroy() async {
+    AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.rewardVideoDestroyAd);
   }
 
   ///获取ecpm
@@ -100,11 +99,11 @@ class AMPSRewardVideoAd {
 
   ///添加预加载广告
   addPreLoadAdInfo() async {
-     AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.rewardedVideoAddPreLoadAdInfo);
+     AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.rewardVideoAddPreLoadAdInfo);
   }
 
   ///获取MediaExtraInfo
   addPreGetMediaExtraInfo() async {
-    AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.rewardedVideoGetMediaExtraInfo);
+    AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.rewardVideoGetMediaExtraInfo);
   }
 }

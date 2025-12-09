@@ -13,6 +13,7 @@ class AMPSPlatformViewRegistry {
   static const ampsSdkInterstitialViewId = '$channelDomain/interstitial_view_id';
   static const ampsSdkNativeViewId = '$channelDomain/native_view_id';
   static const ampsSdkUnifiedViewId = '$channelDomain/unified_view_id';
+  static const ampsSdkBannerViewId = '$channelDomain/banner_view_id';
 }
 ///初始化交互通道方法名称
 class AMPSInitChannelMethod {
@@ -53,6 +54,20 @@ class AMPSRewardedVideoCallBackChannelMethod {
   static const String onVideoPlayError = "RewardedVideo_onVideoPlayError";
   static const String onVideoSkipToEnd = "RewardedVideo_onVideoSkipToEnd";
   static const String onAdCached = "RewardedVideo_onAdCached";
+}
+
+//2. banner相关原生端回调
+class AMPSBannerCallBackChannelMethod {
+  static const String onLoadSuccess = "Banner_onLoadSuccess";
+  static const String onLoadFailure = "Banner_onLoadFailure";
+  static const String onAdShow = "Banner_onAdShow";
+  static const String onAdClicked = "Banner_onAdClicked";
+  static const String onAdClosed = "Banner_onAdClosed";
+  static const String onVideoPlayStart = "Banner_onVideoPlayStart";
+  static const String onVideoPlayEnd = "Banner_onVideoPlayEnd";
+  static const String onVideoPlayError = "Banner_onVideoPlayError";
+  static const String onVideoSkipToEnd = "Banner_onVideoSkipToEnd";
+  static const String onAdReward = "Banner_onAdReward";
 }
 
 ///原生和原生自渲染标识
@@ -133,11 +148,20 @@ class AMPSAdSdkMethodNames {
   static const String rewardVideoShowAd = 'AMPSRewardVideo_showAd';
   static const String rewardVideoGetECPM = 'AMPSRewardVideo_getECPM';
   static const String rewardVideoIsReadyAd = 'AMPSRewardVideo_isReadyAd';
-  static const String rewardedVideoDestroyAd = "AMPSRewardVideo_destroy";
-  static const String rewardedVideoAddPreLoadAdInfo = "AMPSRewardVideo_addPreLoadAdInfo";
-  static const String rewardedVideoGetMediaExtraInfo = "AMPSRewardVideo_getMediaExtraInfo";
+  static const String rewardVideoDestroyAd = "AMPSRewardVideo_destroy";
+  static const String rewardVideoAddPreLoadAdInfo = "AMPSRewardVideo_addPreLoadAdInfo";
+  static const String rewardVideoGetMediaExtraInfo = "AMPSRewardVideo_getMediaExtraInfo";
 
-
+  //Banner
+  static const String bannerCreate = 'AMPSBanner_create';
+  static const String bannerLoad = 'AMPSBanner_load';
+  static const String bannerPreLoad = "AMPSBanner_preLoad";
+  static const String bannerShowAd = 'AMPSBanner_showAd';
+  static const String bannerGetECPM = 'AMPSBanner_getECPM';
+  static const String bannerIsReadyAd = 'AMPSBanner_isReadyAd';
+  static const String bannerDestroyAd = "AMPSBanner_destroy";
+  static const String bannerAddPreLoadAdInfo = "AMPSBanner_addPreLoadAdInfo";
+  static const String bannerGetMediaExtraInfo = "AMPSBanner_getMediaExtraInfo";
 }
 ///Error对应的key
 class AMPSSdkCallBackErrorKey {

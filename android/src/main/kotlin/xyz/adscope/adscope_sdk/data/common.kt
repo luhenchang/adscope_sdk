@@ -97,6 +97,20 @@ object AMPSRewardedVideoCallBackChannelMethod {
     const val ON_AD_CACHED = "RewardedVideo_onAdCached"
 }
 
+//2. banner相关原生端回调
+object AMPSBannerCallbackChannelMethod {
+    const val ON_LOAD_SUCCESS = "Banner_onLoadSuccess"
+    const val ON_LOAD_FAILURE = "Banner_onLoadFailure"
+    const val ON_AD_SHOW = "Banner_onAdShow"
+    const val ON_AD_CLICKED = "Banner_onAdClicked"
+    const val ON_AD_CLOSED = "Banner_onAdClosed"
+    const val ON_VIDEO_PLAY_START = "Banner_onVideoPlayStart"
+    const val ON_VIDEO_PLAY_END = "Banner_onVideoPlayEnd"
+    const val ON_VIDEO_PLAY_ERROR = "Banner_onVideoPlayError"
+    const val ON_VIDEO_SKIP_TO_END = "Banner_onVideoSkipToEnd"
+    const val ON_AD_REWARD = "Banner_onAdReward"
+}
+
 object DownLoadCallBackChannelMethod {
     const val ON_DOWNLOAD_PAUSED = "onDownloadPaused"
     const val ON_DOWNLOAD_STARTED = "onDownloadStarted"
@@ -157,6 +171,17 @@ object AMPSAdSdkMethodNames {
     const val REWARDED_VIDEO_IS_READY_AD = "AMPSRewardVideo_isReadyAd"
     const val REWARDED_VIDEO_ADD_PRE_LOAD_AD_INFO = "AMPSRewardVideo_addPreLoadAdInfo"
     const val REWARDED_VIDEO_GET_MEDIA_EXTRA_INFO = "AMPSRewardVideo_getMediaExtraInfo"
+
+    // Banner ad related methods
+    const val BANNER_CREATE = "AMPSBanner_create"
+    const val BANNER_LOAD = "AMPSBanner_load"
+    const val BANNER_PRE_LOAD = "AMPSBanner_preLoad"
+    const val BANNER_SHOW_AD = "AMPSBanner_showAd"
+    const val BANNER_GET_ECPM = "AMPSBanner_getECPM"
+    const val BANNER_IS_READY_AD = "AMPSBanner_isReadyAd"
+    const val BANNER_DESTROY_AD = "AMPSBanner_destroy"
+    const val BANNER_ADD_PRE_LOAD_AD_INFO = "AMPSBanner_addPreLoadAdInfo"
+    const val BANNER_GET_MEDIA_EXTRA_INFO = "AMPSBanner_getMediaExtraInfo"
 }
 
 // Constants for argument keys or other string values
@@ -233,6 +258,18 @@ val RewardedVideoMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.REWARDED_VIDEO_DESTROY_AD,
     AMPSAdSdkMethodNames.REWARDED_VIDEO_GET_ECPM,
     AMPSAdSdkMethodNames.REWARDED_VIDEO_IS_READY_AD,
+    AMPSAdSdkMethodNames.REWARDED_VIDEO_ADD_PRE_LOAD_AD_INFO,
+    AMPSAdSdkMethodNames.REWARDED_VIDEO_GET_MEDIA_EXTRA_INFO
+)
+
+val BannerMethodNames: Set<String> = setOf(
+    AMPSAdSdkMethodNames.BANNER_CREATE,
+    AMPSAdSdkMethodNames.BANNER_LOAD,
+    AMPSAdSdkMethodNames.BANNER_PRE_LOAD,
+    AMPSAdSdkMethodNames.BANNER_SHOW_AD,
+    AMPSAdSdkMethodNames.BANNER_GET_ECPM,
+    AMPSAdSdkMethodNames.BANNER_IS_READY_AD,
+    AMPSAdSdkMethodNames.BANNER_DESTROY_AD,
     AMPSAdSdkMethodNames.REWARDED_VIDEO_ADD_PRE_LOAD_AD_INFO,
     AMPSAdSdkMethodNames.REWARDED_VIDEO_GET_MEDIA_EXTRA_INFO
 )

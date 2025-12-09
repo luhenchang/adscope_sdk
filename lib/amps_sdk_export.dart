@@ -20,7 +20,9 @@ export 'package:adscope_sdk/controller/amps_native_ad.dart';
 export 'package:adscope_sdk/controller/amps_splash_ad.dart';
 export 'package:adscope_sdk/controller/amps_ad_sdk.dart';
 export 'package:adscope_sdk/controller/amps_reward_video_ad.dart';
+export 'package:adscope_sdk/controller/amps_banner_ad.dart';
 
 export 'package:adscope_sdk/interstitial_widget.dart';
 export 'package:adscope_sdk/native_widget.dart';
 export 'package:adscope_sdk/native_unified_widget.dart';
+export 'package:adscope_sdk/banner_widget.dart';

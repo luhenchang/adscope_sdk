@@ -37,6 +37,7 @@ class MyApp extends StatelessWidget {
          'NativePage':(context)=> const NativePage(title: '原生页面'),
          'NativeUnifiedPage':(context)=> const NativeUnifiedPage(title: '原生自渲染页面'),
          'RewardVideoPage':(context)=> const RewardVideoPage(title: '激励视频页面'),
+         'BannerPage':(context)=> const RewardVideoPage(title: 'Banner页面'),
          'UnionDownloadAppInfoPage': (context) => const UnionDownloadAppInfoPage()
        },
     );
@@ -198,6 +199,14 @@ class _SplashPageState extends State<SplashPage> {
               callBack: () {
                 // 使用命名路由跳转
                 Navigator.pushNamed(context, 'RewardVideoPage');
+              }
+          ),
+          const SizedBox(height: 20,width: 0),
+          ButtonWidget(
+              buttonText: '点击跳转Banner页面',
+              callBack: () {
+                // 使用命名路由跳转
+                Navigator.pushNamed(context, 'BannerPage');
               }
           )
         ],),
