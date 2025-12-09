@@ -63,6 +63,20 @@ enum AMPSAdCallBackChannelMethod {
     static let onVideoSkipToEnd = "onVideoSkipToEnd"
     static let onAdReward = "onAdReward"
 }
+// 1. 激励视频回调方法常量
+class AMPSRewardedVideoCallBackChannelMethod {
+  static let onLoadSuccess = "RewardedVideo_onLoadSuccess";
+  static let onLoadFailure = "RewardedVideo_onLoadFailure";
+  static let onAdShow = "RewardedVideo_onAdShow";
+  static let onAdClicked = "RewardedVideo_onAdClicked";
+  static let onAdClosed = "RewardedVideo_onAdClosed";
+  static let onAdReward = "RewardedVideo_onAdReward";
+  static let onVideoPlayStart = "RewardedVideo_onVideoPlayStart";
+  static let onVideoPlayEnd = "RewardedVideo_onVideoPlayEnd";
+  static let onVideoPlayError = "RewardedVideo_onVideoPlayError";
+  static let onVideoSkipToEnd = "RewardedVideo_onVideoSkipToEnd";
+  static let onAdCached = "RewardedVideo_onAdCached";
+}
 
 // 原生广告回调方法名
 enum AMPSNativeCallBackChannelMethod {
@@ -125,6 +139,18 @@ enum AMPSAdSdkMethodNames {
     static let nativeSetVideoPlayConfig = "AMPSNative_setVideoPlayConfig"
     static let nativeGetUnifiedPattern = "AMPSNative_getUnifiedPattern"
     static let nativeGetDownLoad  = "AMPSNative_getDownLoad"
+    
+    //激励视频
+    static let rewardVideoCreate = "AMPSRewardVideo_create"
+    static let rewardVideoLoad = "AMPSRewardVideo_load"
+    static let rewardVideoPreLoad = "AMPSRewardVideo_preLoad"
+    static let rewardVideoShowAd = "AMPSRewardVideo_showAd"
+    static let rewardVideoGetECPM = "AMPSRewardVideo_getECPM"
+    static let rewardVideoIsReadyAd = "AMPSRewardVideo_isReadyAd"
+    static let rewardedVideoDestroyAd = "AMPSRewardVideo_destroy"
+    static let rewardedVideoAddPreLoadAdInfo = "AMPSRewardVideo_addPreLoadAdInfo"
+    static let rewardedVideoGetMediaExtraInfo = "AMPSRewardVideo_getMediaExtraInfo"
+    
 }
 enum AdOptionKeys{
     static let keySpaceId = "spaceId"
@@ -200,4 +226,14 @@ let nativeMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.nativeSetVideoPlayConfig,
     AMPSAdSdkMethodNames.nativeGetUnifiedPattern,
     AMPSAdSdkMethodNames.nativeGetDownLoad
+]
+let rewardVideoMethodNames: Set<String> = [
+    AMPSAdSdkMethodNames.rewardVideoCreate,
+    AMPSAdSdkMethodNames.rewardVideoLoad,
+    AMPSAdSdkMethodNames.rewardVideoShowAd,
+    AMPSAdSdkMethodNames.rewardVideoGetECPM,
+    AMPSAdSdkMethodNames.rewardedVideoDestroyAd,
+    AMPSAdSdkMethodNames.rewardVideoIsReadyAd,
+    AMPSAdSdkMethodNames.rewardedVideoGetMediaExtraInfo,
+    AMPSAdSdkMethodNames.rewardedVideoAddPreLoadAdInfo
 ]

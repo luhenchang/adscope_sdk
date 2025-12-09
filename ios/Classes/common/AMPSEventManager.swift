@@ -29,6 +29,9 @@ class AMPSEventManager : NSObject{
                 AMPSInterstitialManager.shared.handleMethodCall(methodCall, result: result)
             case let name where  nativeMethodNames.contains(name):
                 AMPSNativeManager.shared.handleMethodCall(methodCall, result: result)
+            case let name where  rewardVideoMethodNames.contains(name):
+                AMPSRewardVideoManager.shared.handleMethodCall(methodCall, result: result)
+            
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -36,8 +39,9 @@ class AMPSEventManager : NSObject{
         
     }
     func sendToFlutter(_ method:String,arg:Any? = nil){
-        
-        channel?.invokeMethod(method, arguments: arg)
+        DispatchQueue.main.async { [weak self] in
+            self?.channel?.invokeMethod(method, arguments: arg)
+        }
     }
     
     func getImage(_ name:String) -> UIImage?  {
