@@ -1,5 +1,3 @@
-
-
 import 'package:adscope_sdk/adscope_sdk.dart';
 import 'package:adscope_sdk/amps_sdk_export.dart';
 
@@ -7,65 +5,58 @@ import '../common.dart';
 
 class AMPSRewardVideoAd {
   AdOptions config;
-  AdCallBack? adCallBack;
+  RewardVideoCallBack? adCallBack;
 
-  AMPSRewardVideoAd({required this.config,this.adCallBack}){
-    AdscopeSdk.channel.invokeListMethod(AMPSAdSdkMethodNames.rewardVideoCreate,config.toMap());
-    
+  AMPSRewardVideoAd({required this.config, this.adCallBack}) {
+    AdscopeSdk.channel.invokeListMethod(
+        AMPSAdSdkMethodNames.rewardVideoCreate, config.toMap());
+
     setMethodCallHandler();
   }
+
   void setMethodCallHandler() {
     AdscopeSdk.channel.setMethodCallHandler(
           (call) async {
         switch (call.method) {
-          case AMPSAdCallBackChannelMethod.onLoadSuccess:
+          case AMPSRewardedVideoCallBackChannelMethod.onLoadSuccess:
             adCallBack?.onLoadSuccess?.call();
             break;
-          case AMPSAdCallBackChannelMethod.onLoadFailure:
+          case AMPSRewardedVideoCallBackChannelMethod.onLoadFailure:
             var map = call.arguments as Map<dynamic, dynamic>;
             adCallBack?.onLoadFailure?.call(map[AMPSSdkCallBackErrorKey.code],
                 map[AMPSSdkCallBackErrorKey.message]);
             break;
-          case AMPSAdCallBackChannelMethod.onRenderOk:
-            adCallBack?.onRenderOk?.call();
-            break;
-          case AMPSAdCallBackChannelMethod.onAdShow:
+          case AMPSRewardedVideoCallBackChannelMethod.onAdShow:
             adCallBack?.onAdShow?.call();
             break;
-          case AMPSAdCallBackChannelMethod.onAdExposure:
-            adCallBack?.onAdExposure?.call();
-            break;
-          case AMPSAdCallBackChannelMethod.onAdClicked:
+          case AMPSRewardedVideoCallBackChannelMethod.onAdClicked:
             adCallBack?.onAdClicked?.call();
             break;
-          case AMPSAdCallBackChannelMethod.onAdClosed:
+          case AMPSRewardedVideoCallBackChannelMethod.onAdClosed:
             adCallBack?.onAdClosed?.call();
             break;
-          case AMPSAdCallBackChannelMethod.onRenderFailure:
-            adCallBack?.onRenderFailure?.call();
-            break;
-          case AMPSAdCallBackChannelMethod.onAdShowError:
-            var map = call.arguments as Map<dynamic, dynamic>;
-            adCallBack?.onAdShowError?.call(map[AMPSSdkCallBackErrorKey.code],
-                map[AMPSSdkCallBackErrorKey.message]);
-            break;
-          case AMPSAdCallBackChannelMethod.onVideoPlayStart:
+          case AMPSRewardedVideoCallBackChannelMethod.onVideoPlayStart:
             adCallBack?.onVideoPlayStart?.call();
             break;
-          case AMPSAdCallBackChannelMethod.onVideoPlayEnd:
+          case AMPSRewardedVideoCallBackChannelMethod.onVideoPlayEnd:
             adCallBack?.onVideoPlayEnd?.call();
             break;
-          case AMPSAdCallBackChannelMethod.onVideoPlayError:
+          case AMPSRewardedVideoCallBackChannelMethod.onVideoPlayError:
             var map = call.arguments as Map<dynamic, dynamic>;
-            adCallBack?.onVideoPlayError?.call(map[AMPSSdkCallBackErrorKey.code],
+            adCallBack?.onVideoPlayError?.call(
+                map[AMPSSdkCallBackErrorKey.code],
                 map[AMPSSdkCallBackErrorKey.message]);
             break;
-          case AMPSAdCallBackChannelMethod.onVideoSkipToEnd:
+          case AMPSRewardedVideoCallBackChannelMethod.onVideoSkipToEnd:
             var map = call.arguments as Map<dynamic, dynamic>;
-            adCallBack?.onVideoSkipToEnd?.call(map[AMPSSdkCallBackParamsKey.playDurationMs]);
+            adCallBack?.onVideoSkipToEnd?.call(
+                map[AMPSSdkCallBackParamsKey.playDurationMs]);
             break;
-          case AMPSAdCallBackChannelMethod.onAdReward:
+          case AMPSRewardedVideoCallBackChannelMethod.onAdReward:
             adCallBack?.onAdReward?.call();
+            break;
+          case AMPSRewardedVideoCallBackChannelMethod.onAdCached:
+            adCallBack?.onAdCached?.call();
             break;
         }
       },
@@ -78,7 +69,7 @@ class AMPSRewardVideoAd {
   }
 
   ///激励视频广预加载
-  void  preLoad() async {
+  void preLoad() async {
     await AdscopeSdk.channel
         .invokeMethod(AMPSAdSdkMethodNames.rewardVideoPreLoad);
   }
@@ -95,10 +86,25 @@ class AMPSRewardVideoAd {
         .invokeMethod(AMPSAdSdkMethodNames.rewardVideoIsReadyAd);
   }
 
+  ///销毁视频广告
+  Future<void> destroy() async {
+    await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.rewardedVideoDestroyAd);
+  }
+
   ///获取ecpm
   Future<num> getECPM() async {
     return await AdscopeSdk.channel
         .invokeMethod(AMPSAdSdkMethodNames.rewardVideoGetECPM);
   }
 
+  ///添加预加载广告
+  addPreLoadAdInfo() async {
+     AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.rewardedVideoAddPreLoadAdInfo);
+  }
+
+  ///获取MediaExtraInfo
+  addPreGetMediaExtraInfo() async {
+    AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.rewardedVideoGetMediaExtraInfo);
+  }
 }

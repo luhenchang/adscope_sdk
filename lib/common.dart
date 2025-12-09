@@ -40,6 +40,21 @@ class AMPSAdCallBackChannelMethod {
   static const String onAdReward = "onAdReward";
 }
 
+// 1. 先定义统一的回调方法常量（参考示例格式）
+class AMPSRewardedVideoCallBackChannelMethod {
+  static const String onLoadSuccess = "RewardedVideo_onLoadSuccess";
+  static const String onLoadFailure = "RewardedVideo_onLoadFailure";
+  static const String onAdShow = "RewardedVideo_onAdShow";
+  static const String onAdClicked = "RewardedVideo_onAdClicked";
+  static const String onAdClosed = "RewardedVideo_onAdClosed";
+  static const String onAdReward = "RewardedVideo_onAdReward";
+  static const String onVideoPlayStart = "RewardedVideo_onVideoPlayStart";
+  static const String onVideoPlayEnd = "RewardedVideo_onVideoPlayEnd";
+  static const String onVideoPlayError = "RewardedVideo_onVideoPlayError";
+  static const String onVideoSkipToEnd = "RewardedVideo_onVideoSkipToEnd";
+  static const String onAdCached = "RewardedVideo_onAdCached";
+}
+
 ///原生和原生自渲染标识
 class AMPSNativeCallBackChannelMethod {
   //广告加载回调标识
@@ -118,6 +133,9 @@ class AMPSAdSdkMethodNames {
   static const String rewardVideoShowAd = 'AMPSRewardVideo_showAd';
   static const String rewardVideoGetECPM = 'AMPSRewardVideo_getECPM';
   static const String rewardVideoIsReadyAd = 'AMPSRewardVideo_isReadyAd';
+  static const String rewardedVideoDestroyAd = "AMPSRewardVideo_destroy";
+  static const String rewardedVideoAddPreLoadAdInfo = "AMPSRewardVideo_addPreLoadAdInfo";
+  static const String rewardedVideoGetMediaExtraInfo = "AMPSRewardVideo_getMediaExtraInfo";
 
 
 }

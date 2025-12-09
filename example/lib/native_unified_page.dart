@@ -1,6 +1,5 @@
 import 'package:adscope_sdk/amps_sdk_export.dart';
 import 'package:adscope_sdk/common.dart';
-import 'package:adscope_sdk/widget/native_unified_widget.dart';
 import 'package:adscope_sdk_example/data/common.dart';
 import 'package:flutter/material.dart';
 
@@ -96,7 +95,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
         onDownloadStarted: (adId) {},
         onInstalled: (adId) {});
     AdOptions options = AdOptions(
-        spaceId: nativeSpaceId,
+        spaceId: unifiedSpaceId,
         adCount: 1,
         expressSize: [expressWidth, expressHeight]);
     _nativeAd = AMPSNativeAd(
@@ -123,7 +122,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
               debugPrint(adId);
               return SizedBox.fromSize(
                   size: Size(expressWidth, expressHeight),
-                  child:Container(color: Colors.red,child: Stack(alignment: AlignmentDirectional.center, children: [
+                  child:Stack(alignment: AlignmentDirectional.center, children: [
                     UnifiedWidget(
                       _nativeAd,
                       mInteractiveCallBack: _interactiveCallBack,
@@ -174,7 +173,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
                                   backgroundColor: Colors.white)),
                         ),
                       )
-                  ]),));
+                  ]));
             }
             return Column(
               children: [

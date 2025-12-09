@@ -78,6 +78,25 @@ object AMPSNativeCallBackChannelMethod {
     const val ON_VIDEO_PLAY_ERROR = "onVideoPlayError" // Video playback error
 }
 
+// 1. 先定义统一的回调方法常量（参考示例格式）
+object AMPSRewardedVideoCallBackChannelMethod {
+    // 基础广告回调（对应第二段代码核心回调）
+    const val ON_LOAD_SUCCESS = "RewardedVideo_onLoadSuccess"
+    const val ON_LOAD_FAILURE = "RewardedVideo_onLoadFailure"
+    const val ON_AD_SHOW = "RewardedVideo_onAdShow"       // 对应 onAdDidShow + onAmpsAdShow
+    const val ON_AD_CLICKED = "RewardedVideo_onAdClicked"
+    const val ON_AD_CLOSED = "RewardedVideo_onAdClosed"     // 对应 onAmpsAdDismiss
+    const val ON_AD_REWARD = "RewardedVideo_onAdReward"     // 对应 onAmpsAdRewardArrived
+
+    // 视频相关回调（对应两段代码的视频回调）
+    const val ON_VIDEO_PLAY_START = "RewardedVideo_onVideoPlayStart"
+    const val ON_VIDEO_PLAY_END = "RewardedVideo_onVideoPlayEnd"       // 对应 onAmpsAdVideoComplete
+    const val ON_VIDEO_PLAY_ERROR = "RewardedVideo_onVideoPlayError"   // 对应 onAmpsAdVideoError
+    const val ON_VIDEO_SKIP_TO_END = "RewardedVideo_onVideoSkipToEnd"
+    // 额外Android接口
+    const val ON_AD_CACHED = "RewardedVideo_onAdCached"
+}
+
 object DownLoadCallBackChannelMethod {
     const val ON_DOWNLOAD_PAUSED = "onDownloadPaused"
     const val ON_DOWNLOAD_STARTED = "onDownloadStarted"
@@ -127,6 +146,17 @@ object AMPSAdSdkMethodNames {
     const val NATIVE_PAUSE = "AMPSNative_pause"
     const val NATIVE_DESTROY = "AMPSNative_destroy"
     const val NATIVE_GET_MEDIA_EXTRA_INFO = "AMPSNative_getMediaExtraInfo"
+
+    // Rewarded ad related methods
+    const val REWARDED_VIDEO_CREATE = "AMPSRewardVideo_create"
+    const val REWARDED_VIDEO_LOAD = "AMPSRewardVideo_load"
+    const val REWARDED_VIDEO_PRE_LOAD = "AMPSRewardVideo_preLoad"
+    const val REWARDED_VIDEO_SHOW_AD = "AMPSRewardVideo_showAd"
+    const val REWARDED_VIDEO_DESTROY_AD = "AMPSRewardVideo_destroy"
+    const val REWARDED_VIDEO_GET_ECPM = "AMPSRewardVideo_getECPM"
+    const val REWARDED_VIDEO_IS_READY_AD = "AMPSRewardVideo_isReadyAd"
+    const val REWARDED_VIDEO_ADD_PRE_LOAD_AD_INFO = "AMPSRewardVideo_addPreLoadAdInfo"
+    const val REWARDED_VIDEO_GET_MEDIA_EXTRA_INFO = "AMPSRewardVideo_getMediaExtraInfo"
 }
 
 // Constants for argument keys or other string values
@@ -193,4 +223,16 @@ val NativeMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.NATIVE_UNIFIED_GET_DOWNLOAD
 
 
+)
+
+val RewardedVideoMethodNames: Set<String> = setOf(
+    AMPSAdSdkMethodNames.REWARDED_VIDEO_CREATE,
+    AMPSAdSdkMethodNames.REWARDED_VIDEO_LOAD,
+    AMPSAdSdkMethodNames.REWARDED_VIDEO_PRE_LOAD,
+    AMPSAdSdkMethodNames.REWARDED_VIDEO_SHOW_AD,
+    AMPSAdSdkMethodNames.REWARDED_VIDEO_DESTROY_AD,
+    AMPSAdSdkMethodNames.REWARDED_VIDEO_GET_ECPM,
+    AMPSAdSdkMethodNames.REWARDED_VIDEO_IS_READY_AD,
+    AMPSAdSdkMethodNames.REWARDED_VIDEO_ADD_PRE_LOAD_AD_INFO,
+    AMPSAdSdkMethodNames.REWARDED_VIDEO_GET_MEDIA_EXTRA_INFO
 )

@@ -82,6 +82,34 @@ class AdCallBack {
     this.onAdReward,
   });
 }
+
+class RewardVideoCallBack {
+  final AdSuccessCallback? onLoadSuccess;
+  final AdSuccessCallback? onAdCached;
+  final AdFailureCallback? onLoadFailure;
+  final AdFailureCallback? onVideoPlayError;
+  final AdSuccessCallback? onAdShow;
+  final AdSuccessCallback? onAdClicked;
+  final AdSuccessCallback? onAdClosed;
+  final AdSuccessCallback? onVideoPlayStart;
+  final AdSuccessCallback? onVideoPlayEnd;
+  final VideoSkipToEndCallback? onVideoSkipToEnd;
+  final AdSuccessCallback? onAdReward;
+
+  const RewardVideoCallBack({
+    this.onLoadSuccess,
+    this.onAdCached,
+    this.onLoadFailure,
+    this.onAdShow,
+    this.onAdClicked,
+    this.onAdClosed,
+    this.onVideoPlayStart,
+    this.onVideoPlayEnd,
+    this.onVideoPlayError,
+    this.onVideoSkipToEnd,
+    this.onAdReward
+  });
+}
 ///组件关闭通知接口
 typedef AdWidgetNeedCloseCall = void Function();
 typedef AdWidgetSizeCall = void Function(double width,double height);

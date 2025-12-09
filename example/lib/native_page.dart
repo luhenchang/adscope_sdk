@@ -1,6 +1,5 @@
 import 'package:adscope_sdk/amps_sdk_export.dart';
 import 'package:adscope_sdk_example/data/common.dart';
-import 'package:adscope_sdk_example/widgets/button_widget.dart';
 import 'package:flutter/material.dart';
 
 class NativePage extends StatefulWidget {
@@ -21,7 +20,7 @@ class _SplashPageState extends State<NativePage> {
   List<String> feedList = [];
   List<String> feedAdList = [];
   late double expressWidth = 350;
-  late double expressHeight = 228;
+  late double expressHeight = 128;
 
   @override
   void initState() {
@@ -119,8 +118,7 @@ class _SplashPageState extends State<NativePage> {
             return Center(
               child:Column(
                 children: [
-                  ButtonWidget(buttonText: "buttonText", callBack: ()=>{
-                  }),
+                  const Divider(height: 5, color: Colors.white),
                   Container(
                     height: 128,
                     width: 350,
@@ -128,6 +126,8 @@ class _SplashPageState extends State<NativePage> {
                     alignment: Alignment.centerLeft,
                     child: Text('List item ${feedList[feedIndex]}'),
                   ),
+                  if (index % 3 == 1 && adIndex < feedAdList.length)
+                    const Divider(height: 5, color: Colors.white)
                 ],
               )
             );

@@ -10,6 +10,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import xyz.adscope.adscope_sdk.data.RewardedVideoMethodNames
 import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import java.lang.ref.WeakReference
 
@@ -52,8 +53,12 @@ class AMPSEventManager private constructor() : MethodCallHandler {
             InterstitialMethodNames.contains(call.method) -> {
                 AMPSInterstitialManager.getInstance().handleMethodCall(call, result)
             }
+
             NativeMethodNames.contains(call.method) -> {
                 AMPSNativeManager.getInstance().handleMethodCall(call, result)
+            }
+            RewardedVideoMethodNames.contains(call.method) -> {
+                AMPSRewardedVideoManager.getInstance().handleMethodCall(call, result)
             }
             else -> {
                 result.notImplemented() // 如果方法名未被识别

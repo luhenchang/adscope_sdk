@@ -1,5 +1,3 @@
-
-
 import 'package:adscope_sdk/amps_sdk_export.dart';
 import 'package:adscope_sdk_example/data/common.dart';
 import 'package:adscope_sdk_example/widgets/blurred_background.dart';
@@ -17,22 +15,19 @@ class RewardVideoPage extends StatefulWidget {
 
 class _RewardVideoPageState extends State<RewardVideoPage> {
   AMPSRewardVideoAd? _rewardVideoAd;
-  late AdCallBack _adCallBack;
+  late RewardVideoCallBack _adCallBack;
   num eCpm = 0;
   bool initSuccess = false;
   bool couldBack = true;
+
   @override
   void initState() {
     super.initState();
-    _adCallBack = AdCallBack(onLoadSuccess: () {
-      debugPrint("ad load onLoadSuccess");
-    }, onRenderOk: () {
-      debugPrint("Flutter==onAmpsAdLoaded=renderOK");
+    _adCallBack = RewardVideoCallBack(onLoadSuccess: () {
       _rewardVideoAd?.showAd();
       setState(() {
         couldBack = false;
       });
-      debugPrint("ad load onRenderOk");
     }, onLoadFailure: (code, msg) {
       debugPrint("ad load failure=$code;$msg");
     }, onAdClicked: () {
@@ -40,11 +35,6 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
         couldBack = true;
       });
       debugPrint("ad load onAdClicked");
-    }, onAdExposure: () {
-      setState(() {
-        couldBack = false;
-      });
-      debugPrint("ad load onAdExposure");
     }, onAdClosed: () {
       setState(() {
         couldBack = true;
@@ -54,21 +44,16 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
       debugPrint("ad load onAdReward");
     }, onAdShow: () {
       debugPrint("ad load onAdShow");
-    }, onAdShowError: (code, msg) {
-      debugPrint("ad load onAdShowError");
-    }, onRenderFailure: () {
-      debugPrint("ad load onRenderFailure");
     }, onVideoPlayStart: () {
       debugPrint("ad load onVideoPlayStart");
-    }, onVideoPlayError: (code, msg) {
-      debugPrint("ad load onVideoPlayError");
     }, onVideoPlayEnd: () {
       debugPrint("ad load onVideoPlayEnd");
     }, onVideoSkipToEnd: (duration) {
       debugPrint("ad load onVideoSkipToEnd=$duration");
     });
     AdOptions options = AdOptions(spaceId: rewardVideoSpaceId);
-    _rewardVideoAd = AMPSRewardVideoAd(config: options,adCallBack: _adCallBack);
+    _rewardVideoAd =
+        AMPSRewardVideoAd(config: options, adCallBack: _adCallBack);
   }
 
   @override
@@ -96,8 +81,8 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
                         callBack: () async {
                           bool? isReadyAd = await _rewardVideoAd?.isReadyAd();
                           debugPrint("isReadyAd=$isReadyAd");
-                          if(_rewardVideoAd != null){
-                            num ecPmResult =  await _rewardVideoAd!.getECPM();
+                          if (_rewardVideoAd != null) {
+                            num ecPmResult = await _rewardVideoAd!.getECPM();
                             debugPrint("ecPm请求结果=$eCpm");
                             setState(() {
                               eCpm = ecPmResult;
