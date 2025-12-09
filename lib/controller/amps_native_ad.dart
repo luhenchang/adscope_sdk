@@ -214,14 +214,11 @@ class AMPSNativeAd {
   }
 
   ///获取信息
-  Future<Map<String, dynamic>?> getMediaExtraInfo() async {
+  Future<dynamic> getMediaExtraInfo() async {
     try {
-      final dynamic param = await AdscopeSdk.channel.invokeMethod(
+      final mediaExtraInfo = await AdscopeSdk.channel.invokeMethod(
           AMPSAdSdkMethodNames.nativeGetMediaExtraInfo, nativeType.value);
-      if (param == null) {
-        return null;
-      }
-      return Map<String, dynamic>.from(param);
+      return mediaExtraInfo;
     } on PlatformException catch (e) {
       throw Exception('调用getCustomExtraData失败: ${e.message}');
     }

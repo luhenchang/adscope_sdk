@@ -11,6 +11,7 @@ import xyz.adscope.amps.ad.interstitial.AMPSInterstitialAd
 import xyz.adscope.amps.ad.interstitial.AMPSInterstitialLoadEventListener
 import xyz.adscope.amps.common.AMPSError
 import xyz.adscope.amps.config.AMPSRequestParameters
+import xyz.adscope.common.v2.gsonlite.Gson
 
 /**
  * 插屏广告管理器 (单例)
@@ -97,7 +98,11 @@ class AMPSInterstitialManager private constructor() {
             }
 
             AMPSAdSdkMethodNames.INTERSTITIAL_GET_MEDIA_EXTRA_INFO -> {
-                result.success(interstitialAd?.mediaExtraInfo)
+                var mediaExtraInfo: String? = null
+                if (interstitialAd?.mediaExtraInfo != null) {
+                    mediaExtraInfo = Gson().toJson(interstitialAd?.mediaExtraInfo)
+                }
+                result.success(mediaExtraInfo)
             }
 
             else -> result.notImplemented()

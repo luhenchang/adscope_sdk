@@ -114,7 +114,7 @@ class AMPSSplashAd {
   }
 
   ///调用addPreGetMediaExtraInfo
-  Future<Map<String, dynamic>?> addPreGetMediaExtraInfo() async {
+  Future<dynamic> addPreGetMediaExtraInfo() async {
     return await AdscopeSdk.channel
         .invokeMethod(AMPSAdSdkMethodNames.splashAddPreGetMediaExtraInfo);
   }

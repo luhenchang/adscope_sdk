@@ -8,15 +8,15 @@ class AMPSRewardVideoAd {
   RewardVideoCallBack? adCallBack;
 
   AMPSRewardVideoAd({required this.config, this.adCallBack}) {
-    AdscopeSdk.channel.invokeListMethod(
-        AMPSAdSdkMethodNames.rewardVideoCreate, config.toMap());
+    AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoCreate, config.toMap());
 
     setMethodCallHandler();
   }
 
   void setMethodCallHandler() {
     AdscopeSdk.channel.setMethodCallHandler(
-          (call) async {
+      (call) async {
         switch (call.method) {
           case AMPSRewardedVideoCallBackChannelMethod.onLoadSuccess:
             adCallBack?.onLoadSuccess?.call();
@@ -49,8 +49,8 @@ class AMPSRewardVideoAd {
             break;
           case AMPSRewardedVideoCallBackChannelMethod.onVideoSkipToEnd:
             var map = call.arguments as Map<dynamic, dynamic>;
-            adCallBack?.onVideoSkipToEnd?.call(
-                map[AMPSSdkCallBackParamsKey.playDurationMs]);
+            adCallBack?.onVideoSkipToEnd
+                ?.call(map[AMPSSdkCallBackParamsKey.playDurationMs]);
             break;
           case AMPSRewardedVideoCallBackChannelMethod.onAdReward:
             adCallBack?.onAdReward?.call();
@@ -76,8 +76,8 @@ class AMPSRewardVideoAd {
 
   ///激励视频广告显示调用
   void showAd() async {
-    await AdscopeSdk.channel.invokeMethod(
-        AMPSAdSdkMethodNames.rewardVideoShowAd);
+    await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoShowAd);
   }
 
   ///激励视频广告是否有预加载
@@ -99,11 +99,13 @@ class AMPSRewardVideoAd {
 
   ///添加预加载广告
   addPreLoadAdInfo() async {
-     AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.rewardVideoAddPreLoadAdInfo);
+    AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoAddPreLoadAdInfo);
   }
 
   ///获取MediaExtraInfo
-  addPreGetMediaExtraInfo() async {
-    AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.rewardVideoGetMediaExtraInfo);
+  Future<dynamic> addPreGetMediaExtraInfo() async {
+    return await AdscopeSdk.channel
+        .invokeMapMethod(AMPSAdSdkMethodNames.rewardVideoGetMediaExtraInfo);
   }
 }

@@ -18,7 +18,6 @@ class _BannerWidgetPageState extends State<BannerWidgetPage> {
   AMPSBannerAd? _bannerAd;
   late BannerCallBack _adCallBack;
   bool splashVisible = false;
-  bool couldBack = true;
   bool isLoading = false;
   num eCpm = -1;
 
@@ -28,7 +27,6 @@ class _BannerWidgetPageState extends State<BannerWidgetPage> {
     super.initState();
     _adCallBack = BannerCallBack(onLoadSuccess: () {
       setState(() {
-        couldBack = false;
         splashVisible = true;
       });
       debugPrint("ad load onRenderOk");
@@ -40,61 +38,66 @@ class _BannerWidgetPageState extends State<BannerWidgetPage> {
     }, onAdClicked: () {
       isLoading = false;
       setState(() {
-        couldBack = true;
         splashVisible = false;
       });
       debugPrint("ad load onAdClicked");
     }, onAdClosed: () {
       isLoading = false;
       setState(() {
-        couldBack = true;
         splashVisible = false;
       });
       debugPrint("ad load onAdClosed");
     });
-
-    AdOptions options = AdOptions(spaceId: splashSpaceId);
-    _bannerAd = AMPSBannerAd(config: options, mCallBack: _adCallBack);
-    _bannerAd?.load();
+    //监听第一帧绘制完成（布局已完成，可安全获取 MediaQuery）
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 获取屏幕尺寸（包含状态栏、导航栏等系统UI的整体屏幕尺寸）
+      final mediaQuery = MediaQuery.of(context);
+      final screenWidth = mediaQuery.size.width;
+      final screenHeight = 120;
+      AdOptions options = AdOptions(
+          spaceId: bannerSpaceId, expressSize: [screenWidth-20, screenHeight]);
+      _bannerAd = AMPSBannerAd(config: options, mCallBack: _adCallBack);
+      _bannerAd?.load();
+    });
   }
+
   @override
   void dispose() {
     _bannerAd?.destroy();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-        canPop: couldBack,
-        child: Scaffold(
-            body: Stack(
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: Stack(
           alignment: AlignmentDirectional.center,
           children: [
             const BlurredBackground(),
-            Column(
-              children: [
-                if (splashVisible) _buildBannerWidget(),
-                const SizedBox(height: 100, width: 0),
-                ButtonWidget(
-                    buttonText: '获取竞价=$eCpm',
-                    callBack: () async {
-                      bool? isReadyAd = await _bannerAd?.isReadyAd();
-                      debugPrint("isReadyAd=$isReadyAd");
-                      if (_bannerAd != null) {
-                        num ecPmResult = await _bannerAd!.getECPM();
-                        debugPrint("ecPm请求结果=$eCpm");
-                        setState(() {
-                          eCpm = ecPmResult;
-                        });
-                      }
-                    }),
-              ],
-            ),
+            Column(children: [
+              if (splashVisible) BannerWidget(_bannerAd),
+              const SizedBox(height: 100, width: 0),
+              ButtonWidget(
+                  buttonText: '获取竞价=$eCpm',
+                  callBack: () async {
+                    _bannerAd?.getMediaExtraInfo().then((mediaInfo)=>{
+                       debugPrint("mediaInfo=${mediaInfo.toString()}")
+                    });
+                    bool? isReadyAd = await _bannerAd?.isReadyAd();
+                    debugPrint("isReadyAd=$isReadyAd");
+                    if (_bannerAd != null) {
+                      num ecPmResult = await _bannerAd!.getECPM();
+                      debugPrint("ecPm请求结果=$eCpm");
+                      setState(() {
+                        eCpm = ecPmResult;
+                      });
+                    }
+                  }),
+            ]),
           ],
-        )));
-  }
-
-  Widget _buildBannerWidget() {
-    return BannerWidget(_bannerAd);
+        ));
   }
 }

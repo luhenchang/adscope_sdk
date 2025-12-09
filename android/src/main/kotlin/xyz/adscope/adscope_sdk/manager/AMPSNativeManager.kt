@@ -25,6 +25,7 @@ import xyz.adscope.amps.ad.unified.inter.AMPSUnifiedDownloadListener
 import xyz.adscope.amps.ad.unified.inter.AMPSUnifiedNativeItem
 import xyz.adscope.amps.common.AMPSError
 import xyz.adscope.amps.config.AMPSRequestParameters
+import xyz.adscope.common.v2.gsonlite.Gson
 import java.util.UUID
 import kotlin.collections.mapOf
 @Suppress("UNCHECKED_CAST")
@@ -376,9 +377,17 @@ class AMPSNativeManager {
                 val vdConfigParams = args as HashMap<String, Any>
                 val nativeType = vdConfigParams[NATIVE_TYPE] as? Int ?: 0
                 if (nativeType == 0) {
-                    result.success(mNativeAd?.mediaExtraInfo)
+                    var mediaExtraInfo: String? = null
+                    if (mNativeAd?.mediaExtraInfo != null) {
+                        mediaExtraInfo = Gson().toJson(mNativeAd?.mediaExtraInfo)
+                    }
+                    result.success(mediaExtraInfo)
                 } else {
-                    result.success(mUnifiedAd?.mediaExtraInfo)
+                    var mediaExtraInfo: String? = null
+                    if (mUnifiedAd?.mediaExtraInfo != null) {
+                        mediaExtraInfo = Gson().toJson(mUnifiedAd?.mediaExtraInfo)
+                    }
+                    result.success(mediaExtraInfo)
                 }
             }
 

@@ -23,6 +23,7 @@ object AMPSPlatformViewRegistry {
     const val AMPS_SDK_INTERSTITIAL_VIEW_ID = "$CHANNEL_DOMAIN/interstitial_view_id"
     const val AMPS_SDK_NATIVE_VIEW_ID = "$CHANNEL_DOMAIN/native_view_id"
     const val AMPS_SDK_UNIFIED_VIEW_ID = "$CHANNEL_DOMAIN/unified_view_id"
+    const val AMPS_SDK_BANNER_VIEW_ID = "$CHANNEL_DOMAIN/banner_view_id"
 }
 
 object AMPSInitChannelMethod {
@@ -270,6 +271,6 @@ val BannerMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.BANNER_GET_ECPM,
     AMPSAdSdkMethodNames.BANNER_IS_READY_AD,
     AMPSAdSdkMethodNames.BANNER_DESTROY_AD,
-    AMPSAdSdkMethodNames.REWARDED_VIDEO_ADD_PRE_LOAD_AD_INFO,
-    AMPSAdSdkMethodNames.REWARDED_VIDEO_GET_MEDIA_EXTRA_INFO
+    AMPSAdSdkMethodNames.BANNER_ADD_PRE_LOAD_AD_INFO,
+    AMPSAdSdkMethodNames.BANNER_GET_MEDIA_EXTRA_INFO
 )

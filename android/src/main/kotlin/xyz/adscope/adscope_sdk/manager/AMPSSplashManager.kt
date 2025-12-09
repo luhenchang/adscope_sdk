@@ -17,6 +17,7 @@ import xyz.adscope.adscope_sdk.view.SplashBottomViewFactory
 import xyz.adscope.amps.ad.splash.AMPSSplashAd
 import xyz.adscope.amps.ad.splash.AMPSSplashLoadEventListener
 import xyz.adscope.amps.common.AMPSError
+import xyz.adscope.common.v2.gsonlite.Gson
 
 class AMPSSplashManager private constructor() {
     private var mSplashAd: AMPSSplashAd? = null
@@ -79,6 +80,7 @@ class AMPSSplashManager private constructor() {
         contentView?.findViewWithTag<View>("splash_main_container_tag")?.let { viewToRemove ->
             contentView.removeView(viewToRemove)
         }
+        mSplashAd?.destroy()
         mSplashAd = null
         SplashBottomModule.current = null
     }
@@ -107,7 +109,11 @@ class AMPSSplashManager private constructor() {
             }
 
             AMPSAdSdkMethodNames.SPLASH_GET_MEDIA_EXTRA_INFO -> {
-                result.success(mSplashAd?.mediaExtraInfo)
+                var mediaExtraInfo: String? = null
+                if (mSplashAd?.mediaExtraInfo != null) {
+                    mediaExtraInfo = Gson().toJson(mSplashAd?.mediaExtraInfo)
+                }
+                result.success(mediaExtraInfo)
             }
 
             AMPSAdSdkMethodNames.SPLASH_IS_READY_AD -> {

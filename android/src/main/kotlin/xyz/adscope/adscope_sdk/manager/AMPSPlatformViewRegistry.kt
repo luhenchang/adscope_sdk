@@ -3,6 +3,7 @@ package xyz.adscope.adscope_sdk.manager
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.plugin.common.StandardMessageCodec
 import xyz.adscope.adscope_sdk.data.AMPSPlatformViewRegistry
+import xyz.adscope.adscope_sdk.view.BannerFactory
 import xyz.adscope.adscope_sdk.view.NativeFactory
 import xyz.adscope.adscope_sdk.view.SplashFactory
 import xyz.adscope.adscope_sdk.view.UnifiedFactory
@@ -45,6 +46,12 @@ class AMPSPlatformViewManager private constructor() {
         platformViewRegistry.registerViewFactory(
             AMPSPlatformViewRegistry.AMPS_SDK_UNIFIED_VIEW_ID,
             UnifiedFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
+        )
+
+        // 注册 Banner 视图工厂
+        platformViewRegistry.registerViewFactory(
+            AMPSPlatformViewRegistry.AMPS_SDK_BANNER_VIEW_ID,
+            BannerFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
         )
     }
 }

@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'package:adscope_sdk_example/banner_widget_page.dart';
 import 'package:adscope_sdk_example/data/common.dart';
 import 'package:adscope_sdk_example/interstitial_show_page.dart';
 import 'package:adscope_sdk_example/reward_video_page.dart';
@@ -37,7 +38,7 @@ class MyApp extends StatelessWidget {
          'NativePage':(context)=> const NativePage(title: '原生页面'),
          'NativeUnifiedPage':(context)=> const NativeUnifiedPage(title: '原生自渲染页面'),
          'RewardVideoPage':(context)=> const RewardVideoPage(title: '激励视频页面'),
-         'BannerPage':(context)=> const RewardVideoPage(title: 'Banner页面'),
+         'BannerPage':(context)=> const BannerWidgetPage(title: 'Banner页面'),
          'UnionDownloadAppInfoPage': (context) => const UnionDownloadAppInfoPage()
        },
     );

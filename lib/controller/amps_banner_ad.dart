@@ -100,7 +100,7 @@ class AMPSBannerAd {
   }
 
   ///调用addPreGetMediaExtraInfo
-  Future<Map<String, dynamic>?> addPreGetMediaExtraInfo() async {
+  Future<dynamic> getMediaExtraInfo() async {
     return await AdscopeSdk.channel
         .invokeMethod(AMPSAdSdkMethodNames.bannerGetMediaExtraInfo);
   }

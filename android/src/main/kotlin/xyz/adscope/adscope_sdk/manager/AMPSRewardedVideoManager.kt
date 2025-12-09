@@ -9,6 +9,7 @@ import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import xyz.adscope.amps.ad.reward.AMPSRewardVideoAd
 import xyz.adscope.amps.ad.reward.AMPSRewardVideoLoadEventListener
 import xyz.adscope.amps.common.AMPSError
+import xyz.adscope.common.v2.gsonlite.Gson
 
 /**
  * 插屏广告管理器 (单例)
@@ -127,7 +128,11 @@ class AMPSRewardedVideoManager private constructor() {
             }
 
             AMPSAdSdkMethodNames.REWARDED_VIDEO_GET_MEDIA_EXTRA_INFO -> {
-                result.success(rewardedVideoAd?.mediaExtraInfo)
+                var mediaExtraInfo: String? = null
+                if (rewardedVideoAd?.mediaExtraInfo != null) {
+                    mediaExtraInfo = Gson().toJson(rewardedVideoAd?.mediaExtraInfo)
+                }
+                result.success(mediaExtraInfo)
             }
 
             else -> result.notImplemented()
