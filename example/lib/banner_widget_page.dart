@@ -59,7 +59,7 @@ class _BannerWidgetPageState extends State<BannerWidgetPage> {
 
   @override
   void dispose() {
-    _bannerAd?.destroy();
+    //_bannerAd?.destroy();
     super.dispose();
   }
 

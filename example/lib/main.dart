@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'data/init_data.dart';
+import 'draw_page.dart';
 import 'interstitial_page.dart';
 import 'native_page.dart';
 import 'native_unified_page.dart';
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
          'NativeUnifiedPage':(context)=> const NativeUnifiedPage(title: '原生自渲染页面'),
          'RewardVideoPage':(context)=> const RewardVideoPage(title: '激励视频页面'),
          'BannerPage':(context)=> const BannerWidgetPage(title: 'Banner页面'),
+         'DrawPage':(context)=> const DrawPage(title: 'Draw页面'),
          'UnionDownloadAppInfoPage': (context) => const UnionDownloadAppInfoPage()
        },
     );
@@ -137,7 +139,7 @@ class _SplashPageState extends State<SplashPage> {
       children: [
         const BlurredBackground(),
         Column(children: [
-          const SizedBox(height: 100,width: 0),
+          const SizedBox(height: 50,width: 0),
           ButtonWidget(
               buttonText: getInitResult(initStatus),
               backgroundColor: getInitColor(initStatus),
@@ -208,6 +210,14 @@ class _SplashPageState extends State<SplashPage> {
               callBack: () {
                 // 使用命名路由跳转
                 Navigator.pushNamed(context, 'BannerPage');
+              }
+          ),
+          const SizedBox(height: 20,width: 0),
+          ButtonWidget(
+              buttonText: '点击跳转Draw页面',
+              callBack: () {
+                // 使用命名路由跳转
+                Navigator.pushNamed(context, 'DrawPage');
               }
           )
         ],),

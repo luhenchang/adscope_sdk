@@ -14,6 +14,7 @@ class AMPSPlatformViewRegistry {
   static const ampsSdkNativeViewId = '$channelDomain/native_view_id';
   static const ampsSdkUnifiedViewId = '$channelDomain/unified_view_id';
   static const ampsSdkBannerViewId = '$channelDomain/banner_view_id';
+  static const ampsSdkDrawViewId = '$channelDomain/draw_view_id';
 }
 ///初始化交互通道方法名称
 class AMPSInitChannelMethod {
@@ -70,6 +71,24 @@ class AMPSBannerCallBackChannelMethod {
   static const String onAdReward = "Banner_onAdReward";
 }
 
+class AmpsDrawCallbackChannelMethod {
+  static const String onLoadSuccess = "Draw_onLoadSuccess";
+  static const String onLoadFailure = "Draw_onLoadFailure";
+  static const String onRenderSuccess = "Draw_onRenderSuccess";
+  static const String onRenderFail = "Draw_onRenderFail";
+  static const String onAdShow = "Draw_onAdShow";
+  static const String onAdClicked = "Draw_onAdClicked";
+  static const String onAdClosed = "Draw_onAdClosed";
+  static const String onVideoLoad = "Draw_onVideoLoad";
+  static const String onVideoPlayStart = "Draw_onVideoPlayStart";
+  static const String onVideoPlayPause = "Draw_onVideoAdPaused";
+  static const String onVideoAdContinuePlay = "Draw_onVideoAdContinuePlay";
+  static const String onProgressUpdate = "Draw_onProgressUpdate";
+  static const String onVideoError = "Draw_onVideoError";
+  static const String onVideoAdComplete = "Draw_onVideoAdComplete";
+  static const String drawSizeUpdate = "Draw_SizeUpdate";
+
+}
 ///原生和原生自渲染标识
 class AMPSNativeCallBackChannelMethod {
   //广告加载回调标识
@@ -162,6 +181,16 @@ class AMPSAdSdkMethodNames {
   static const String bannerDestroyAd = "AMPSBanner_destroy";
   static const String bannerAddPreLoadAdInfo = "AMPSBanner_addPreLoadAdInfo";
   static const String bannerGetMediaExtraInfo = "AMPSBanner_getMediaExtraInfo";
+
+  // Draw ad related methods
+  static const String drawCreate = "AMPSDraw_create";
+  static const String drawLoad = "AMPSDraw_load";
+  static const String drawGetEcpm = "AMPSDraw_getEcpm";
+  static const String drawIsReadyAd = "AMPSDraw_isReadyAd";
+  static const String drawDestroyAd = "AMPSDraw_destroy";
+  static const String drawPauseAd = "AMPSDraw_pause";
+  static const String drawResumeAd = "AMPSDraw_resume";
+  static const String drawGetMediaExtraInfo = "AMPSDraw_getMediaExtraInfo";
 }
 ///Error对应的key
 class AMPSSdkCallBackErrorKey {
@@ -169,6 +198,8 @@ class AMPSSdkCallBackErrorKey {
   static const String code = "code";
   static const String message = "message";
   static const String extra = "extra";
+  static const String current = "current";
+  static const String duration = "duration";
 }
 
 class AMPSSdkCallBackParamsKey {

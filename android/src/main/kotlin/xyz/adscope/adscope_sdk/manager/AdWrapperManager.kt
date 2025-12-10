@@ -1,6 +1,7 @@
 package xyz.adscope.adscope_sdk.manager
 
 import android.view.View
+import xyz.adscope.amps.ad.draw.inter.AMPSDrawAdExpressInfo
 import xyz.adscope.amps.ad.nativead.inter.AMPSNativeAdExpressInfo
 import java.util.concurrent.ConcurrentHashMap
 
@@ -8,6 +9,7 @@ class AdWrapperManager private constructor() {
     // 使用ConcurrentHashMap保证线程安全
     private val adViewMap: MutableMap<String, View> = ConcurrentHashMap()
     private val adItemMap: MutableMap<String, AMPSNativeAdExpressInfo> = ConcurrentHashMap()
+    private val adDrawItemMap: MutableMap<String, AMPSDrawAdExpressInfo> = ConcurrentHashMap()
 
     companion object {
         // 单例实例，使用双重校验锁保证线程安全
@@ -38,6 +40,12 @@ class AdWrapperManager private constructor() {
         }
     }
 
+    fun addDrawAdItem(adId: String, adItem: AMPSDrawAdExpressInfo) {
+        if (adId.isNotBlank()) {
+            adDrawItemMap[adId] = adItem
+        }
+    }
+
     /**
      * 根据adId获取View实例
      * @param adId 广告的唯一ID
@@ -49,6 +57,10 @@ class AdWrapperManager private constructor() {
 
     fun getAdItem(adId: String): AMPSNativeAdExpressInfo? {
         return adItemMap[adId]
+    }
+
+    fun getDrawAdItem(adId: String): AMPSDrawAdExpressInfo? {
+        return adDrawItemMap[adId]
     }
 
     /**

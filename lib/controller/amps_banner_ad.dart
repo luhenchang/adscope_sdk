@@ -34,7 +34,6 @@ class AMPSBannerAd {
             mCallBack?.onAdShow?.call();
             break;
           case AMPSBannerCallBackChannelMethod.onAdClicked:
-            mCloseCallBack?.call();
             mCallBack?.onAdClicked?.call();
             break;
           case AMPSBannerCallBackChannelMethod.onAdClosed:

@@ -129,8 +129,3 @@ class AMPSBannerManager private constructor() {
         AMPSEventManager.getInstance().sendMessageToFlutter(method, args)
     }
 }
-
-class AppInfoName{
-    val name:String = "哈哈"
-    val age:Int = 11
-}

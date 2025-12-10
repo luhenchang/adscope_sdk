@@ -24,6 +24,7 @@ object AMPSPlatformViewRegistry {
     const val AMPS_SDK_NATIVE_VIEW_ID = "$CHANNEL_DOMAIN/native_view_id"
     const val AMPS_SDK_UNIFIED_VIEW_ID = "$CHANNEL_DOMAIN/unified_view_id"
     const val AMPS_SDK_BANNER_VIEW_ID = "$CHANNEL_DOMAIN/banner_view_id"
+    const val AMPS_SDK_DRAW_VIEW_ID = "$CHANNEL_DOMAIN/draw_view_id"
 }
 
 object AMPSInitChannelMethod {
@@ -112,6 +113,24 @@ object AMPSBannerCallbackChannelMethod {
     const val ON_AD_REWARD = "Banner_onAdReward"
 }
 
+//2. draw相关原生端回调
+object AMPSDrawCallbackChannelMethod {
+    const val ON_LOAD_SUCCESS = "Draw_onLoadSuccess"
+    const val ON_LOAD_FAILURE = "Draw_onLoadFailure"
+    const val ON_RENDER_SUCCESS = "Draw_onRenderSuccess"
+    const val ON_RENDER_FAIL = "Draw_onRenderFail"
+    const val ON_AD_SHOW = "Draw_onAdShow"
+    const val ON_AD_CLICKED = "Draw_onAdClicked"
+    const val ON_AD_CLOSED = "Draw_onAdClosed"
+    const val ON_VIDEO_LOAD = "Draw_onVideoLoad"
+    const val ON_VIDEO_PLAY_START = "Draw_onVideoPlayStart"
+    const val ON_VIDEO_PLAY_PAUSE = "Draw_onVideoAdPaused"
+    const val ON_VIDEO_AD_CONTINUE_PLAY = "Draw_onVideoAdContinuePlay"
+    const val ON_PROGRESS_UPDATE = "Draw_onProgressUpdate"
+    const val ON_VIDEO_ERROR = "Draw_onVideoError"
+    const val ON_VIDEO_AD_COMPLETE = "Draw_onVideoAdComplete"
+}
+
 object DownLoadCallBackChannelMethod {
     const val ON_DOWNLOAD_PAUSED = "onDownloadPaused"
     const val ON_DOWNLOAD_STARTED = "onDownloadStarted"
@@ -183,6 +202,17 @@ object AMPSAdSdkMethodNames {
     const val BANNER_DESTROY_AD = "AMPSBanner_destroy"
     const val BANNER_ADD_PRE_LOAD_AD_INFO = "AMPSBanner_addPreLoadAdInfo"
     const val BANNER_GET_MEDIA_EXTRA_INFO = "AMPSBanner_getMediaExtraInfo"
+    
+    //Draw ad related methods
+    const val DRAW_CREATE = "AMPSDraw_create"
+    const val DRAW_LOAD = "AMPSDraw_load"
+    const val DRAW_GET_ECPM = "AMPSDraw_getECPM"
+    const val DRAW_IS_READY_AD = "AMPSDraw_isReadyAd"
+    const val DRAW_DESTROY_AD = "AMPSDraw_destroy"
+    const val DRAW_PAUSE_AD = "AMPSDraw_pause"
+    const val DRAW_RESUME_AD = "AMPSDraw_resume"
+    const val DRAW_GET_MEDIA_EXTRA_INFO = "AMPSDraw_getMediaExtraInfo"
+    const val DRAW_SIZE_UPDATE = "Draw_SizeUpdate"
 }
 
 // Constants for argument keys or other string values
@@ -273,4 +303,15 @@ val BannerMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.BANNER_DESTROY_AD,
     AMPSAdSdkMethodNames.BANNER_ADD_PRE_LOAD_AD_INFO,
     AMPSAdSdkMethodNames.BANNER_GET_MEDIA_EXTRA_INFO
+)
+
+val DrawMethodNames: Set<String> = setOf(
+    AMPSAdSdkMethodNames.DRAW_CREATE,
+    AMPSAdSdkMethodNames.DRAW_LOAD,
+    AMPSAdSdkMethodNames.DRAW_GET_ECPM,
+    AMPSAdSdkMethodNames.DRAW_IS_READY_AD,
+    AMPSAdSdkMethodNames.DRAW_DESTROY_AD,
+    AMPSAdSdkMethodNames.DRAW_PAUSE_AD,
+    AMPSAdSdkMethodNames.DRAW_RESUME_AD,
+    AMPSAdSdkMethodNames.DRAW_GET_MEDIA_EXTRA_INFO
 )

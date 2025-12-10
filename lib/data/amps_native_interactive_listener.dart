@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 ///原生和原生自渲染广告相关回调
 ///原生广告加载回调
 typedef AdLoadCallback = void Function(List<String> adIds);
@@ -11,15 +13,16 @@ class AMPSNativeAdListener {
   const AMPSNativeAdListener({this.loadOk, this.loadFail});
 }
 
-
 class AMPSNegativeFeedbackListener {
-   final OnComplainSuccess onComplainSuccess;
-   const AMPSNegativeFeedbackListener({required this.onComplainSuccess});
+  final OnComplainSuccess onComplainSuccess;
+
+  const AMPSNegativeFeedbackListener({required this.onComplainSuccess});
 }
 
 /// 渲染回调
 typedef AMPSNativeRenderCallback = void Function(String adId);
-typedef AMPSNativeRenderFailedCallback = void Function(String adId, int code, String message);
+typedef AMPSNativeRenderFailedCallback = void Function(
+    String adId, int code, String message);
 
 class AMPSNativeRenderListener {
   final AMPSNativeRenderCallback? renderSuccess;
@@ -47,19 +50,20 @@ class AmpsNativeInteractiveListener {
 
 /// 视频相关回调
 typedef VideoPlayerEventCallback = void Function(String adId);
-typedef VideoPlayerErrorCallback = void Function(String adId, int code, String extra);
+typedef VideoPlayerErrorCallback = void Function(
+    String adId, int code, String extra);
 
 class AmpsVideoPlayListener {
-  final VideoPlayerEventCallback? onVideoInit;//android有
-  final VideoPlayerEventCallback? onVideoLoading;//android有
+  final VideoPlayerEventCallback? onVideoInit; //android有
+  final VideoPlayerEventCallback? onVideoLoading; //android有
   final VideoPlayerEventCallback? onVideoReady;
-  final VideoPlayerEventCallback? onVideoLoaded;//android有
+  final VideoPlayerEventCallback? onVideoLoaded; //android有
   final VideoPlayerEventCallback? onVideoPlayStart;
   final VideoPlayerEventCallback? onVideoPlayComplete;
   final VideoPlayerEventCallback? onVideoPause;
   final VideoPlayerEventCallback? onVideoResume;
-  final VideoPlayerEventCallback? onVideoStop;//android有
-  final VideoPlayerEventCallback? onVideoClicked;//android有
+  final VideoPlayerEventCallback? onVideoStop; //android有
+  final VideoPlayerEventCallback? onVideoClicked; //android有
   final VideoPlayerErrorCallback? onVideoPlayError;
 
   const AmpsVideoPlayListener({
@@ -79,9 +83,9 @@ class AmpsVideoPlayListener {
 
 ///Android下载相关回调
 class AMPSUnifiedDownloadListener {
-  final Function(int position,String adId)? onDownloadPaused;
+  final Function(int position, String adId)? onDownloadPaused;
   final Function(String adId)? onDownloadStarted;
-  final Function(int position,String adId)? onDownloadProgressUpdate;
+  final Function(int position, String adId)? onDownloadProgressUpdate;
   final Function(String adId)? onDownloadFinished;
   final Function(String adId)? onDownloadFailed;
   final Function(String adId)? onInstalled;
@@ -93,4 +97,56 @@ class AMPSUnifiedDownloadListener {
       this.onDownloadFinished,
       this.onDownloadFailed,
       this.onInstalled});
+}
+
+///Draw回调
+class AMPSDrawAdListener {
+  final AdLoadCallback? loadOk;
+  final AdLoadErrorCallback? loadFail;
+
+  const AMPSDrawAdListener({this.loadOk, this.loadFail});
+}
+
+typedef AMPSDrawRenderCallBack = void Function(String adId);
+typedef AMPSDrawRenderFailedCallBack = void Function(
+    String adId, int code, String message);
+
+class AMPSDrawRenderListener {
+  final AMPSDrawRenderCallBack? onAdShow;
+  final AMPSDrawRenderCallBack? onAdClick;
+  final AMPSDrawRenderCallBack? onAdClose;
+  final AMPSDrawRenderCallBack? renderSuccess;
+  final AMPSDrawRenderFailedCallBack? renderFailed;
+
+  const AMPSDrawRenderListener(
+      {this.onAdShow,
+      this.onAdClick,
+      this.onAdClose,
+      this.renderSuccess,
+      this.renderFailed});
+}
+
+typedef AMPSDrawVideoCallBack = void Function(String adId);
+typedef AMPSDrawVideoFailedCallBack = void Function(
+    String adId, int code, String message);
+typedef AMPSDrawProgressUpdateCallBack = void Function(
+    String adId, int current, int duration);
+
+class AMPSDrawVideoListener {
+  final AMPSDrawVideoCallBack? onVideoLoad;
+  final AMPSDrawVideoFailedCallBack? onVideoError;
+  final AMPSDrawVideoCallBack? onVideoAdStartPlay;
+  final AMPSDrawVideoCallBack? onVideoAdPaused;
+  final AMPSDrawVideoCallBack? onVideoAdContinuePlay;
+  final AMPSDrawProgressUpdateCallBack? onProgressUpdate;
+  final AMPSDrawVideoCallBack? onVideoAdComplete;
+
+  AMPSDrawVideoListener(
+      {this.onVideoLoad,
+      this.onVideoError,
+      this.onVideoAdStartPlay,
+      this.onVideoAdPaused,
+      this.onVideoAdContinuePlay,
+      this.onProgressUpdate,
+      this.onVideoAdComplete});
 }

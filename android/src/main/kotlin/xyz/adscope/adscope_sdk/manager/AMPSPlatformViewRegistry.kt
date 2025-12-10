@@ -4,6 +4,7 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.plugin.common.StandardMessageCodec
 import xyz.adscope.adscope_sdk.data.AMPSPlatformViewRegistry
 import xyz.adscope.adscope_sdk.view.BannerFactory
+import xyz.adscope.adscope_sdk.view.DrawFactory
 import xyz.adscope.adscope_sdk.view.NativeFactory
 import xyz.adscope.adscope_sdk.view.SplashFactory
 import xyz.adscope.adscope_sdk.view.UnifiedFactory
@@ -40,6 +41,12 @@ class AMPSPlatformViewManager private constructor() {
         platformViewRegistry.registerViewFactory(
             AMPSPlatformViewRegistry.AMPS_SDK_NATIVE_VIEW_ID,
             NativeFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
+        )
+
+        // 注册 Draw 视图工厂
+        platformViewRegistry.registerViewFactory(
+            AMPSPlatformViewRegistry.AMPS_SDK_DRAW_VIEW_ID,
+            DrawFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
         )
 
         // 注册 Unified 视图工厂
