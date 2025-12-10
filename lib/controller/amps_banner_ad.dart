@@ -1,7 +1,9 @@
+import 'dart:ffi';
+import 'package:flutter/cupertino.dart';
+
 import '../adscope_sdk.dart';
 import '../common.dart';
 import '../data/amps_ad.dart';
-import '../widget/splash_bottom_widget.dart';
 
 ///开屏广告类
 class AMPSBannerAd {
@@ -51,13 +53,14 @@ class AMPSBannerAd {
             mCallBack?.onVideoPlayError?.call(map[AMPSSdkCallBackErrorKey.code],
                 map[AMPSSdkCallBackErrorKey.message]);
             break;
-          case AMPSBannerCallBackChannelMethod.onVideoSkipToEnd:
-            var map = call.arguments as Map<dynamic, dynamic>;
-            mCallBack?.onVideoSkipToEnd
-                ?.call(map[AMPSSdkCallBackParamsKey.playDurationMs]);
+          case AMPSBannerCallBackChannelMethod.onVideoReady:
+            mCallBack?.onVideoReady?.call();
             break;
-          case AMPSBannerCallBackChannelMethod.onAdReward:
-            mCallBack?.onAdReward?.call();
+          case AMPSBannerCallBackChannelMethod.onVideoPause:
+            mCallBack?.onVideoPause?.call();
+            break;
+          case AMPSBannerCallBackChannelMethod.onVideoResume:
+            mCallBack?.onVideoResume?.call();
             break;
         }
       },
@@ -75,9 +78,9 @@ class AMPSBannerAd {
   }
 
   ///开屏广告显示调用
-  void showAd({SplashBottomWidget? splashBottomWidget}) async {
+  void setSlideTime(Int time) async {
     await AdscopeSdk.channel.invokeMethod(
-        AMPSAdSdkMethodNames.bannerShowAd, splashBottomWidget?.toMap());
+        AMPSAdSdkMethodNames.bannerSetSlideTime, time);
   }
 
   ///开屏广告是否有预加载

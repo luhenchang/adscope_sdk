@@ -4,7 +4,7 @@ import { AMPSBannerManager } from './AMPSBannerManager';
 @Component
 export  struct AMPSBannerComponent {
 
-  bannerAd?: AMPSBannerAdWrapper
+  bannerAd?: AMPSBannerAdWrapper = undefined
   aboutToAppear(): void {
     this.bannerAd = AMPSBannerManager.getInstance().getBannerAdItem()
   }

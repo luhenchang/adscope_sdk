@@ -11,22 +11,13 @@ import {
   AMPSNativeRenderListener
 } from 'xyz.adscope.amps';
 import {
-  AD_ID,
-  AD_LOSS_REASON,
-  AD_SEC_PRICE,
-  AD_WIN_PRICE,
   AMPSAdSdkMethodNames,
-  AMPSNativeCallBackChannelMethod,
-  VIDEO_LOOP_REPLAY,
-  VIDEO_PLAY_TYPE,
-  VIDEO_SOUND } from '../common/common';
+  AMPSNativeCallBackChannelMethod
+} from '../common/common';
 import { AdOptionsModule } from '../common/AdOptionsModule';
 import { window } from '@kit.ArkUI';
 import { AdWrapperManager } from '../native/AdWrapperManager';
 import { AMPSEventManager } from '../common/AMPSEventManager';
-import { HashMap } from '@kit.ArkTS';
-import { StringConstants } from '../common/StringConstants';
-import { thirdPaymentService } from '@kit.PaymentKit';
 
 export class AMPSNativeManager {
   private static instance: AMPSNativeManager;
@@ -98,7 +89,7 @@ export class AMPSNativeManager {
       })
     },
     loadFail: (code: number, message: string): void => {
-      this.sendMessage(AMPSNativeCallBackChannelMethod.loadFail,{ code, message })
+      this.sendMessage(AMPSNativeCallBackChannelMethod.loadFail, { code, message })
     }
   };
 
@@ -112,8 +103,8 @@ export class AMPSNativeManager {
   handleMethodCall(call: MethodCall, result: MethodResult) {
     switch (call.method) {
       case AMPSAdSdkMethodNames.nativeCreate:
-        this.handleCreate(call,result)
-      break
+        this.handleCreate(call, result)
+        break
       case AMPSAdSdkMethodNames.nativeLoad:
         this.handleLoadAd(call, result);
         break;
@@ -143,8 +134,8 @@ export class AMPSNativeManager {
   }
 
   private getAdWrapper(arg: ESObject): AMPSNativeAdWrapper | undefined {
-     const targetAdId = (arg as Map<string, Any>)["adId"] as string
-     return AdWrapperManager.getInstance().getAd(targetAdId);
+    const targetAdId = (arg as Map<string, Any>)["adId"] as string
+    return AdWrapperManager.getInstance().getAd(targetAdId);
   }
 
   private handleCreate(call: MethodCall, result: MethodResult): void {
@@ -166,6 +157,7 @@ export class AMPSNativeManager {
       result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
     }
   }
+
   // 处理开屏广告加载
   private handleLoadAd(call: MethodCall, result: MethodResult): void {
     try {

@@ -117,11 +117,13 @@ class BannerCallBack {
   final AdSuccessCallback? onAdShow;
   final AdSuccessCallback? onAdClicked;
   final AdSuccessCallback? onAdClosed;
+  final AdSuccessCallback? onVideoPause;
+  final AdSuccessCallback? onVideoReady;
+  final AdSuccessCallback? onVideoResume;
   final AdSuccessCallback? onVideoPlayStart;
   final AdSuccessCallback? onVideoPlayEnd;
   final AdFailureCallback? onVideoPlayError;
-  final VideoSkipToEndCallback? onVideoSkipToEnd;
-  final AdSuccessCallback? onAdReward;
+
 
   const BannerCallBack(
       {this.onLoadSuccess,
@@ -129,11 +131,12 @@ class BannerCallBack {
       this.onAdShow,
       this.onAdClicked,
       this.onAdClosed,
+      this.onVideoReady,
       this.onVideoPlayStart,
       this.onVideoPlayEnd,
-      this.onVideoSkipToEnd,
+      this.onVideoPause,
       this.onVideoPlayError,
-      this.onAdReward});
+      this.onVideoResume});
 }
 
 ///组件关闭通知接口

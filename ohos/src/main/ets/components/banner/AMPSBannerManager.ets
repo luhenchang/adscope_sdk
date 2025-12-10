@@ -1,10 +1,9 @@
 import { Any, MethodCall, MethodResult } from '@ohos/flutter_ohos';
-import { ampsAd, AMPSBannerAd, AMPSRewardVideoListener, AMPSBannerAdWrapper } from 'xyz.adscope.amps';
+import { ampsAd, AMPSBannerAd, AMPSBannerAdWrapper } from 'xyz.adscope.amps';
 import { AdOptionsModule } from '../common/AdOptionsModule';
 import { AMPSEventManager } from '../common/AMPSEventManager';
-import { AMPSAdCallBackChannelMethod, AMPSAdSdkMethodNames } from '../common/common';
+import { AMPSBannerCallBackChannelMethod, AMPSAdSdkMethodNames } from '../common/common';
 import { window } from '@kit.ArkUI';
-import { thirdPaymentService } from '@kit.PaymentKit';
 
 export class AMPSBannerManager{
 
@@ -24,61 +23,36 @@ export class AMPSBannerManager{
     return this.bannerAdItem
   }
 
-  private callBack: AMPSRewardVideoListener = {
-    onLoadSuccess: (): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onLoadSuccess);
-      this.sendMessage(AMPSAdCallBackChannelMethod.onRenderOk)
-    },
-    onLoadFailure: (code: number, message: string): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onLoadFailure,{ code, message });
-    },
-    onAdDidShow: (): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onAdShow);
-      this.sendMessage(AMPSAdCallBackChannelMethod.onAdExposure);
-    },
-    onAdClicked: (): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onAdClicked);
-    },
-    onAdClosed: (): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onAdClosed);
-    },
-    onVideoPlayStart: (): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onVideoPlayStart);
-    },
-    onVideoPlayEnd: (): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onVideoPlayEnd);
-    },
-    onVideoPlayError: (code: number, message: string): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onVideoPlayError,{ code, message });
-    },
-    onVideoSkipToEnd: (playDurationMs?: number | undefined): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onVideoSkipToEnd,{playDurationMs});
-    },
-    onAdReward: (): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onAdReward);
-    }
+  cleanUp(){
+    this.bannerAd = undefined
+    this.bannerAdItem = undefined
   }
-
   handleMethodCall(call: MethodCall, result: MethodResult) {
     switch (call.method) {
-      case AMPSAdSdkMethodNames.rewardVideoCreate:
+      case AMPSAdSdkMethodNames.bannerCreate:
         this.handleCreate(call, result);
         break;
-      case AMPSAdSdkMethodNames.rewardVideoLoad:
+      case AMPSAdSdkMethodNames.bannerLoad:
         this.handleLoadAd(call, result);
+        break;
+      case AMPSAdSdkMethodNames.bannerPreLoad:
+        this.handlePreLoadAd(call, result);
         break;
       case AMPSAdSdkMethodNames.bannerSetSlideTime:
         this.setSlideIntervalTime(result, call.args)
         break
-      case AMPSAdSdkMethodNames.rewardVideoGetECPM:
+      case AMPSAdSdkMethodNames.bannerGetECPM:
         const mEcpm = this.bannerAdItem?.getECPM() ?? 0
         result.success(mEcpm);
         break;
-      case AMPSAdSdkMethodNames.rewardVideoIsReadyAd:
+      case AMPSAdSdkMethodNames.bannerDestroyAd:
+        this.cleanUp()
+        break;
+      case AMPSAdSdkMethodNames.bannerIsReadyAd:
         result.success(this.bannerAd?.isReadyAd() ?? false);
         break;
       default:
-        result.notImplemented();
+        result.success(undefined);
     }
   }
   mWindowStage?: window.WindowStage
@@ -94,53 +68,53 @@ export class AMPSBannerManager{
           this.bannerAd = new AMPSBannerAd(mWindow.getUIContext(), adOption, {
             loadOk:(ads)=>{
               that.bannerAdItem = ads[0]
-              this.sendMessage(AMPSAdCallBackChannelMethod.onLoadSuccess)
+
               that.bannerAdItem.renderCallBack = {
                 renderSuccess(){
-                  this.sendMessage(AMPSAdCallBackChannelMethod.onRenderOk)
+                  that.sendMessage(AMPSBannerCallBackChannelMethod.onLoadSuccess)
                 },
                 renderFailed(code,message){
-                  this.sendMessage(AMPSAdCallBackChannelMethod.onRenderFailure,{code,message})
+                  that.sendMessage(AMPSBannerCallBackChannelMethod.onLoadFailure,{code,message})
                 }
               }
               that.bannerAdItem.interactCallBack = {
                 onAdShow(){
-                  this.sendMessage(AMPSAdCallBackChannelMethod.onAdShow)
+                  that.sendMessage(AMPSBannerCallBackChannelMethod.onAdShow)
                 },
                 onAdExposure(){
-                  this.sendMessage(AMPSAdCallBackChannelMethod.onAdExposure)
+                  that.sendMessage(AMPSBannerCallBackChannelMethod.onAdShow)
                 },
                 onAdClicked(){
-                  this.sendMessage(AMPSAdCallBackChannelMethod.onAdClicked)
+                  that.sendMessage(AMPSBannerCallBackChannelMethod.onAdClicked)
                 },
                 toCloseAd(){
-                  this.sendMessage(AMPSAdCallBackChannelMethod.onAdClosed)
+                  that.sendMessage(AMPSBannerCallBackChannelMethod.onAdClosed)
                 }
               }
               that.bannerAdItem.videoPlayCallBack ={
                 onVideoReady(){
-                  this.sendMessage(AMPSAdCallBackChannelMethod)
+                  that.sendMessage(AMPSBannerCallBackChannelMethod.onVideoReady)
                 },
                 onVideoPlayStart(){
-
+                  that.sendMessage(AMPSBannerCallBackChannelMethod.onVideoPlayStart)
                 },
                 onVideoPause(){
-
+                  that.sendMessage(AMPSBannerCallBackChannelMethod.onVideoPause)
                 },
                 onVideoResume(){
-
+                  that.sendMessage(AMPSBannerCallBackChannelMethod.onVideoResume)
                 },
                 onVideoPlayComplete(){
-
+                  that.sendMessage(AMPSBannerCallBackChannelMethod.onVideoPlayEnd)
                 },
-                onVideoPlayError(){
-
+                onVideoPlayError(code,message){
+                  that.sendMessage(AMPSBannerCallBackChannelMethod.onLoadFailure,{code,message})
                 }
               }
-
+              ads[0].renderAd()
             },
             loadFail:(code,message)=>{
-              this.sendMessage(AMPSAdCallBackChannelMethod.onLoadFailure,{code,message})
+              that.sendMessage(AMPSBannerCallBackChannelMethod.onLoadFailure,{code,message})
             }
           });
 
@@ -165,7 +139,14 @@ export class AMPSBannerManager{
     }
     result.success(true)
   }
-
+  private handlePreLoadAd(call: MethodCall, result: MethodResult): void {
+    try {
+      this.bannerAd?.load();
+    } catch (error) {
+      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`,undefined);
+    }
+    result.success(true)
+  }
   // 处理开屏广告显示
   private setSlideIntervalTime(result: MethodResult, args: Any): void {
     try {

@@ -16,6 +16,7 @@ export class AMPSPlatformViewRegistry {
   static readonly ampsSdkInterstitialViewId = `${channelDomain}/interstitial_view_id`;
   static readonly ampsSdkNativeViewId = `${channelDomain}/native_view_id`;
   static readonly ampsSdkUnifiedViewId = `${channelDomain}/unified_view_id`;
+  static readonly ampsSdkBannerViewId = `${channelDomain}/banner_view_id`;
 }
 
 //初始化交互通道方法名称
@@ -43,7 +44,7 @@ export class AMPSAdCallBackChannelMethod {
   static readonly onVideoSkipToEnd = "onVideoSkipToEnd";
   static readonly onAdReward = "onAdReward";
 }
-// 1. 先定义统一的回调方法常量（参考示例格式）
+// 1. 激励视频回调方法常量（参考示例格式）
 export class AMPSRewardedVideoCallBackChannelMethod {
   static readonly onLoadSuccess = "RewardedVideo_onLoadSuccess";
   static readonly onLoadFailure = "RewardedVideo_onLoadFailure";
@@ -56,6 +57,21 @@ export class AMPSRewardedVideoCallBackChannelMethod {
   static readonly onVideoPlayError = "RewardedVideo_onVideoPlayError";
   static readonly onVideoSkipToEnd = "RewardedVideo_onVideoSkipToEnd";
   static readonly onAdCached = "RewardedVideo_onAdCached";
+}
+//2. banner相关原生端回调
+export class AMPSBannerCallBackChannelMethod {
+  static readonly onLoadSuccess = "Banner_onLoadSuccess";
+  static readonly onLoadFailure = "Banner_onLoadFailure";
+  static readonly onAdShow = "Banner_onAdShow";
+  static readonly onAdClicked = "Banner_onAdClicked";
+  static readonly onAdClosed = "Banner_onAdClosed";
+
+  static readonly onVideoReady = "Banner_onVideoReady";
+  static readonly onVideoPlayStart = "Banner_onVideoPlayStart";
+  static readonly onVideoPlayEnd = "Banner_onVideoPlayEnd";
+  static readonly onVideoPlayError = "Banner_onVideoPlayError";
+  static readonly onVideoPause = "Banner_onVideoPause";
+  static readonly onVideoResume = "Banner_onVideoResume";
 }
 //原生和原生自渲染标识
 export class AMPSNativeCallBackChannelMethod {
@@ -126,12 +142,16 @@ export class AMPSAdSdkMethodNames {
   static readonly rewardVideoAddPreLoadAdInfo = "AMPSRewardVideo_addPreLoadAdInfo";
   static readonly rewardVideoGetMediaExtraInfo = "AMPSRewardVideo_getMediaExtraInfo";
 
+  //Banner
   static readonly bannerCreate = 'AMPSBanner_create';
   static readonly bannerLoad = 'AMPSBanner_load';
   static readonly bannerPreLoad = 'AMPSBanner_preLoad';
   static readonly bannerSetSlideTime = 'AMPSBanner_setSlideTime';
   static readonly bannerGetECPM = 'AMPSBanner_getECPM';
   static readonly bannerIsReadyAd = 'AMPSBanner_isReadyAd';
+  static readonly bannerDestroyAd = "AMPSBanner_destroy";
+  static readonly bannerAddPreLoadAdInfo = "AMPSBanner_addPreLoadAdInfo";
+  static readonly bannerGetMediaExtraInfo = "AMPSBanner_getMediaExtraInfo";
 
 }
 
@@ -197,5 +217,17 @@ export let RewardVideoMethodNames: string[] = [
   AMPSAdSdkMethodNames.rewardVideoDestroyAd,
   AMPSAdSdkMethodNames.rewardVideoAddPreLoadAdInfo,
   AMPSAdSdkMethodNames.rewardVideoGetMediaExtraInfo
+];
+
+export let BannerMethodNames: string[] = [
+  AMPSAdSdkMethodNames.bannerCreate,
+  AMPSAdSdkMethodNames.bannerLoad,
+  AMPSAdSdkMethodNames.bannerPreLoad,
+  AMPSAdSdkMethodNames.bannerSetSlideTime,
+  AMPSAdSdkMethodNames.bannerGetECPM,
+  AMPSAdSdkMethodNames.bannerIsReadyAd,
+  AMPSAdSdkMethodNames.bannerDestroyAd,
+  AMPSAdSdkMethodNames.bannerAddPreLoadAdInfo,
+  AMPSAdSdkMethodNames.bannerGetMediaExtraInfo
 ];
 

@@ -4,6 +4,7 @@ import { InterstitialFactory } from '../interstitial/InterstitialFactory';
 import { NativeFactory } from '../native/NativeFactory';
 import { SplashFactory } from '../splash/SplashFactory';
 import { UnifiedFactory } from '../native/UnifiedFactory';
+import { BannerFactory } from '../banner/BannerFactory';
 
 export class AMPSPlatformViewManager {
   private static sInstance: AMPSPlatformViewManager;
@@ -27,5 +28,8 @@ export class AMPSPlatformViewManager {
       new NativeFactory(binding.getBinaryMessenger(), StandardMessageCodec.INSTANCE));
     binding.getPlatformViewRegistry().registerViewFactory(AMPSPlatformViewRegistry.ampsSdkUnifiedViewId,
       new UnifiedFactory(binding.getBinaryMessenger(), StandardMessageCodec.INSTANCE));
+    binding.getPlatformViewRegistry().registerViewFactory(AMPSPlatformViewRegistry.ampsSdkBannerViewId,
+      new BannerFactory(binding.getBinaryMessenger(), StandardMessageCodec.INSTANCE));
+
   }
 }

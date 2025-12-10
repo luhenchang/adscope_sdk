@@ -64,11 +64,13 @@ class AMPSBannerCallBackChannelMethod {
   static const String onAdShow = "Banner_onAdShow";
   static const String onAdClicked = "Banner_onAdClicked";
   static const String onAdClosed = "Banner_onAdClosed";
+
+  static const String onVideoReady = "Banner_onVideoReady";
+  static const String onVideoPause = "Banner_onVideoPause";
+  static const String onVideoResume = "Banner_onVideoResume";
   static const String onVideoPlayStart = "Banner_onVideoPlayStart";
   static const String onVideoPlayEnd = "Banner_onVideoPlayEnd";
   static const String onVideoPlayError = "Banner_onVideoPlayError";
-  static const String onVideoSkipToEnd = "Banner_onVideoSkipToEnd";
-  static const String onAdReward = "Banner_onAdReward";
 }
 
 class AmpsDrawCallbackChannelMethod {
@@ -175,7 +177,7 @@ class AMPSAdSdkMethodNames {
   static const String bannerCreate = 'AMPSBanner_create';
   static const String bannerLoad = 'AMPSBanner_load';
   static const String bannerPreLoad = "AMPSBanner_preLoad";
-  static const String bannerShowAd = 'AMPSBanner_showAd';
+  static const String bannerSetSlideTime = 'AMPSBanner_setSlideTime';
   static const String bannerGetECPM = 'AMPSBanner_getECPM';
   static const String bannerIsReadyAd = 'AMPSBanner_isReadyAd';
   static const String bannerDestroyAd = "AMPSBanner_destroy";
