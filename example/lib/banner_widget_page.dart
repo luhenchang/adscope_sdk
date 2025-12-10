@@ -26,23 +26,19 @@ class _BannerWidgetPageState extends State<BannerWidgetPage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     super.initState();
     _adCallBack = BannerCallBack(onLoadSuccess: () {
+      isLoading = false;
       setState(() {
         splashVisible = true;
       });
-      debugPrint("ad load onRenderOk");
+      debugPrint("ad load onLoadSuccess");
     }, onAdShow: () {
       debugPrint("ad load onAdShow");
     }, onLoadFailure: (code, msg) {
       isLoading = false;
       debugPrint("ad load failure=$code;$msg");
     }, onAdClicked: () {
-      isLoading = false;
-      setState(() {
-        splashVisible = false;
-      });
       debugPrint("ad load onAdClicked");
     }, onAdClosed: () {
-      isLoading = false;
       setState(() {
         splashVisible = false;
       });

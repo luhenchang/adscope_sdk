@@ -36,6 +36,7 @@ enum AMPSPlatformViewIds {
     static let interstitialViewId = "\(channelDomain)/interstitial_view_id"
     static let nativeViewId = "\(channelDomain)/native_view_id"
     static let unifiedViewId = "\(channelDomain)/unified_view_id"
+    static let bannerViewId = "\(channelDomain)/banner_view_id"
 }
 
 // 初始化相关方法名
@@ -76,6 +77,19 @@ class AMPSRewardedVideoCallBackChannelMethod {
   static let onVideoPlayError = "RewardedVideo_onVideoPlayError";
   static let onVideoSkipToEnd = "RewardedVideo_onVideoSkipToEnd";
   static let onAdCached = "RewardedVideo_onAdCached";
+}
+//2. banner相关原生端回调
+class AMPSBannerCallBackChannelMethod {
+  static let onLoadSuccess = "Banner_onLoadSuccess";
+  static let onLoadFailure = "Banner_onLoadFailure";
+  static let onAdShow = "Banner_onAdShow";
+  static let onAdClicked = "Banner_onAdClicked";
+  static let onAdClosed = "Banner_onAdClosed";
+  static let onVideoPlayStart = "Banner_onVideoPlayStart";
+  static let onVideoPlayEnd = "Banner_onVideoPlayEnd";
+  static let onVideoPlayError = "Banner_onVideoPlayError";
+  static let onVideoSkipToEnd = "Banner_onVideoSkipToEnd";
+  static let onAdReward = "Banner_onAdReward";
 }
 
 // 原生广告回调方法名
@@ -147,9 +161,20 @@ enum AMPSAdSdkMethodNames {
     static let rewardVideoShowAd = "AMPSRewardVideo_showAd"
     static let rewardVideoGetECPM = "AMPSRewardVideo_getECPM"
     static let rewardVideoIsReadyAd = "AMPSRewardVideo_isReadyAd"
-    static let rewardedVideoDestroyAd = "AMPSRewardVideo_destroy"
-    static let rewardedVideoAddPreLoadAdInfo = "AMPSRewardVideo_addPreLoadAdInfo"
-    static let rewardedVideoGetMediaExtraInfo = "AMPSRewardVideo_getMediaExtraInfo"
+    static let rewardVideoDestroyAd = "AMPSRewardVideo_destroy"
+    static let rewardVideoAddPreLoadAdInfo = "AMPSRewardVideo_addPreLoadAdInfo"
+    static let rewardVideoGetMediaExtraInfo = "AMPSRewardVideo_getMediaExtraInfo"
+    
+    //Banner
+    static let bannerCreate = "AMPSBanner_create"
+    static let bannerLoad = "AMPSBanner_load"
+    static let bannerPreLoad = "AMPSBanner_preLoad";
+    static let bannerShowAd = "AMPSBanner_showAd"
+    static let bannerGetECPM = "AMPSBanner_getECPM"
+    static let bannerIsReadyAd = "AMPSBanner_isReadyAd"
+    static let bannerDestroyAd = "AMPSBanner_destroy";
+    static let bannerAddPreLoadAdInfo = "AMPSBanner_addPreLoadAdInfo";
+    static let bannerGetMediaExtraInfo = "AMPSBanner_getMediaExtraInfo";
     
 }
 enum AdOptionKeys{
@@ -226,8 +251,18 @@ let rewardVideoMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.rewardVideoLoad,
     AMPSAdSdkMethodNames.rewardVideoShowAd,
     AMPSAdSdkMethodNames.rewardVideoGetECPM,
-    AMPSAdSdkMethodNames.rewardedVideoDestroyAd,
+    AMPSAdSdkMethodNames.rewardVideoDestroyAd,
     AMPSAdSdkMethodNames.rewardVideoIsReadyAd,
-    AMPSAdSdkMethodNames.rewardedVideoGetMediaExtraInfo,
-    AMPSAdSdkMethodNames.rewardedVideoAddPreLoadAdInfo
+    AMPSAdSdkMethodNames.rewardVideoGetMediaExtraInfo,
+    AMPSAdSdkMethodNames.rewardVideoAddPreLoadAdInfo
+]
+let bannerMethodNames: Set<String> = [
+    AMPSAdSdkMethodNames.bannerCreate,
+    AMPSAdSdkMethodNames.bannerLoad,
+    AMPSAdSdkMethodNames.bannerShowAd,
+    AMPSAdSdkMethodNames.bannerGetECPM,
+    AMPSAdSdkMethodNames.bannerDestroyAd,
+    AMPSAdSdkMethodNames.bannerIsReadyAd,
+    AMPSAdSdkMethodNames.bannerGetMediaExtraInfo,
+    AMPSAdSdkMethodNames.bannerAddPreLoadAdInfo
 ]

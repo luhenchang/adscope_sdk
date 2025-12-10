@@ -71,30 +71,6 @@ class AMPSInterstitialManager: NSObject {
        
     }
     
-    private func handleNotifyRTBWin(arguments: [String: Any]?, result: FlutterResult) {
-        guard let arguments =  arguments else{
-            return
-        }
-        let winPrice = arguments[ArgumentKeys.adWinPrice] as? Int ?? 0
-        let secPrice = arguments[ArgumentKeys.adSecPrice] as? Int ?? 0
-        interstitialAd?.sendWinNotification(withInfo: [BidKeys.winPrince:winPrice,BidKeys.lossSecondPrice:secPrice])
-        result(true)
-    }
-    
-    private func handleNotifyRTBLoss(arguments: [String: Any]?, result: FlutterResult) {
-        guard let arguments =  arguments else{
-            return
-        }
-        let lossWinPrice = arguments[ArgumentKeys.adWinPrice] as? Int ?? 0
-        let lossSecPrice = arguments[ArgumentKeys.adSecPrice] as? Int ?? 0
-        let lossReason = arguments[ArgumentKeys.adLossReason] as? String ?? ""
-        interstitialAd?.sendLossNotification(withInfo: [
-            BidKeys.winPrince:lossWinPrice,
-            BidKeys.lossSecondPrice:lossSecPrice,
-            BidKeys.lossReason:lossReason
-        ])
-        result(true)
-    }
     
     
     private func cleanupViewsAfterAdClosed() {

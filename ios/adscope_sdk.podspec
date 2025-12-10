@@ -19,7 +19,7 @@ A new Flutter plugin project.
 
   s.dependency 'AMPSASNPAdapter'
 #   s.dependency 'AMPSBZAdapter', '~> 5.1.490700.1'
-#   s.dependency 'AMPSGDTAdapter', '~> 5.1.41560.3'
+  s.dependency 'AMPSGDTAdapter', '~> 5.1.41560.3'
   s.dependency 'AMPSKSAdapter' , '~> 5.1.4920.1'
 #   s.dependency 'AMPSGMAdapter'
 #   s.dependency 'AMPSBDAdapter', '~> 5.1.10020.1'

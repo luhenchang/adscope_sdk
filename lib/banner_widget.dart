@@ -67,7 +67,7 @@ class _BannerWidgetState extends State<BannerWidget>
     }
     // else if (Platform.isOhos) {
     //   view =  OhosView(
-    //       viewType: AMPSPlatformViewRegistry.ampsSdkNativeViewId,
+    //       viewType: AMPSPlatformViewRegistry.ampsSdkBannerViewId,
     //       onPlatformViewCreated: _onPlatformViewCreated,
     //       creationParams: creationParams,
     //       creationParamsCodec: const StandardMessageCodec());
