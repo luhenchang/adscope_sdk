@@ -113,8 +113,8 @@ enum AMPSAdSdkMethodNames {
     static let splashLoad = "AMPSSplashAd_load"
     static let splashShowAd = "AMPSSplashAd_showAd"
     static let splashGetEcpm = "AMPSSplashAd_getECPM"
-    static let splashNotifyRtbWin = "AMPSSplashAd_notifyRTBWin"
-    static let splashNotifyRtbLoss = "AMPSSplashAd_notifyRTBLoss"
+//    static let splashNotifyRtbWin = "AMPSSplashAd_notifyRTBWin"
+//    static let splashNotifyRtbLoss = "AMPSSplashAd_notifyRTBLoss"
     static let splashIsReadyAd = "AMPSSplashAd_isReadyAd"
     
     // 插屏广告相关方法
@@ -122,8 +122,8 @@ enum AMPSAdSdkMethodNames {
     static let interstitialLoad = "AMPSInterstitial_load"
     static let interstitialShowAd = "AMPSInterstitial_showAd"
     static let interstitialGetEcpm = "AMPSSInterstitial_getECPM"
-    static let interstitialNotifyRtbWin = "AMPSInterstitial_notifyRTBWin"
-    static let interstitialNotifyRtbLoss = "AMPSInterstitial_notifyRTBLoss"
+//    static let interstitialNotifyRtbWin = "AMPSInterstitial_notifyRTBWin"
+//    static let interstitialNotifyRtbLoss = "AMPSInterstitial_notifyRTBLoss"
     static let interstitialIsReadyAd = "AMPSInterstitial_isReadyAd"
     
     // 原生广告相关方法
@@ -131,8 +131,8 @@ enum AMPSAdSdkMethodNames {
     static let nativeLoad = "AMPSNative_load"
     static let nativeShowAd = "AMPSNative_showAd"
     static let nativeGetEcpm = "AMPSNative_getECPM"
-    static let nativeNotifyRtbWin = "AMPSNative_notifyRTBWin"
-    static let nativeNotifyRtbLoss = "AMPSNative_notifyRTBLoss"
+//    static let nativeNotifyRtbWin = "AMPSNative_notifyRTBWin"
+//    static let nativeNotifyRtbLoss = "AMPSNative_notifyRTBLoss"
     static let nativeIsReadyAd = "AMPSNative_isReadyAd"
     static let nativeIsNativeExpress = "AMPSNative_isNativeExpress"
     static let nativeGetVideoDuration = "AMPSNative_getVideoDuration"
@@ -198,8 +198,6 @@ let splashMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.splashLoad,
     AMPSAdSdkMethodNames.splashShowAd,
     AMPSAdSdkMethodNames.splashGetEcpm,
-    AMPSAdSdkMethodNames.splashNotifyRtbWin,
-    AMPSAdSdkMethodNames.splashNotifyRtbLoss,
     AMPSAdSdkMethodNames.splashIsReadyAd
 ]
 
@@ -208,8 +206,6 @@ let interstitialMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.interstitialLoad,
     AMPSAdSdkMethodNames.interstitialShowAd,
     AMPSAdSdkMethodNames.interstitialGetEcpm,
-    AMPSAdSdkMethodNames.interstitialNotifyRtbWin,
-    AMPSAdSdkMethodNames.interstitialNotifyRtbLoss,
     AMPSAdSdkMethodNames.interstitialIsReadyAd
 ]
 
@@ -218,8 +214,6 @@ let nativeMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.nativeLoad,
     AMPSAdSdkMethodNames.nativeShowAd,
     AMPSAdSdkMethodNames.nativeGetEcpm,
-    AMPSAdSdkMethodNames.nativeNotifyRtbWin,
-    AMPSAdSdkMethodNames.nativeNotifyRtbLoss,
     AMPSAdSdkMethodNames.nativeIsReadyAd,
     AMPSAdSdkMethodNames.nativeIsNativeExpress,
     AMPSAdSdkMethodNames.nativeGetVideoDuration,

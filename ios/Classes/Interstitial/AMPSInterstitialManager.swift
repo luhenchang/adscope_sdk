@@ -29,10 +29,6 @@ class AMPSInterstitialManager: NSObject {
             handleInterstitialShowAd(arguments: arguments, result: result)
         case AMPSAdSdkMethodNames.interstitialGetEcpm:
             result(interstitialAd?.eCPM() ?? 0)
-        case AMPSAdSdkMethodNames.interstitialNotifyRtbWin:
-            handleNotifyRTBWin(arguments: arguments, result: result)
-        case AMPSAdSdkMethodNames.interstitialNotifyRtbLoss:
-            handleNotifyRTBLoss(arguments: arguments, result: result)
         case AMPSAdSdkMethodNames.interstitialIsReadyAd:
             result(interstitialAd != nil)
         default:
@@ -44,6 +40,7 @@ class AMPSInterstitialManager: NSObject {
     private func handleInterstitialCreate(arguments: [String: Any]?, result: FlutterResult) {
     
         guard let param = arguments else {
+            result(nil)
             return
         }
         
@@ -101,6 +98,8 @@ class AMPSInterstitialManager: NSObject {
     
     
     private func cleanupViewsAfterAdClosed() {
+        interstitialAd?.delegate = nil
+        interstitialAd?.remove()
         interstitialAd = nil
     }
     

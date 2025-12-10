@@ -76,6 +76,8 @@ class AMPSRewardVideoManager: NSObject {
     }
     
     private func cleanupViewsAfterAdClosed() {
+        rewardVideoAd?.delegate = nil
+        rewardVideoAd?.remove()
         rewardVideoAd = nil
     }
     

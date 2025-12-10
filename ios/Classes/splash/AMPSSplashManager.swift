@@ -38,10 +38,7 @@ class AMPSSplashManager: NSObject {
             handleSplashShowAd(arguments: arguments, result: result)
         case AMPSAdSdkMethodNames.splashGetEcpm:
             result(splashAd?.eCPM() ?? 0)
-        case AMPSAdSdkMethodNames.splashNotifyRtbWin:
-            handleNotifyRTBWin(arguments: arguments, result: result)
-        case AMPSAdSdkMethodNames.splashNotifyRtbLoss:
-            handleNotifyRTBLoss(arguments: arguments, result: result)
+        
         case AMPSAdSdkMethodNames.splashIsReadyAd:
             result(splashAd != nil)
         default:
@@ -251,32 +248,10 @@ class AMPSSplashManager: NSObject {
 
     }
     
-    private func handleNotifyRTBWin(arguments: [String: Any]?, result: FlutterResult) {
-        guard let arguments =  arguments else{
-            return
-        }
-        let winPrice = arguments[ArgumentKeys.adWinPrice] as? Int ?? 0
-        let secPrice = arguments[ArgumentKeys.adSecPrice] as? Int ?? 0
-        splashAd?.sendWinNotification(withInfo: [BidKeys.winPrince:winPrice,BidKeys.lossSecondPrice:secPrice])
-        result(true)
-    }
-    
-    private func handleNotifyRTBLoss(arguments: [String: Any]?, result: FlutterResult) {
-        guard let arguments =  arguments else{
-            return
-        }
-        let lossWinPrice = arguments[ArgumentKeys.adWinPrice] as? Int ?? 0
-        let lossSecPrice = arguments[ArgumentKeys.adSecPrice] as? Int ?? 0
-        let lossReason = arguments[ArgumentKeys.adLossReason] as? String ?? ""
-        splashAd?.sendLossNotification(withInfo: [
-            BidKeys.winPrince:lossWinPrice,
-            BidKeys.lossSecondPrice:lossSecPrice,
-            BidKeys.lossReason:lossReason
-        ])
-        result(true)
-    }
     
     private func cleanupViewsAfterAdClosed() {
+        splashAd?.delegate = nil
+        splashAd?.remove()
         splashAd = nil
     }
     

@@ -160,6 +160,7 @@ extension AMPSNativeManager: AMPSNativeExpressViewDelegate{
     }
     
     func ampsNativeAdDidClose(_ nativeView: AMPSNativeExpressView) {
+        nativeView.removeNativeAd()
         if let adID = self.adIdMap[nativeView] {
             sendMessage(AMPSNativeCallBackChannelMethod.onAdClosed,adID)
         }
