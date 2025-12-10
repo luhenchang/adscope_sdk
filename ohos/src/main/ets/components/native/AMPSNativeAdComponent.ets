@@ -1,3 +1,4 @@
+import { Any } from '@ohos/flutter_ohos';
 import { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformView';
 import { AMPSBuildNativeView, AMPSNativeAdWrapper } from 'xyz.adscope.amps';
 import { AMPSEventManager } from '../common/AMPSEventManager';
@@ -28,15 +29,20 @@ export struct AMPSNativeAdComponent {
           if (oldValue.height as number == (size.height as number)) {
             return
           }
-          let map: Map<string, number> = new Map()
+          let map: Map<string, Any> = new Map()
+          map.set("adId",this.adId)
           map.set("width", size.width as number)
           map.set("height", size.height as number)
+          console.log("nativeSizeUpdate-w:" + size.width + "h:" + size.height)
           AMPSEventManager.getInstance().sendMessageToFlutter(AMPSNativeCallBackChannelMethod.nativeSizeUpdate, map)
         }
       })
+      .backgroundColor(Color.Green)
     }
     .alignItems(HorizontalAlign.Center)
     .justifyContent(FlexAlign.Center)
     .direction(Direction.Ltr)
+    .height("100%")
+    .width("100%")
   }
 }

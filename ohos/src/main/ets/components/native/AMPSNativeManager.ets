@@ -26,6 +26,7 @@ import { AdWrapperManager } from '../native/AdWrapperManager';
 import { AMPSEventManager } from '../common/AMPSEventManager';
 import { HashMap } from '@kit.ArkTS';
 import { StringConstants } from '../common/StringConstants';
+import { thirdPaymentService } from '@kit.PaymentKit';
 
 export class AMPSNativeManager {
   private static instance: AMPSNativeManager;
@@ -75,9 +76,9 @@ export class AMPSNativeManager {
           this.sendMessage(AMPSNativeCallBackChannelMethod.onVideoPlayError, { adId, code, extra })
         }
       };
-      if (this.mVideoConfig) {
-        adWrapper.setVideoPlayConfig(this.mVideoConfig);
-      }
+      // if (this.mVideoConfig) {
+      //   adWrapper.setVideoPlayConfig(this.mVideoConfig);
+      // }
       //需要缓存到单利。使用完毕之后移除
       AdWrapperManager.getInstance().addAd(adWrapper);
     },
@@ -110,69 +111,43 @@ export class AMPSNativeManager {
 
   handleMethodCall(call: MethodCall, result: MethodResult) {
     switch (call.method) {
+      case AMPSAdSdkMethodNames.nativeCreate:
+        this.handleCreate(call,result)
+      break
       case AMPSAdSdkMethodNames.nativeLoad:
         this.handleLoadAd(call, result);
         break;
       case AMPSAdSdkMethodNames.nativeGetECPM:
-        const foundWrapper: AMPSNativeAdWrapper | undefined = this.getAdWrapperByAdId(call.args);
+        const foundWrapper: AMPSNativeAdWrapper | undefined = this.getAdWrapper(call.args);
         const mEcpm = foundWrapper?.getECPM() ?? 0
         result.success(mEcpm);
         break;
-      case AMPSAdSdkMethodNames.nativeNotifyRTBWin:
-        const params: HashMap<String, Any> = call.args;
-        const winPrice: number = params.get(AD_WIN_PRICE) ?? 0
-        const secPrice: number = params.get(AD_SEC_PRICE) ?? 0
-        const mAdId: string = params.get(AD_ID) ?? ""
-        if (winPrice != undefined && secPrice != undefined) {
-          const foundWrapper: AMPSNativeAdWrapper | undefined = this.getAdWrapperByAdId(mAdId);
-          foundWrapper?.notifyRTBWin(winPrice, secPrice)
-        }
-        break;
-      case AMPSAdSdkMethodNames.nativeNotifyRTBLoss:
-        const lossParams: HashMap<String, Any> = call.args;
-        const lossWinPrice: number = lossParams.get(AD_WIN_PRICE) ?? 0
-        const lossSecPrice: number = lossParams.get(AD_SEC_PRICE) ?? 0
-        const lossReason: string = lossParams.get(AD_LOSS_REASON) ?? StringConstants.EMPTY_STRING
-        const lossAdId: string = lossParams.get(AD_ID) ?? ""
-        if (lossWinPrice != undefined  && lossSecPrice != undefined  && lossReason != undefined ) {
-          const foundWrapper: AMPSNativeAdWrapper | undefined = this.getAdWrapperByAdId(lossAdId);
-          foundWrapper?.notifyRTBLoss(lossWinPrice, lossSecPrice, lossReason)
-        }
-        break;
+
       case AMPSAdSdkMethodNames.nativeIsReadyAd:
+        result.success(this.mNativeAd?.isReadyAd())
         break;
       case AMPSAdSdkMethodNames.nativeIsNativeExpress:
-        const wrapperForAId: AMPSNativeAdWrapper | undefined = this.getAdWrapperByAdId(call.args);
+        const wrapperForAId: AMPSNativeAdWrapper | undefined = this.getAdWrapper(call.args);
         const isNativeExpress = wrapperForAId?.isNativeExpress() ?? false
         result.success(isNativeExpress);
         break;
       case AMPSAdSdkMethodNames.nativeGetVideoDuration:
-        const wrapperByAdId: AMPSNativeAdWrapper | undefined = this.getAdWrapperByAdId(call.args);
-        // const duration = wrapperByAdId?.getVideoDuration() ?? 0
-        result.success(0);
+        const wrapperByAdId: AMPSNativeAdWrapper | undefined = this.getAdWrapper(call.args);
+        const duration = wrapperByAdId?.getVideoDuration() ?? 0
+        result.success(duration);
         break;
-      case AMPSAdSdkMethodNames.nativeSetVideoPlayConfig:
-        const vdConfigParams: HashMap<String, Any> = call.args;
-        const videoSound: boolean = vdConfigParams.get(VIDEO_SOUND) ?? false;
-        const videoPlayType: number = vdConfigParams.get(VIDEO_PLAY_TYPE) ?? 0
-        const videoLoopReplay: boolean = vdConfigParams.get(VIDEO_LOOP_REPLAY) ?? false;
-        this.mVideoConfig = {
-          videoSoundEnable: videoSound,
-          videoAutoPlayType: videoPlayType,
-          videoLoopReplay: videoLoopReplay
-        };
-        result.success(true);
+
       default:
-        result.notImplemented();
+        result.success(null);
     }
   }
 
-  private getAdWrapperByAdId(targetAdId: string): AMPSNativeAdWrapper | undefined {
+  private getAdWrapper(arg: ESObject): AMPSNativeAdWrapper | undefined {
+     const targetAdId = (arg as Map<string, Any>)["adId"] as string
      return AdWrapperManager.getInstance().getAd(targetAdId);
   }
 
-  // 处理开屏广告加载
-  private handleLoadAd(call: MethodCall, result: MethodResult): void {
+  private handleCreate(call: MethodCall, result: MethodResult): void {
     try {
       const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(call.args);
       let context = AMPSEventManager.getInstance().getContext()
@@ -181,13 +156,20 @@ export class AMPSNativeManager {
         let mWindow = this.mWindowStage.getMainWindowSync();
         if (mWindow) {
           this.mNativeAd = new AMPSNativeAd(mWindow.getUIContext(), adOption, this.callback);
-          this.mNativeAd.load();
         } else {
           result.error('LOAD_FAILED', '获取窗口或UI上下文失败', undefined);
         }
       } else {
         result.error('LOAD_FAILED', 'WindowStage未初始化', undefined);
       }
+    } catch (error) {
+      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
+    }
+  }
+  // 处理开屏广告加载
+  private handleLoadAd(call: MethodCall, result: MethodResult): void {
+    try {
+      this.mNativeAd?.load();
     } catch (error) {
       result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
     }

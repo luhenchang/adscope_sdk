@@ -130,7 +130,7 @@ class AMPSAdSdkMethodNames {
   /// 原生与自渲染相关方法
   static const String nativeCreate = 'AMPSNative_create';
   static const String nativeLoad = 'AMPSNative_load';
-  static const String nativeShowAd = 'AMPSNative_showAd';
+  // static const String nativeShowAd = 'AMPSNative_showAd';
   static const String nativePattern = 'AMPSNative_getUnifiedPattern';
   static const String nativeGetECPM = 'AMPSNative_getECPM';
   static const String nativeIsReadyAd = 'AMPSNative_isReadyAd';
@@ -138,7 +138,7 @@ class AMPSAdSdkMethodNames {
   static const String nativeUnifiedMaterialType = "AMPSNative_materialType";
   static const String nativeUnifiedGetDownLoad = "AMPSNative_getDownLoad";
   static const String nativeGetVideoDuration = 'AMPSNative_getVideoDuration';
-  static const String nativeSetVideoPlayConfig = 'AMPSNative_setVideoPlayConfig';
+  // static const String nativeSetVideoPlayConfig = 'AMPSNative_setVideoPlayConfig';
   static const String nativeGetMediaExtraInfo = "AMPSNative_getMediaExtraInfo";
 
   //激励视频

@@ -43,7 +43,20 @@ export class AMPSAdCallBackChannelMethod {
   static readonly onVideoSkipToEnd = "onVideoSkipToEnd";
   static readonly onAdReward = "onAdReward";
 }
-
+// 1. 先定义统一的回调方法常量（参考示例格式）
+export class AMPSRewardedVideoCallBackChannelMethod {
+  static readonly onLoadSuccess = "RewardedVideo_onLoadSuccess";
+  static readonly onLoadFailure = "RewardedVideo_onLoadFailure";
+  static readonly onAdShow = "RewardedVideo_onAdShow";
+  static readonly onAdClicked = "RewardedVideo_onAdClicked";
+  static readonly onAdClosed = "RewardedVideo_onAdClosed";
+  static readonly onAdReward = "RewardedVideo_onAdReward";
+  static readonly onVideoPlayStart = "RewardedVideo_onVideoPlayStart";
+  static readonly onVideoPlayEnd = "RewardedVideo_onVideoPlayEnd";
+  static readonly onVideoPlayError = "RewardedVideo_onVideoPlayError";
+  static readonly onVideoSkipToEnd = "RewardedVideo_onVideoSkipToEnd";
+  static readonly onAdCached = "RewardedVideo_onAdCached";
+}
 //原生和原生自渲染标识
 export class AMPSNativeCallBackChannelMethod {
   //广告加载回调标识
@@ -75,26 +88,32 @@ export class AMPSAdSdkMethodNames {
   static readonly splashLoad = 'AMPSSplashAd_load';
   static readonly splashShowAd = 'AMPSSplashAd_showAd';
   static readonly splashGetECPM = 'AMPSSplashAd_getECPM';
-  static readonly splashNotifyRTBWin = 'AMPSSplashAd_notifyRTBWin';
-  static readonly splashNotifyRTBLoss = 'AMPSSplashAd_notifyRTBLoss';
+  static readonly splashPreLoad = "AMPSSplashAd_preLoad";
+  static readonly splashAddPreLoadAdInfo = "AMPSSplashAd_addPreLoadAdInfo";
+  static readonly splashAddPreGetMediaExtraInfo = "AMPSSplashAd_getMediaExtraInfo";
   static readonly splashIsReadyAd = 'AMPSSplashAd_isReadyAd';
 
+  //插屏
+  static readonly interstitialCreate = "AMPSInterstitial_create";
   static readonly interstitialLoad = 'AMPSInterstitial_load';
-  static readonly interstitialShowAd = 'AMPSSInterstitial_showAd';
-  static readonly interstitialGetECPM = 'AMPSSInterstitial_getECPM';
-  static readonly interstitialNotifyRTBWin = 'AMPSInterstitial_notifyRTBWin';
-  static readonly interstitialNotifyRTBLoss = 'AMPSInterstitial_notifyRTBLoss';
+  static readonly interstitialShowAd = 'AMPSInterstitial_showAd';
+  static readonly interstitialGetECPM = 'AMPSInterstitial_getECPM';
+  static readonly interstitialPreLoad = "AMPSInterstitial_preLoad";
+  static readonly interstitialAddPreLoadAdInfo = "AMPSInterstitial_addPreLoadAdInfo";
+  static readonly interstitialGetMediaExtraInfo = "AMPSInterstitial_getMediaExtraInfo";
   static readonly interstitialIsReadyAd = 'AMPSInterstitial_isReadyAd';
 
+
   static readonly nativeLoad = 'AMPSNative_load';
-  static readonly nativeShowAd = 'AMPSNative_showAd';
+  static readonly nativeCreate = 'AMPSNative_create';
   static readonly nativeGetECPM = 'AMPSNative_getECPM';
-  static readonly nativeNotifyRTBWin = 'AMPSNative_notifyRTBWin';
-  static readonly nativeNotifyRTBLoss = 'AMPSNative_notifyRTBLoss';
   static readonly nativeIsReadyAd = 'AMPSNative_isReadyAd';
   static readonly nativeIsNativeExpress = 'AMPSNative_isNativeExpress';
+  static readonly nativeUnifiedMaterialType = "AMPSNative_materialType";
+  static readonly nativeUnifiedGetDownLoad = "AMPSNative_getDownLoad";
   static readonly nativeGetVideoDuration = 'AMPSNative_getVideoDuration';
-  static readonly nativeSetVideoPlayConfig = 'AMPSNative_setVideoPlayConfig';
+  // static readonly nativeSetVideoPlayConfig = 'AMPSNative_setVideoPlayConfig';
+  static readonly nativeGetMediaExtraInfo = "AMPSNative_getMediaExtraInfo";
 
 
   static readonly rewardVideoCreate = 'AMPSRewardVideo_create';
@@ -103,7 +122,9 @@ export class AMPSAdSdkMethodNames {
   static readonly rewardVideoShowAd = 'AMPSRewardVideo_showAd';
   static readonly rewardVideoGetECPM = 'AMPSRewardVideo_getECPM';
   static readonly rewardVideoIsReadyAd = 'AMPSRewardVideo_isReadyAd';
-
+  static readonly rewardVideoDestroyAd = "AMPSRewardVideo_destroy";
+  static readonly rewardVideoAddPreLoadAdInfo = "AMPSRewardVideo_addPreLoadAdInfo";
+  static readonly rewardVideoGetMediaExtraInfo = "AMPSRewardVideo_getMediaExtraInfo";
 
   static readonly bannerCreate = 'AMPSBanner_create';
   static readonly bannerLoad = 'AMPSBanner_load';
@@ -136,31 +157,34 @@ export let SplashMethodNames: string[] =
     AMPSAdSdkMethodNames.splashLoad,
     AMPSAdSdkMethodNames.splashShowAd,
     AMPSAdSdkMethodNames.splashGetECPM,
-    AMPSAdSdkMethodNames.splashNotifyRTBWin,
-    AMPSAdSdkMethodNames.splashNotifyRTBLoss,
+    AMPSAdSdkMethodNames.splashPreLoad,
+    AMPSAdSdkMethodNames.splashAddPreLoadAdInfo,
+    AMPSAdSdkMethodNames.splashAddPreGetMediaExtraInfo,
     AMPSAdSdkMethodNames.splashIsReadyAd
   ];
 
 export let InterstitialMethodNames: string[] =
   [
+    AMPSAdSdkMethodNames.interstitialCreate,
     AMPSAdSdkMethodNames.interstitialLoad,
     AMPSAdSdkMethodNames.interstitialShowAd,
     AMPSAdSdkMethodNames.interstitialGetECPM,
-    AMPSAdSdkMethodNames.interstitialNotifyRTBWin,
-    AMPSAdSdkMethodNames.interstitialNotifyRTBLoss,
+    AMPSAdSdkMethodNames.interstitialAddPreLoadAdInfo,
+    AMPSAdSdkMethodNames.interstitialGetMediaExtraInfo,
+    AMPSAdSdkMethodNames.interstitialPreLoad,
     AMPSAdSdkMethodNames.interstitialIsReadyAd,
   ];
 
 export let NativeMethodNames: string[] = [
   AMPSAdSdkMethodNames.nativeLoad,
-  AMPSAdSdkMethodNames.nativeShowAd,
+  AMPSAdSdkMethodNames.nativeCreate,
   AMPSAdSdkMethodNames.nativeGetECPM,
-  AMPSAdSdkMethodNames.nativeNotifyRTBWin,
-  AMPSAdSdkMethodNames.nativeNotifyRTBLoss,
+  AMPSAdSdkMethodNames.nativeUnifiedMaterialType,
+  AMPSAdSdkMethodNames.nativeUnifiedGetDownLoad,
+  AMPSAdSdkMethodNames.nativeGetMediaExtraInfo,
   AMPSAdSdkMethodNames.nativeIsReadyAd,
   AMPSAdSdkMethodNames.nativeIsNativeExpress,
-  AMPSAdSdkMethodNames.nativeGetVideoDuration,
-  AMPSAdSdkMethodNames.nativeSetVideoPlayConfig
+  AMPSAdSdkMethodNames.nativeGetVideoDuration
 ];
 
 export let RewardVideoMethodNames: string[] = [
@@ -169,6 +193,9 @@ export let RewardVideoMethodNames: string[] = [
   AMPSAdSdkMethodNames.rewardVideoPreLoad,
   AMPSAdSdkMethodNames.rewardVideoShowAd,
   AMPSAdSdkMethodNames.rewardVideoGetECPM,
-  AMPSAdSdkMethodNames.rewardVideoIsReadyAd
+  AMPSAdSdkMethodNames.rewardVideoIsReadyAd,
+  AMPSAdSdkMethodNames.rewardVideoDestroyAd,
+  AMPSAdSdkMethodNames.rewardVideoAddPreLoadAdInfo,
+  AMPSAdSdkMethodNames.rewardVideoGetMediaExtraInfo
 ];
 

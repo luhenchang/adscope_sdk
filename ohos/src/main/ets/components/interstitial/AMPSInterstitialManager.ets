@@ -7,6 +7,7 @@ import { ampsAd, AMPSInterstitialAd } from 'xyz.adscope.amps';
 import { AdOptionsModule } from '../common/AdOptionsModule';
 import { HashMap } from '@kit.ArkTS';
 import { StringConstants } from '../common/StringConstants';
+import { thirdPaymentService } from '@kit.PaymentKit';
 
 export class AMPSInterstitialManager {
   private static instance: AMPSInterstitialManager;
@@ -20,7 +21,10 @@ export class AMPSInterstitialManager {
     onAdShow: () => this.sendMessage(AMPSAdCallBackChannelMethod.onAdShow),
     onAdExposure: () => this.sendMessage(AMPSAdCallBackChannelMethod.onAdExposure),
     onAdClicked: () => this.sendMessage(AMPSAdCallBackChannelMethod.onAdClicked),
-    onAdClosed: () => this.sendMessage(AMPSAdCallBackChannelMethod.onAdClosed),
+    onAdClosed: () => {
+      this.cleanUp()
+      this.sendMessage(AMPSAdCallBackChannelMethod.onAdClosed)
+    },
     onRenderFailure: () => this.sendMessage(AMPSAdCallBackChannelMethod.onRenderFailure),
     onAdShowError: (code: number, message: string) =>
     this.sendMessage(AMPSAdCallBackChannelMethod.onAdShowError, { code, message }),
@@ -42,14 +46,23 @@ export class AMPSInterstitialManager {
   getInterstitialAd(){
     return this.interstitialAd
   }
+  private cleanUp(){
 
+    this.interstitialAd = undefined
+  }
   handleMethodCall(call: MethodCall, result: MethodResult) {
     switch (call.method) {
+      case AMPSAdSdkMethodNames.interstitialCreate:
+        this.handleCreate(call, result)
+        break;
+      case AMPSAdSdkMethodNames.interstitialPreLoad:
+        this.handlePreLoadAd(result);
+        break;
       case AMPSAdSdkMethodNames.interstitialLoad:
-        this.handleLoadAd(call, result);
+        this.handleLoadAd(result);
         break;
       case AMPSAdSdkMethodNames.interstitialShowAd:
-        this.handleShowAd(result,call.args);
+        this.handleShowAd(result, call.args);
         break;
       case AMPSAdSdkMethodNames.interstitialGetECPM:
         const mEcpm = this.interstitialAd?.getECPM() ?? 0
@@ -59,16 +72,30 @@ export class AMPSInterstitialManager {
         result.success(this.interstitialAd?.isReadyAd() ?? false);
         break;
       default:
-        result.notImplemented();
+        result.success(null);
     }
   }
-
-  // 处理开屏广告加载
-  private handleLoadAd(call: MethodCall, result: MethodResult): void {
+  private handleCreate(call: MethodCall, result: MethodResult): void {
     try {
       const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(call.args);
       this.interstitialAd = new AMPSInterstitialAd(adOption, this.callback);
+    } catch (error) {
+      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`,undefined);
+    }
+    result.success(true)
+  }
+  // 处理开屏广告加载
+  private handleLoadAd( result: MethodResult): void {
+    try {
       this.interstitialAd?.load();
+    } catch (error) {
+      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`,undefined);
+    }
+    result.success(true)
+  }
+  private handlePreLoadAd( result: MethodResult): void {
+    try {
+      this.interstitialAd?.preloadAd();
     } catch (error) {
       result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`,undefined);
     }

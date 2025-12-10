@@ -2,16 +2,20 @@ import { Any, MethodCall, MethodResult } from '@ohos/flutter_ohos';
 import { ampsAd, AMPSRewardVideoAd, AMPSRewardVideoListener } from 'xyz.adscope.amps';
 import { AdOptionsModule } from '../common/AdOptionsModule';
 import { AMPSEventManager } from '../common/AMPSEventManager';
-import { AMPSAdCallBackChannelMethod, AMPSAdSdkMethodNames } from '../common/common';
+import {
+  AMPSRewardedVideoCallBackChannelMethod,
+  AMPSAdSdkMethodNames,
+} from '../common/common';
 
-export class AMPSRewardVideoManager{
-
-
+export class AMPSRewardVideoManager {
   private static instance?: AMPSRewardVideoManager
-  private constructor() {}
-  static getInstance(){
+
+  private constructor() {
+  }
+
+  static getInstance() {
     if (!AMPSRewardVideoManager.instance) {
-      AMPSRewardVideoManager.instance  = new AMPSRewardVideoManager()
+      AMPSRewardVideoManager.instance = new AMPSRewardVideoManager()
     }
     return AMPSRewardVideoManager.instance!
   }
@@ -19,36 +23,34 @@ export class AMPSRewardVideoManager{
   rewardVideo?: AMPSRewardVideoAd
   private callBack: AMPSRewardVideoListener = {
     onLoadSuccess: (): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onLoadSuccess);
-      this.sendMessage(AMPSAdCallBackChannelMethod.onRenderOk)
+      this.sendMessage(AMPSRewardedVideoCallBackChannelMethod.onLoadSuccess);
     },
     onLoadFailure: (code: number, message: string): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onLoadFailure,{ code, message });
+      this.sendMessage(AMPSRewardedVideoCallBackChannelMethod.onLoadFailure, { code, message });
     },
     onAdDidShow: (): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onAdShow);
-      this.sendMessage(AMPSAdCallBackChannelMethod.onAdExposure);
+      this.sendMessage(AMPSRewardedVideoCallBackChannelMethod.onAdShow);
     },
     onAdClicked: (): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onAdClicked);
+      this.sendMessage(AMPSRewardedVideoCallBackChannelMethod.onAdClicked);
     },
     onAdClosed: (): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onAdClosed);
+      this.sendMessage(AMPSRewardedVideoCallBackChannelMethod.onAdClosed);
     },
     onVideoPlayStart: (): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onVideoPlayStart);
+      this.sendMessage(AMPSRewardedVideoCallBackChannelMethod.onVideoPlayStart);
     },
     onVideoPlayEnd: (): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onVideoPlayEnd);
+      this.sendMessage(AMPSRewardedVideoCallBackChannelMethod.onVideoPlayEnd);
     },
     onVideoPlayError: (code: number, message: string): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onVideoPlayError,{ code, message });
+      this.sendMessage(AMPSRewardedVideoCallBackChannelMethod.onVideoPlayError, { code, message });
     },
     onVideoSkipToEnd: (playDurationMs?: number | undefined): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onVideoSkipToEnd,{playDurationMs});
+      this.sendMessage(AMPSRewardedVideoCallBackChannelMethod.onVideoSkipToEnd, { playDurationMs });
     },
     onAdReward: (): void => {
-      this.sendMessage(AMPSAdCallBackChannelMethod.onAdReward);
+      this.sendMessage(AMPSRewardedVideoCallBackChannelMethod.onAdReward);
     }
   }
 
@@ -58,11 +60,14 @@ export class AMPSRewardVideoManager{
         this.handleCreate(call, result);
         break;
       case AMPSAdSdkMethodNames.rewardVideoLoad:
-        this.handleLoadAd(call,result);
+        this.handleLoadAd(call, result);
         break;
-        case AMPSAdSdkMethodNames.rewardVideoShowAd:
-          this.handleShowAd(result,call.args);
-          break;
+      case AMPSAdSdkMethodNames.rewardVideoPreLoad:
+        this.handlePreLoadAd(call, result);
+        break;
+      case AMPSAdSdkMethodNames.rewardVideoShowAd:
+        this.handleShowAd(result, call.args);
+        break;
       case AMPSAdSdkMethodNames.rewardVideoGetECPM:
         const mEcpm = this.rewardVideo?.getECPM() ?? 0
         result.success(mEcpm);
@@ -70,27 +75,43 @@ export class AMPSRewardVideoManager{
       case AMPSAdSdkMethodNames.rewardVideoIsReadyAd:
         result.success(this.rewardVideo?.isReadyAd() ?? false);
         break;
+      case AMPSAdSdkMethodNames.rewardVideoDestroyAd:
+        this.rewardVideo = undefined
+        result.success(true);
+        break;
       default:
-        result.notImplemented();
+        result.success(undefined);
     }
   }
+
   private handleCreate(call: MethodCall, result: MethodResult): void {
     try {
       let adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(call.args);
 
-      this.rewardVideo = new AMPSRewardVideoAd(adOption,this.callBack)
+      this.rewardVideo = new AMPSRewardVideoAd(adOption, this.callBack)
     } catch (error) {
-      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`,undefined);
+      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
     }
     result.success(true)
   }
+
   // 处理开屏广告加载
+  private handlePreLoadAd(call: MethodCall, result: MethodResult): void {
+    try {
+
+      this.rewardVideo?.load();
+    } catch (error) {
+      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
+    }
+    result.success(true)
+  }
+
   private handleLoadAd(call: MethodCall, result: MethodResult): void {
     try {
 
       this.rewardVideo?.load();
     } catch (error) {
-      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`,undefined);
+      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
     }
     result.success(true)
   }
@@ -103,10 +124,10 @@ export class AMPSRewardVideoManager{
         this.rewardVideo?.showAd(context.windowStage)
 
       } else {
-        result.error('SHOW_FAILED', '广告未加载或WindowStage不存在',undefined);
+        result.error('SHOW_FAILED', '广告未加载或WindowStage不存在', undefined);
       }
     } catch (error) {
-      result.error('SHOW_EXCEPTION', `显示广告异常: ${error instanceof Error ? error.message : error}`,undefined);
+      result.error('SHOW_EXCEPTION', `显示广告异常: ${error instanceof Error ? error.message : error}`, undefined);
     }
     result.success(true)
   }

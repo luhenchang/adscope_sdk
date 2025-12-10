@@ -163,7 +163,7 @@ class AMPSNativeAd {
                 // 安全调用回调
                 if (param.containsKey("adId")) {
                   final adId = param["adId"];
-                      updateSizeMap[adId]?.call(width, height);
+                  updateSizeMap[adId]?.call(width, height);
                 }
 
               } else {

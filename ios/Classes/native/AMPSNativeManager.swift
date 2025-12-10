@@ -41,6 +41,7 @@ class AMPSNativeManager: NSObject {
             case AMPSAdSdkMethodNames.nativeGetEcpm:
                 if let adId = arguments["adId"] as? String {
                     if  let view = self.getAdView(adId: adId) {
+                        
                         result(view.eCPM())
                         return
                     }
@@ -50,7 +51,12 @@ class AMPSNativeManager: NSObject {
                 result(true)
                 
             case AMPSAdSdkMethodNames.nativeIsReadyAd:
-                result(nativeAd?.viewsArray.count ?? 0 > 0)
+                if let adId = arguments["adId"] as? String {
+                    if  let view = self.getAdView(adId: adId) {
+                        result(view.isReadyAd())
+                        return
+                    }
+                }
             default:
                 result(false)
             }

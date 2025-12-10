@@ -7,8 +7,6 @@ import { ampsAd, AMPSSplashAd } from 'xyz.adscope.amps';
 import { AdOptionsModule } from '../common/AdOptionsModule';
 import { SplashBottomModule } from '../splash/SplashBottomModule';
 import { window } from '@kit.ArkUI';
-import { HashMap } from '@kit.ArkTS';
-import { StringConstants } from '../common/StringConstants';
 
 export let globalSplashBottomBuilder: WrappedBuilder<[]> | undefined  = wrapBuilder(SplashBottomBuilder);
 export class AMPSSplashManager {
@@ -33,6 +31,7 @@ export class AMPSSplashManager {
     this.mWindowStage = undefined
     this.mSplashAd = undefined
     this.mWindow = undefined
+    this.mSplashAd
 
   }
 
@@ -62,7 +61,6 @@ export class AMPSSplashManager {
   };
 
   handleMethodCall(call: MethodCall, result: MethodResult) {
-    let mm89 = call.method
     switch (call.method) {
       case AMPSAdSdkMethodNames.splashCreate:
         this.handleSplashCreate(call,result)
@@ -77,37 +75,34 @@ export class AMPSSplashManager {
         const mEcpm = this.mSplashAd?.getECPM() ?? 0
         result.success(mEcpm);
         break;
-      case AMPSAdSdkMethodNames.splashNotifyRTBWin:
-        const params: HashMap<String, number> = call.args;
-        const winPrice: number = params.get(AD_WIN_PRICE) ?? 0
-        const secPrice: number = params.get(AD_SEC_PRICE) ?? 0
-        if (winPrice != undefined && secPrice != undefined) {
-          // this.mSplashAd?.notifyRTBWin(winPrice, secPrice)
-        }
-        break;
-      case AMPSAdSdkMethodNames.splashNotifyRTBLoss:
-        const lossParams: HashMap<String, Any> = call.args;
-        const lossWinPrice: number = lossParams.get(AD_WIN_PRICE) ?? 0
-        const lossSecPrice: number = lossParams.get(AD_SEC_PRICE) ?? 0
-        const lossReason: string = lossParams.get(AD_LOSS_REASON) ?? StringConstants.EMPTY_STRING
-        if (lossWinPrice != undefined  && lossSecPrice != undefined  && lossReason != undefined ) {
-          // this.mSplashAd?.notifyRTBLoss(lossWinPrice, lossSecPrice, lossReason)
-        }
+      case AMPSAdSdkMethodNames.splashIsReadyAd:
+        this.handleSplashPreLoad(call, result)
         break;
       case AMPSAdSdkMethodNames.splashIsReadyAd:
         result.success(this.mSplashAd?.isReadyAd() ?? false);
         break;
       default:
-        result.notImplemented();
+        result.success(null);
     }
   }
 
-
+  // 处理开屏广告加载
+  private handleSplashPreLoad(call: MethodCall, result: MethodResult): void {
+    try {
+      if (!this.mSplashAd) {
+        this.handleSplashCreate(call,result)
+      }
+      this.mSplashAd?.preloadAd()
+      result.success(true);
+    } catch (error) {
+      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
+    }
+  }
   // 处理开屏广告加载
   private handleSplashLoad(call: MethodCall, result: MethodResult): void {
     try {
       if (!this.mSplashAd) {
-        this.handleSplashLoad(call,result)
+        this.handleSplashCreate(call,result)
       }
       this.mSplashAd?.load();
       result.success(true);
