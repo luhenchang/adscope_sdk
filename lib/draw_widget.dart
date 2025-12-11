@@ -78,7 +78,7 @@ class _DrawWidgetState extends State<DrawWidget>
     }
     // else if (Platform.isOhos) {
     //   view =  OhosView(
-    //       viewType: AMPSPlatformViewRegistry.ampsSdkNativeViewId,
+    //       viewType: AMPSPlatformViewRegistry.ampsSdkDrawViewId,
     //       onPlatformViewCreated: _onPlatformViewCreated,
     //       creationParams: creationParams,
     //       creationParamsCodec: const StandardMessageCodec());

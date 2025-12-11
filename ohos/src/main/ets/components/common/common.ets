@@ -17,6 +17,7 @@ export class AMPSPlatformViewRegistry {
   static readonly ampsSdkNativeViewId = `${channelDomain}/native_view_id`;
   static readonly ampsSdkUnifiedViewId = `${channelDomain}/unified_view_id`;
   static readonly ampsSdkBannerViewId = `${channelDomain}/banner_view_id`;
+  static readonly ampsSdkDrawViewId = `${channelDomain}/draw_view_id`;
 }
 
 //初始化交互通道方法名称
@@ -72,6 +73,25 @@ export class AMPSBannerCallBackChannelMethod {
   static readonly onVideoPlayError = "Banner_onVideoPlayError";
   static readonly onVideoPause = "Banner_onVideoPause";
   static readonly onVideoResume = "Banner_onVideoResume";
+}
+export class AmpsDrawCallbackChannelMethod {
+  static readonly onLoadSuccess = "Draw_onLoadSuccess";
+  static readonly onLoadFailure = "Draw_onLoadFailure";
+  static readonly onRenderSuccess = "Draw_onRenderSuccess";
+  static readonly onRenderFail = "Draw_onRenderFail";
+  static readonly onAdShow = "Draw_onAdShow";
+  static readonly onAdClicked = "Draw_onAdClicked";
+  static readonly onAdClosed = "Draw_onAdClosed";
+  static readonly onVideoLoad = "Draw_onVideoLoad";
+
+  static readonly onVideoPlayStart = "Draw_onVideoPlayStart";
+  static readonly onVideoPlayPause = "Draw_onVideoAdPaused";
+  static readonly onVideoAdContinuePlay = "Draw_onVideoAdContinuePlay";
+  static readonly onProgressUpdate = "Draw_onProgressUpdate";
+  static readonly onVideoError = "Draw_onVideoError";
+  static readonly onVideoAdComplete = "Draw_onVideoAdComplete";
+  static readonly drawSizeUpdate = "Draw_SizeUpdate";
+
 }
 //原生和原生自渲染标识
 export class AMPSNativeCallBackChannelMethod {
@@ -153,6 +173,16 @@ export class AMPSAdSdkMethodNames {
   static readonly bannerAddPreLoadAdInfo = "AMPSBanner_addPreLoadAdInfo";
   static readonly bannerGetMediaExtraInfo = "AMPSBanner_getMediaExtraInfo";
 
+  //draw
+  static readonly drawCreate = "AMPSDraw_create";
+  static readonly drawLoad = "AMPSDraw_load";
+  static readonly drawGetEcpm = "AMPSDraw_getEcpm";
+  static readonly drawIsReadyAd = "AMPSDraw_isReadyAd";
+  static readonly drawDestroyAd = "AMPSDraw_destroy";
+  static readonly drawPauseAd = "AMPSDraw_pause";
+  static readonly drawResumeAd = "AMPSDraw_resume";
+  static readonly drawGetMediaExtraInfo = "AMPSDraw_getMediaExtraInfo";
+
 }
 
 export const AD_WIN_PRICE = 'winPrice'
@@ -229,5 +259,16 @@ export let BannerMethodNames: string[] = [
   AMPSAdSdkMethodNames.bannerDestroyAd,
   AMPSAdSdkMethodNames.bannerAddPreLoadAdInfo,
   AMPSAdSdkMethodNames.bannerGetMediaExtraInfo
+];
+
+export let DrawMethodNames: string[] = [
+  AMPSAdSdkMethodNames.drawCreate,
+  AMPSAdSdkMethodNames.drawLoad,
+  AMPSAdSdkMethodNames.drawGetEcpm,
+  AMPSAdSdkMethodNames.drawIsReadyAd,
+  AMPSAdSdkMethodNames.drawDestroyAd,
+  AMPSAdSdkMethodNames.drawPauseAd,
+  AMPSAdSdkMethodNames.drawResumeAd,
+  AMPSAdSdkMethodNames.drawGetMediaExtraInfo
 ];
 

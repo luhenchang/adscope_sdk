@@ -1,85 +1,95 @@
+
 import {
   Any, MethodCall, MethodResult
 } from '@ohos/flutter_ohos';
 import {
   ampsAd,
-  AMPSNativeAd,
-  AMPSNativeAdListener,
-  AMPSAdVideoPlayConfig,
-  AMPSNativeAdWrapper,
+  AMPSDrawAd,
+  AMPSDrawAdListener,
+  AMPSDrawAdWrapper,
   AMPSNativeInteractiveListener,
-  AMPSNativeRenderListener
+  AMPSDrawRenderListener
 } from 'xyz.adscope.amps';
 import {
   AMPSAdSdkMethodNames,
-  AMPSNativeCallBackChannelMethod
+  AmpsDrawCallbackChannelMethod
 } from '../common/common';
 import { AdOptionsModule } from '../common/AdOptionsModule';
 import { window } from '@kit.ArkUI';
 import { AdWrapperManager } from '../native/AdWrapperManager';
 import { AMPSEventManager } from '../common/AMPSEventManager';
 
-export class AMPSNativeManager {
-  private static instance: AMPSNativeManager;
+export class AMPSDrawAdManager {
+  private static instance: AMPSDrawAdManager;
   // 使用private修饰符限制访问，并添加明确类型
   private mWindowStage?: window.WindowStage;
-  private mNativeAd?: AMPSNativeAd;
-  private mVideoConfig?: AMPSAdVideoPlayConfig
+  private mDrawAd?: AMPSDrawAd;
+  private adItemMap: Map<string,AMPSDrawAdWrapper> = new Map()
+
+  getAdItem(id:string){
+    return this.adItemMap.get(id)
+  }
+  addAdItem(adWrapper: AMPSDrawAdWrapper){
+    this.adItemMap.set(adWrapper.adId,adWrapper)
+  }
+
+
+
   private mAdWrapperCallBack: AMPSNativeInteractiveListener = {
     onAdShow: (adId?: string | undefined): void => {
-      this.sendMessage(AMPSNativeCallBackChannelMethod.onAdShow, adId)
+      // this.sendMessage(AmpsDrawCallbackChannelMethod.onAdShow, adId)
     },
     onAdExposure: (adId?: string | undefined): void => {
-      this.sendMessage(AMPSNativeCallBackChannelMethod.onAdExposure, adId)
+      this.sendMessage(AmpsDrawCallbackChannelMethod.onAdShow, adId)
     },
     onAdClicked: (adId?: string | undefined): void => {
-      this.sendMessage(AMPSNativeCallBackChannelMethod.onAdClicked, adId)
+      this.sendMessage(AmpsDrawCallbackChannelMethod.onAdClicked, adId)
     },
     toCloseAd: (adId?: string | undefined): void => {
       if (adId) {
         AdWrapperManager.getInstance().removeAd(adId);
-        this.sendMessage(AMPSNativeCallBackChannelMethod.onAdClosed, adId)
+        this.sendMessage(AmpsDrawCallbackChannelMethod.onAdClosed, adId)
       }
     }
   }
-  private mRenderCallBack: AMPSNativeRenderListener = {
-    renderSuccess: (adWrapper: AMPSNativeAdWrapper): void => {
-      this.sendMessage(AMPSNativeCallBackChannelMethod.renderSuccess, adWrapper.adId)
+  private mRenderCallBack: AMPSDrawRenderListener = {
+    renderSuccess: (adWrapper: AMPSDrawAdWrapper): void => {
+      this.sendMessage(AmpsDrawCallbackChannelMethod.onRenderSuccess, adWrapper.adId)
       adWrapper.interactCallBack = this.mAdWrapperCallBack;
       adWrapper.videoPlayCallBack = {
         onVideoReady: () => {
-          this.sendMessage(AMPSNativeCallBackChannelMethod.onVideoReady, adWrapper.adId)
+          // this.sendMessage(AmpsDrawCallbackChannelMethod.onVideoPlayStart, adWrapper.adId)
         },
         onVideoPlayStart: () => {
-          this.sendMessage(AMPSNativeCallBackChannelMethod.onVideoPlayStart, adWrapper.adId)
+          this.sendMessage(AmpsDrawCallbackChannelMethod.onVideoPlayStart, adWrapper.adId)
         },
         onVideoPause: () => {
-          this.sendMessage(AMPSNativeCallBackChannelMethod.onVideoPause, adWrapper.adId)
+          this.sendMessage(AmpsDrawCallbackChannelMethod.onVideoPlayPause, adWrapper.adId)
         },
         onVideoResume: () => {
-          this.sendMessage(AMPSNativeCallBackChannelMethod.onVideoResume, adWrapper.adId)
+          this.sendMessage(AmpsDrawCallbackChannelMethod.onVideoAdContinuePlay, adWrapper.adId)
         },
         onVideoPlayComplete: () => {
-          this.sendMessage(AMPSNativeCallBackChannelMethod.onVideoPlayComplete, adWrapper.adId)
+          this.sendMessage(AmpsDrawCallbackChannelMethod.onVideoAdComplete, adWrapper.adId)
         },
         onVideoPlayError: (code, extra) => {
           let adId = adWrapper.adId
-          this.sendMessage(AMPSNativeCallBackChannelMethod.onVideoPlayError, { adId, code, extra })
+          this.sendMessage(AmpsDrawCallbackChannelMethod.onVideoError, { adId, code, extra })
         }
       };
 
       //需要缓存到单利。使用完毕之后移除
-      AdWrapperManager.getInstance().addAd(adWrapper);
+      this.addAdItem(adWrapper);
     },
-    renderFailed: (adWrapper: AMPSNativeAdWrapper): void => {
-      this.sendMessage(AMPSNativeCallBackChannelMethod.renderFailed, adWrapper.adId)
+    renderFailed: (adWrapper: AMPSDrawAdWrapper): void => {
+      this.sendMessage(AmpsDrawCallbackChannelMethod.onRenderFail, adWrapper.adId)
     }
   }
-  private callback: AMPSNativeAdListener = {
-    loadOk: (adItems: AMPSNativeAdWrapper[]): void => {
+  private callback: AMPSDrawAdListener = {
+    loadOk: (adItems: AMPSDrawAdWrapper[]): void => {
       const adIdList: string[] = adItems.map(ad => ad.adId);
       //回调给Flutter端
-      this.sendMessage(AMPSNativeCallBackChannelMethod.loadOk, adIdList)
+      this.sendMessage(AmpsDrawCallbackChannelMethod.onLoadSuccess, adIdList)
       //render
       adItems.forEach((item) => {
         item.renderCallBack = this.mRenderCallBack;
@@ -87,43 +97,38 @@ export class AMPSNativeManager {
       })
     },
     loadFail: (code: number, message: string): void => {
-      this.sendMessage(AMPSNativeCallBackChannelMethod.loadFail, { code, message })
+      this.sendMessage(AmpsDrawCallbackChannelMethod.onLoadFailure, { code, message })
     }
   };
 
-  public static getInstance(): AMPSNativeManager {
-    if (!AMPSNativeManager.instance) {
-      AMPSNativeManager.instance = new AMPSNativeManager();
+  public static getInstance(): AMPSDrawAdManager {
+    if (!AMPSDrawAdManager.instance) {
+      AMPSDrawAdManager.instance = new AMPSDrawAdManager();
     }
-    return AMPSNativeManager.instance;
+    return AMPSDrawAdManager.instance;
   }
 
   handleMethodCall(call: MethodCall, result: MethodResult) {
     switch (call.method) {
-      case AMPSAdSdkMethodNames.nativeCreate:
+      case AMPSAdSdkMethodNames.drawCreate:
         this.handleCreate(call, result)
         break
-      case AMPSAdSdkMethodNames.nativeLoad:
+      case AMPSAdSdkMethodNames.drawLoad:
         this.handleLoadAd(call, result);
         break;
-      case AMPSAdSdkMethodNames.nativeGetECPM:
-        const foundWrapper: AMPSNativeAdWrapper | undefined = this.getAdWrapper(call.args);
+      case AMPSAdSdkMethodNames.drawGetEcpm:
+        const foundWrapper: AMPSDrawAdWrapper | undefined = this.getAdWrapper(call.args);
         const mEcpm = foundWrapper?.getECPM() ?? 0
         result.success(mEcpm);
         break;
-
-      case AMPSAdSdkMethodNames.nativeIsReadyAd:
-        result.success(this.mNativeAd?.isReadyAd())
+      case AMPSAdSdkMethodNames.drawIsReadyAd:
+        result.success(this.mDrawAd?.isReadyAd())
         break;
-      case AMPSAdSdkMethodNames.nativeIsNativeExpress:
-        const wrapperForAId: AMPSNativeAdWrapper | undefined = this.getAdWrapper(call.args);
-        const isNativeExpress = wrapperForAId?.isNativeExpress() ?? false
-        result.success(isNativeExpress);
+      case AMPSAdSdkMethodNames.drawPauseAd:
+        result.success(null);
         break;
-      case AMPSAdSdkMethodNames.nativeGetVideoDuration:
-        const wrapperByAdId: AMPSNativeAdWrapper | undefined = this.getAdWrapper(call.args);
-        const duration = wrapperByAdId?.getVideoDuration() ?? 0
-        result.success(duration);
+      case AMPSAdSdkMethodNames.drawResumeAd:
+        result.success(null);
         break;
 
       default:
@@ -131,9 +136,9 @@ export class AMPSNativeManager {
     }
   }
 
-  private getAdWrapper(arg: ESObject): AMPSNativeAdWrapper | undefined {
+  private getAdWrapper(arg: ESObject): AMPSDrawAdWrapper | undefined {
     const targetAdId = (arg as Map<string, Any>)["adId"] as string
-    return AdWrapperManager.getInstance().getAd(targetAdId);
+    return this.getAdItem(targetAdId);
   }
 
   private handleCreate(call: MethodCall, result: MethodResult): void {
@@ -144,7 +149,7 @@ export class AMPSNativeManager {
       if (this.mWindowStage) {
         let mWindow = this.mWindowStage.getMainWindowSync();
         if (mWindow) {
-          this.mNativeAd = new AMPSNativeAd(mWindow.getUIContext(), adOption, this.callback);
+          this.mDrawAd = new AMPSDrawAd(mWindow.getUIContext(), adOption, this.callback);
         } else {
           result.error('LOAD_FAILED', '获取窗口或UI上下文失败', undefined);
         }
@@ -159,7 +164,7 @@ export class AMPSNativeManager {
   // 处理开屏广告加载
   private handleLoadAd(call: MethodCall, result: MethodResult): void {
     try {
-      this.mNativeAd?.load();
+      this.mDrawAd?.load();
     } catch (error) {
       result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
     }

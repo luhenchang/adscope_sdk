@@ -1,6 +1,7 @@
 import { BinaryMessenger, MethodCall, MethodChannel, MethodResult } from '@ohos/flutter_ohos';
 import {
   BannerMethodNames,
+  DrawMethodNames,
   InitMethodNames, InterstitialMethodNames, NativeMethodNames,
   RewardVideoMethodNames,
   SplashMethodNames } from '../common/common';
@@ -11,6 +12,7 @@ import { AMPSInterstitialManager } from '../interstitial/AMPSInterstitialManager
 import { AMPSNativeManager } from '../native/AMPSNativeManager';
 import { AMPSRewardVideoManager } from '../rewardVideo/AMPSRewardVideoManager';
 import { AMPSBannerManager } from '../banner/AMPSBannerManager';
+import { AMPSDrawAdManager } from '../draw/AMPSDrawAdManager';
 
 export class AMPSEventManager {
   private static sInstance: AMPSEventManager;
@@ -50,6 +52,8 @@ export class AMPSEventManager {
             AMPSRewardVideoManager.getInstance().handleMethodCall(call, result);
           } else if (BannerMethodNames.includes(call.method)) {
             AMPSBannerManager.getInstance().handleMethodCall(call, result);
+          }else if (DrawMethodNames.includes(call.method)) {
+            AMPSDrawAdManager.getInstance().handleMethodCall(call, result);
           }
         }
       });
