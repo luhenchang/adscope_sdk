@@ -211,7 +211,7 @@ class AMPSDrawManager private constructor() {
             return
         }
         val adOptionsMap = call.arguments<Map<String, Any>?>()
-        val adOption = AdOptionsModule.getAdOptionFromMap(adOptionsMap, activity)
+        val adOption = AdOptionsModule.getNativeAdOptionFromMap(adOptionsMap, activity)
         try {
             mDrawAd = AMPSDrawAd(activity, adOption, adCallback)
             result.success(true)

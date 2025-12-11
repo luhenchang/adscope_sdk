@@ -161,8 +161,9 @@ class _DrawPageState extends State<DrawPage> with WidgetsBindingObserver {
         final expressHeight = MediaQuery.of(context).size.height;
         AdOptions options = AdOptions(
           spaceId: drawSpaceId,
-          adCount: 5,
+          adCount: 2,
           expressSize: [expressWidth, expressHeight],
+          timeoutInterval: 15000
         );
         _drawAd = AMPSDrawAd(
           config: options,

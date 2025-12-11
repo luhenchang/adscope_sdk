@@ -13,6 +13,8 @@ object AdOptionKeys {
     const val KEY_EXPRESS_SIZE = "expressSize"
     const val KEY_USER_ID = "userId"
     const val KEY_EXTRA = "extra"
+    const val KEY_CUSTOM_EXTRA_PARAMETER = "customExtraParameters"
+    const val KEY_COUNT = "adCount"
 }
 
 object AdOptionsModule {
@@ -23,13 +25,13 @@ object AdOptionsModule {
         if (map == null) {
             return builder.build()
         }
-
         val spaceId = map[AdOptionKeys.KEY_SPACE_ID] as? String ?: ""
         val timeoutInterval = map[AdOptionKeys.KEY_TIMEOUT_INTERVAL] as? Number
         val userId = map[AdOptionKeys.KEY_USER_ID] as? String
         val extra = map[AdOptionKeys.KEY_EXTRA] as? String
+        val customExtra = map[AdOptionKeys.KEY_CUSTOM_EXTRA_PARAMETER] as? Map<String, Any>
+        val count = map[AdOptionKeys.KEY_COUNT] as? Int
         val expressSize = map[AdOptionKeys.KEY_EXPRESS_SIZE] as? ArrayList<Int>
-
         builder.setSpaceId(spaceId)
         if (userId != null) {
             builder.setUserId(userId)
@@ -39,6 +41,12 @@ object AdOptionsModule {
         }
         if (timeoutInterval != null) {
             builder.setTimeOut(timeoutInterval.toInt())
+        }
+        if (count != null) {
+            builder.setAdCount(count)
+        }
+        if (customExtra != null) {
+            builder.setCustomExtraParameters(customExtra)
         }
         builder.setWidth(AMPSScreenUtil.getScreenWidth(context))
         builder.setHeight(AMPSScreenUtil.getScreenHeight(context))
@@ -59,20 +67,22 @@ object AdOptionsModule {
         if (map == null) {
             return builder.build()
         }
-
         val spaceId = map[AdOptionKeys.KEY_SPACE_ID] as? String ?: ""
         val timeoutInterval = map[AdOptionKeys.KEY_TIMEOUT_INTERVAL] as? Number
         val express = map[AdOptionKeys.KEY_EXPRESS_SIZE] as? ArrayList<Double>
+        val customExtra = map[AdOptionKeys.KEY_CUSTOM_EXTRA_PARAMETER] as? Map<String, Any>
         val userId = map[AdOptionKeys.KEY_USER_ID] as? String
         val extra = map[AdOptionKeys.KEY_EXTRA] as? String
-
-
+        val count = map[AdOptionKeys.KEY_COUNT] as? Int
         builder.setSpaceId(spaceId)
         if (userId != null) {
             builder.setUserId(userId)
         }
         if (extra != null) {
             builder.setExtraData(extra)
+        }
+        if (count != null) {
+            builder.setAdCount(count)
         }
         if (timeoutInterval != null) {
             builder.setTimeOut(timeoutInterval.toInt())
@@ -82,6 +92,9 @@ object AdOptionsModule {
         }
         if (express != null && express.size > 1) {
             builder.setHeight(express[1].dpToPx(context))
+        }
+        if (customExtra != null) {
+            builder.setCustomExtraParameters(customExtra)
         }
         return builder.build()
     }
