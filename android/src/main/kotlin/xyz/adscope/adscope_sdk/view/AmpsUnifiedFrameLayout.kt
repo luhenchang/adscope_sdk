@@ -276,7 +276,7 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
     ): View {
         return AppCompatTextView(context).apply {
             this.text = text
-            layoutParams = createLayoutParams(null, null, child.x, child.y)
+            layoutParams = createLayoutParams(child.width, null, child.x, child.y)
             child.fontSize?.let { textSize = it.toFloat() }
             child.color?.let {
                 try {
@@ -284,6 +284,7 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
                 } catch (_: Exception) {
                 }
             }
+            fontTextEllipsize(child.maxLines,child.ellipsize)
             setupClickListener(this, child.clickType, child.clickIdType)
         }
     }
@@ -300,7 +301,7 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
                 } catch (_: Exception) {
                 }
             }
-            fontTextEllipsize(child)
+            fontTextEllipsize(child.maxLines,child.ellipsize)
             setupClickListener(this, child.clickType, child.clickIdType)
         }
     }
@@ -486,13 +487,13 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
     }
 }
 
-private fun AppCompatTextView.fontTextEllipsize(child: NativeUnifiedChild.Description) {
-    child.maxLines?.let {
+private fun AppCompatTextView.fontTextEllipsize(mMaxLines: Int?,mEllipsize: Int?) {
+    mMaxLines?.let {
         if (it > 0) {
             maxLines = it
         }
     }
-    child.ellipsize?.let {
+    mEllipsize?.let {
         when (it) {
             1 -> {
                 ellipsize = TextUtils.TruncateAt.END

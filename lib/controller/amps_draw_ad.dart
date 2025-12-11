@@ -168,6 +168,25 @@ class AMPSDrawAd {
         .invokeMethod(AMPSAdSdkMethodNames.drawGetEcpm, adId);
   }
 
+  ///页面销毁时调用
+  void destroy() {
+    AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.drawDestroyAd);
+  }
+
+  ///失去焦点时调用
+  void pauseAd() {
+    AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.drawPauseAd);
+  }
+
+  ///再次获取焦点时候调用
+  void resumeAd() {
+    AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.drawResumeAd);
+  }
+
+
 
   void setAdCloseCallBack(String adId, AdWidgetNeedCloseCall? closeWidgetCall) {
     if (closeWidgetCall != null) {
@@ -186,9 +205,5 @@ class AMPSDrawAd {
     if (func != null) {
       updateSizeMap[adId] = func;
     }
-  }
-
-  void destroy() {
-
   }
 }

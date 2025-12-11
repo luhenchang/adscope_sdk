@@ -25,6 +25,7 @@ sealed class NativeUnifiedChild : Serializable {
     data class Title(
         override val x: Double? = null,
         override val y: Double? = null,
+        val width: Double? = null,
         val clickType: Int? = null,
         val clickIdType: Int? = null,
         val fontSize: Double? = null,
@@ -232,6 +233,7 @@ class NativeUnifiedModule(map: Map<String, Any>?) : Serializable {
         return NativeUnifiedChild.Title(
             x = map["x"].asDouble(),
             y = map["y"].asDouble(),
+            width = map["width"].asDouble(),
             clickType = map["clickType"].asInt(),
             clickIdType = map["clickIdType"].asInt(),
             fontSize = map["fontSize"].asDouble(),

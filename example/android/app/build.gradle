@@ -5,6 +5,20 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        debug {
+            storeFile file('C:\\Users\\12769\\Desktop\\key')
+            storePassword '123456'
+            keyAlias 'key'
+            keyPassword '123456'
+        }
+        release {
+            storeFile file('C:\\Users\\12769\\Desktop\\key')
+            storePassword '123456'
+            keyAlias 'key'
+            keyPassword '123456'
+        }
+    }
     namespace = "xyz.adscope.adscope_sdk_example"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -23,11 +37,27 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled true
+        //支持架构 SDK默认支持armeabi-v7a,arm64-v8a两种架构，如果有其他架构（armeabi架构）需求，请联系技术支持同学；
+        ndk {
+            abiFilters 'armeabi-v7a','arm64-v8a'
+        }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.debug
+            debuggable false
+            // 打开混淆
+            minifyEnabled true
+            // Zipalign优化
+            zipAlignEnabled true
+            // 移除无用的resource文件
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            minifyEnabled false
         }
     }
 }

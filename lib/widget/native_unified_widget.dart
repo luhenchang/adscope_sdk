@@ -110,6 +110,7 @@ class UnifiedTitleWidget extends LayoutWidget {
   final String color;
   final double x;
   final double y;
+  final double? width;
   int maxLines;
   Ellipsize ellipsize;
   AMPSAdItemClickType clickType;
@@ -120,6 +121,7 @@ class UnifiedTitleWidget extends LayoutWidget {
     required this.color,
     required this.x,
     required this.y,
+    this.width,
     this.maxLines = 0,
     this.ellipsize = Ellipsize.none,
     this.clickType = AMPSAdItemClickType.none,
@@ -131,6 +133,7 @@ class UnifiedTitleWidget extends LayoutWidget {
     return {
       'type': 'mainTitle',
       'fontSize': fontSize,
+      'width' : width,
       'color': color,
       'x': x,
       'y': y,
