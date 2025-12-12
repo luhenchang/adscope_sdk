@@ -315,6 +315,9 @@ export class AMPSInitConfigConverter {
           ampsCustomController.location = ampsLocation;
         }
         ampsInitConfigBuilder?.setAdCustomController(ampsCustomController);
+        let map: HashMap<string, string | number | boolean | object> = new HashMap()
+        map.set("flutter",true)
+        ampsInitConfigBuilder.setExtensionParamItems(AMPSConstants.ExtensionParamKey.hw,map)
       }
     }
     return ampsInitConfigBuilder?.build();

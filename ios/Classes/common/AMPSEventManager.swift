@@ -33,7 +33,8 @@ class AMPSEventManager : NSObject{
                 AMPSRewardVideoManager.shared.handleMethodCall(methodCall, result: result)
             case let name where  bannerMethodNames.contains(name):
                 AMPSBannerManager.shared.handleMethodCall(methodCall, result: result)
-                
+            case let name where  drawMethodNames.contains(name):
+                AMPSDrawManager.shared.handleMethodCall(methodCall, result: result)
             default:
                 result(FlutterMethodNotImplemented)
             }

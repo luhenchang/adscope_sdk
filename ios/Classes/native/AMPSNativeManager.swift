@@ -58,7 +58,7 @@ class AMPSNativeManager: NSObject {
                     }
                 }
             default:
-                result(false)
+                result(nil)
             }
         }
         

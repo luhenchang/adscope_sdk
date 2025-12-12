@@ -37,6 +37,7 @@ enum AMPSPlatformViewIds {
     static let nativeViewId = "\(channelDomain)/native_view_id"
     static let unifiedViewId = "\(channelDomain)/unified_view_id"
     static let bannerViewId = "\(channelDomain)/banner_view_id"
+    static let drawViewId = "\(channelDomain)/draw_view_id"
 }
 
 // 初始化相关方法名
@@ -90,6 +91,26 @@ class AMPSBannerCallBackChannelMethod {
   static let onVideoPlayError = "Banner_onVideoPlayError";
   static let onVideoSkipToEnd = "Banner_onVideoSkipToEnd";
   static let onAdReward = "Banner_onAdReward";
+}
+
+class AmpsDrawCallbackChannelMethod {
+    
+  static let onLoadSuccess = "Draw_onLoadSuccess";
+  static let onLoadFailure = "Draw_onLoadFailure";
+  static let onRenderSuccess = "Draw_onRenderSuccess";
+  static let onRenderFail = "Draw_onRenderFail";
+  static let onAdShow = "Draw_onAdShow";
+  static let onAdClicked = "Draw_onAdClicked";
+  static let onAdClosed = "Draw_onAdClosed";
+  static let onVideoLoad = "Draw_onVideoLoad";
+  static let onVideoPlayStart = "Draw_onVideoPlayStart";
+  static let onVideoPlayPause = "Draw_onVideoAdPaused";
+  static let onVideoAdContinuePlay = "Draw_onVideoAdContinuePlay";
+  static let onProgressUpdate = "Draw_onProgressUpdate";
+  static let onVideoError = "Draw_onVideoError";
+  static let onVideoAdComplete = "Draw_onVideoAdComplete";
+  static let drawSizeUpdate = "Draw_SizeUpdate";
+
 }
 
 // 原生广告回调方法名
@@ -175,6 +196,16 @@ enum AMPSAdSdkMethodNames {
     static let bannerDestroyAd = "AMPSBanner_destroy";
     static let bannerAddPreLoadAdInfo = "AMPSBanner_addPreLoadAdInfo";
     static let bannerGetMediaExtraInfo = "AMPSBanner_getMediaExtraInfo";
+    
+    // Draw ad related methods
+    static let drawCreate = "AMPSDraw_create";
+    static let drawLoad = "AMPSDraw_load";
+    static let drawGetEcpm = "AMPSDraw_getEcpm";
+    static let drawIsReadyAd = "AMPSDraw_isReadyAd";
+    static let drawDestroyAd = "AMPSDraw_destroy";
+    static let drawPauseAd = "AMPSDraw_pause";
+    static let drawResumeAd = "AMPSDraw_resume";
+    static let drawGetMediaExtraInfo = "AMPSDraw_getMediaExtraInfo";
     
 }
 enum AdOptionKeys{
@@ -265,4 +296,14 @@ let bannerMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.bannerIsReadyAd,
     AMPSAdSdkMethodNames.bannerGetMediaExtraInfo,
     AMPSAdSdkMethodNames.bannerAddPreLoadAdInfo
+]
+let drawMethodNames: Set<String> = [
+    AMPSAdSdkMethodNames.drawCreate,
+    AMPSAdSdkMethodNames.drawLoad,
+    AMPSAdSdkMethodNames.drawGetEcpm,
+    AMPSAdSdkMethodNames.drawPauseAd,
+    AMPSAdSdkMethodNames.drawResumeAd,
+    AMPSAdSdkMethodNames.drawDestroyAd,
+    AMPSAdSdkMethodNames.drawIsReadyAd,
+    AMPSAdSdkMethodNames.drawGetMediaExtraInfo
 ]

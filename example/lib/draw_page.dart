@@ -120,13 +120,13 @@ class _DrawPageState extends State<DrawPage> with WidgetsBindingObserver {
     );
 
     _renderCallBack = AMPSDrawRenderListener(
-      onAdShow: (adId) {},
-      onAdClick: (adId) {},
-      onAdClose: (adId) {},
+      onAdShow: (adId) {debugPrint("adId onAdShow=$adId");},
+      onAdClick: (adId) {debugPrint("adId onAdClick=$adId");},
+      onAdClose: (adId) {debugPrint("adId onAdClose=$adId");},
       renderFailed: (adId, code, message) {},
       renderSuccess: (adId) {
         setState(() {
-          debugPrint("adId renderCallBack=$adId");
+          debugPrint("adId renderSuccess=$adId");
           bool adExists = mergedFeedList.any(
                 (item) => item.type == FeedItemType.ad && item.data == adId,
           );
