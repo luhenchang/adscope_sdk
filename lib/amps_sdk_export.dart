@@ -5,7 +5,7 @@ export 'package:adscope_sdk/data/amps_native_interactive_listener.dart';
 export 'package:adscope_sdk/data/amps_sdk_api_keys.dart';
 export 'package:adscope_sdk/data/amps_ad_video_play_config.dart';
 export 'package:adscope_sdk/data/app_detail.dart';
-export 'package:adscope_sdk/data/amps_constants.dart';
+export 'package:adscope_sdk/data/amps_android_constants.dart';
 export 'package:adscope_sdk/data/unified_ad_download_app_info.dart';
 export 'package:adscope_sdk/data/unified_pattern.dart';
 

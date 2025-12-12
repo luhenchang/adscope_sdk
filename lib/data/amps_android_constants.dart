@@ -1,6 +1,6 @@
 /// Defines constants used throughout the AMPS SDK.
-class AmpsConstants {
-  AmpsConstants._();
+class AmpsAndroidConstants {
+  AmpsAndroidConstants._();
 
   static const String ampsLogTag = 'amps_log_tag';
   static const String ampsLogTagReport = 'amps_log_report';
@@ -10,7 +10,7 @@ class AmpsConstants {
   static const String ampsCrashReasonKey = 'amps_crash_reason_key';
   static const String ampsCrashRequestSdkPackagename = 'crash_request_sdk';
   static const String ampsCrashReportKey = 'ampsCrashReport';
-  static const String ampsAppid = '${AmpsConstants.resourceHead}_appid';
+  static const String ampsAppid = '${AmpsAndroidConstants.resourceHead}_appid';
   static const String acceptEncrypt = 'Accept-Encrypt';
   static const String acceptEncryptDefault = '101,1001';
   static const String ampsConfigUrl =

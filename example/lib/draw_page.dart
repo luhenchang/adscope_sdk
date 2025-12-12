@@ -114,7 +114,9 @@ class _DrawPageState extends State<DrawPage> with WidgetsBindingObserver {
     // 广告回调逻辑（保持不变）
     _adCallBack = AMPSDrawAdListener(
       loadOk: (adIds) {},
-      loadFail: (code, message) => {},
+      loadFail: (code, message) => {
+        debugPrint("draw page loadFail code=$code message=$message")
+      },
     );
 
     _renderCallBack = AMPSDrawRenderListener(
