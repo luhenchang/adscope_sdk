@@ -129,6 +129,9 @@ class DownLoadCallBackChannelMethod {
 class AMPSAdSdkMethodNames {
   /// 初始化AMPS广告SDK的方法名
   static const String init = 'AMPSAdSdk_init';
+  static const String getSdkVersion= "AMPSAdSdk_getSdkVersion";
+  static const String getInitStatus= "AMPSAdSdk_getSdkVersion";
+  static const String setPersonalRecommend = "AMPSAdSdk_setPersonalRecommend";
   /// 开屏相关方法
   static const String splashCreate = 'AMPSSplashAd_create';
   static const String splashLoad = 'AMPSSplashAd_load';

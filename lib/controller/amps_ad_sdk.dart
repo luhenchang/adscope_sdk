@@ -3,6 +3,7 @@ import 'package:adscope_sdk/adscope_sdk.dart';
 
 import '../common.dart';
 import '../data/amps_init_config.dart';
+import '../data/amps_sdk_Init_status.dart';
 ///SDK初始化入口类
 class AMPSAdSDK {
   final StreamController<String> _controller = StreamController<String>();
@@ -43,6 +44,30 @@ class AMPSAdSDK {
       AMPSAdSdkMethodNames.init,
       sdkConfig.toMap(AMPSAdSDK.testModel),
     );
+  }
+
+  /// 运行中设置个性化
+  Future<void> setPersonalRecommend(bool flag) async {
+    await AdscopeSdk.channel.invokeMethod(
+      AMPSAdSdkMethodNames.setPersonalRecommend,
+      flag,
+    );
+  }
+
+  ///获取SDK版本
+  Future<String> getSdkVersion() async {
+    final sdkVersion = await AdscopeSdk.channel.invokeMethod(
+        AMPSAdSdkMethodNames.getSdkVersion
+    );
+    return sdkVersion;
+  }
+
+  ///获取SDK状态
+  Future<AMPSSDKInitStatus?> getSdkInitStatus() async {
+    final statusCode = await AdscopeSdk.channel.invokeMethod(
+      AMPSAdSdkMethodNames.getInitStatus
+    );
+    return AMPSSDKInitStatus.fromCode(statusCode);
   }
 }
 

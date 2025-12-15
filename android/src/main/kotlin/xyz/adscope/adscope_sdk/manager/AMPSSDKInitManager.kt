@@ -64,6 +64,18 @@ class AMPSSDKInitManager private constructor() {
                     }
                 }
             }
+            AMPSAdSdkMethodNames.GET_SDK_VERSION -> {
+                result.success(AMPSSDK.getSdkVersion())
+            }
+
+            AMPSAdSdkMethodNames.GET_INIT_STATUS -> {
+                result.success(AMPSSDK.sdkInitStatus().code)
+            }
+
+            AMPSAdSdkMethodNames.SET_PERSONAL_RECOMMEND -> {
+                AMPSSDK.setPersonalRecommend(call.arguments as Boolean)
+                result.success(null)
+            }
 
             else -> result.notImplemented()
         }
