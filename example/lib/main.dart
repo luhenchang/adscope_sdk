@@ -144,7 +144,7 @@ class _SplashPageState extends State<SplashPage> {
               buttonText: getInitResult(initStatus),
               backgroundColor: getInitColor(initStatus),
               callBack: () {
-                //AMPSAdSDK.testModel = true;
+                SDKLog.setLogLevel(LogLevel.logLevelAll);
                 AMPSAdSDK().init(sdkConfig, _callBack);
               }
           ),

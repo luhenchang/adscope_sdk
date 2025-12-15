@@ -144,8 +144,9 @@ object AMPSAdSdkMethodNames {
     // Method name for initializing AMPS Ad SDK
     const val TEST_MODE = "testMode"
     const val INIT = "AMPSAdSdk_init"
+    const val SET_LOG_LEVEL = "AMPSAdSdk_setLogLevel";
     const val GET_SDK_VERSION= "AMPSAdSdk_getSdkVersion"
-    const val GET_INIT_STATUS= "AMPSAdSdk_getSdkVersion"
+    const val GET_INIT_STATUS= "AMPSAdSdk_getInitStatus"
     const val SET_PERSONAL_RECOMMEND = "AMPSAdSdk_setPersonalRecommend"
 
     // Splash ad related methods
@@ -241,6 +242,7 @@ enum class NativeType(val value: Int) {
 }
 
 val InitMethodNames: Set<String> = setOf(
+    AMPSAdSdkMethodNames.SET_LOG_LEVEL,
     AMPSAdSdkMethodNames.INIT,
     AMPSAdSdkMethodNames.GET_SDK_VERSION,
     AMPSAdSdkMethodNames.GET_INIT_STATUS,

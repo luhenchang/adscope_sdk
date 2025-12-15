@@ -127,10 +127,12 @@ class DownLoadCallBackChannelMethod {
   static const String onInstalled = "onInstalled";
 }
 class AMPSAdSdkMethodNames {
+  /// 设置日志等级
+  static const String setLogLevel = "AMPSAdSdk_setLogLevel";
   /// 初始化AMPS广告SDK的方法名
   static const String init = 'AMPSAdSdk_init';
   static const String getSdkVersion= "AMPSAdSdk_getSdkVersion";
-  static const String getInitStatus= "AMPSAdSdk_getSdkVersion";
+  static const String getInitStatus= "AMPSAdSdk_getInitStatus";
   static const String setPersonalRecommend = "AMPSAdSdk_setPersonalRecommend";
   /// 开屏相关方法
   static const String splashCreate = 'AMPSSplashAd_create';

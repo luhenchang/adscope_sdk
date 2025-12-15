@@ -3,7 +3,6 @@ package xyz.adscope.adscope_sdk.manager
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import xyz.adscope.adscope_sdk.data.AMPSAdSdkMethodNames
 import xyz.adscope.adscope_sdk.data.AMPSInitChannelMethod
 import xyz.adscope.adscope_sdk.data.AMPSInitConfigConverter
@@ -33,13 +32,30 @@ class AMPSSDKInitManager private constructor() {
             }
         }
     }
-
+    /**
+     * 全局方法：根据 code 值获取 Java 枚举 LOG_LEVEL 实例
+     * @param code 枚举对应的整数值（可为 null）
+     * @return 匹配的 LOG_LEVEL 枚举，无匹配/空值时返回 null
+     */
+    fun getLogLevelByCode(code: Int?): SDKLog.LOG_LEVEL? {
+        if (code == null) return null
+        // 遍历枚举值匹配 code
+        return SDKLog.LOG_LEVEL.entries.firstOrNull { it.value == code }
+    }
     @Suppress("UNCHECKED_CAST")
     fun handleMethodCall(call: MethodCall, result: Result) {
         val method: String = call.method
         val flutterParams: Map<String, Any>? = call.arguments as? Map<String, Any>
 
         when (method) {
+            AMPSAdSdkMethodNames.SET_LOG_LEVEL -> {
+                if (call.arguments != null) {
+                    getLogLevelByCode(call.arguments as Int)?.let {
+                        SDKLog.setLogLevel(it)
+                    }
+                }
+                result.success(null)
+            }
             AMPSAdSdkMethodNames.INIT -> {
                 val context = FlutterPluginUtil.getActivity()
                 if (context != null && flutterParams != null) {
@@ -101,7 +117,6 @@ class AMPSSDKInitManager private constructor() {
         }
 
         if (ampsInitConfig != null) {
-            SDKLog.setLogLevel(SDKLog.LOG_LEVEL.LOG_LEVEL_ALL)
             AMPSSDK.init(context, ampsInitConfig, callback)
         }
     }
