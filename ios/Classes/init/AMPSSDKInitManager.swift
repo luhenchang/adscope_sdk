@@ -35,7 +35,7 @@ class AMPSSDKInitManager {
         let appid = initParam?.appId ?? ""
         
         let config =  AMPSAdSDKManager.sharedInstance().sdkConfiguration
-       
+        
         if let https = initParam?._isUseHttps{
             config.isUseHttps = https
         }

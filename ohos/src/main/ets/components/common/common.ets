@@ -119,6 +119,9 @@ export class AMPSAdSdkMethodNames {
   // 初始化AMPS广告SDK的方法名
   static readonly testMode = 'testMode'
   static readonly init = 'AMPSAdSdk_init';
+  static readonly getSdkVersion= "AMPSAdSdk_getSdkVersion";
+  static readonly getInitStatus= "AMPSAdSdk_getInitStatus";
+  static readonly setPersonalRecommend = "AMPSAdSdk_setPersonalRecommend";
   // 开屏相关方法
   static readonly splashCreate = 'AMPSSplashAd_create';
   static readonly splashLoad = 'AMPSSplashAd_load';
@@ -199,7 +202,12 @@ export const defaultAdOption: ampsAd.AdOptions = {
   spaceId: StringConstants.EMPTY_STRING
 }
 
-export let InitMethodNames: string[] = [AMPSAdSdkMethodNames.init];
+export let InitMethodNames: string[] = [
+  AMPSAdSdkMethodNames.init,
+  AMPSAdSdkMethodNames.getSdkVersion,
+  AMPSAdSdkMethodNames.getInitStatus,
+  AMPSAdSdkMethodNames.setPersonalRecommend
+];
 
 export let SplashMethodNames: string[] =
   [

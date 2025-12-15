@@ -13,6 +13,7 @@ export class AMPSSDKInitManager {
     }
     return AMPSSDKInitManager.instance;
   }
+  static initStatus: number = 0
 
   handleMethodCall(call: MethodCall, result: MethodResult) {
     let method: string = call.method;
@@ -21,11 +22,29 @@ export class AMPSSDKInitManager {
       case AMPSAdSdkMethodNames.init:
         let context = AMPSEventManager.getInstance().getContext()
         if (context) {
-          const ampsConfig = new AMPSInitConfigConverter().convert(flutterParams, context);
-          this.initAMPSSDK(ampsConfig)
+          try {
+            const ampsConfig = new AMPSInitConfigConverter().convert(flutterParams, context)
+            this.initAMPSSDK(ampsConfig)
+          } catch (error) {
+            this.sendMessage(AMPSInitChannelMethod.initFailed, { code: -1, message: (error as Error).message })
+          }
           result.success(true);
         }
         break;
+      case AMPSAdSdkMethodNames.getSdkVersion:
+        let version = AMPSAdSdk.sdkVersion()
+        result.success(version)
+        break
+      case AMPSAdSdkMethodNames.getInitStatus:
+        let status = AMPSSDKInitManager.initStatus
+        result.success(status)
+        break
+      case AMPSAdSdkMethodNames.setPersonalRecommend:
+        // let recommend = call.args as boolean
+        result.success(undefined)
+        break
+      default :
+        result.success(undefined)
     }
   }
 
@@ -33,16 +52,20 @@ export class AMPSSDKInitManager {
   initAMPSSDK(ampsInitConfig?: AMPSInitConfig) {
     let callback: AMPSIInitCallback = {
       initSuccess: (): void => {
-        this.sendMessage(AMPSInitChannelMethod.initSuccess)
+        AMPSSDKInitManager.initStatus = 2
+        AMPSSDKInitManager.getInstance().sendMessage(AMPSInitChannelMethod.initSuccess)
       },
       initializing: (): void => {
-        this.sendMessage(AMPSInitChannelMethod.initializing)
+        AMPSSDKInitManager.initStatus = 1
+        AMPSSDKInitManager.getInstance().sendMessage(AMPSInitChannelMethod.initializing)
       },
       alreadyInit: (): void => {
-        this.sendMessage(AMPSInitChannelMethod.alreadyInit)
+        AMPSSDKInitManager.initStatus = 4
+        AMPSSDKInitManager.getInstance().sendMessage(AMPSInitChannelMethod.alreadyInit)
       },
       initFailed: (code: number, message: string): void => {
-        this.sendMessage(AMPSInitChannelMethod.initFailed, { code, message })
+        AMPSSDKInitManager.initStatus = 3
+        AMPSSDKInitManager.getInstance().sendMessage(AMPSInitChannelMethod.initFailed, { code, message })
       }
     }
     if (ampsInitConfig) {

@@ -46,8 +46,8 @@ class AMPSAdSDK {
     );
   }
 
-  /// 运行中设置个性化
-  Future<void> setPersonalRecommend(bool flag) async {
+  /// 运行中设置个性化150444
+  static Future<void> setPersonalRecommend(bool flag) async {
     await AdscopeSdk.channel.invokeMethod(
       AMPSAdSdkMethodNames.setPersonalRecommend,
       flag,
@@ -55,7 +55,7 @@ class AMPSAdSDK {
   }
 
   ///获取SDK版本
-  Future<String> getSdkVersion() async {
+  static Future<String> getSdkVersion() async {
     final sdkVersion = await AdscopeSdk.channel.invokeMethod(
         AMPSAdSdkMethodNames.getSdkVersion
     );
@@ -63,7 +63,7 @@ class AMPSAdSDK {
   }
 
   ///获取SDK状态
-  Future<AMPSSDKInitStatus?> getSdkInitStatus() async {
+  static Future<AMPSSDKInitStatus?> getSdkInitStatus() async {
     final statusCode = await AdscopeSdk.channel.invokeMethod(
       AMPSAdSdkMethodNames.getInitStatus
     );
