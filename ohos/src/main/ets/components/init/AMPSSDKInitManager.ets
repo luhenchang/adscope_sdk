@@ -69,7 +69,7 @@ export class AMPSSDKInitManager {
       }
     }
     if (ampsInitConfig) {
-      AMPSAdSdk.testMode = true
+      AMPSAdSdk.testMode = false
       AMPSAdSdk.init(ampsInitConfig, callback)
     }
   }
