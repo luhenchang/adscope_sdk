@@ -1,4 +1,5 @@
 
+import 'dart:ui';
 import '../common.dart';
 
 ///广告加载入参参数
@@ -47,26 +48,26 @@ class AdOptions {
   }
 }
 
-typedef AdSuccessCallback = void Function();
+
 typedef AdFailureCallback = void Function(int code, String message);
 typedef VideoPlayErrorCallback = void Function(int code, String message);
 typedef VideoSkipToEndCallback = void Function(int? playDurationMs);
 ///广告回调相关接口
 class AdCallBack {
-  final AdSuccessCallback? onLoadSuccess;
+  final VoidCallback? onLoadSuccess;
   final AdFailureCallback? onLoadFailure;
-  final AdSuccessCallback? onRenderOk;
-  final AdSuccessCallback? onRenderFailure;
+  final VoidCallback? onRenderOk;
+  final VoidCallback? onRenderFailure;
   final AdFailureCallback? onAdShowError;
-  final AdSuccessCallback? onAdShow;
-  final AdSuccessCallback? onAdExposure;
-  final AdSuccessCallback? onAdClicked;
-  final AdSuccessCallback? onAdClosed;
-  final AdSuccessCallback? onVideoPlayStart;
-  final AdSuccessCallback? onVideoPlayEnd;
+  final VoidCallback? onAdShow;
+  final VoidCallback? onAdExposure;
+  final VoidCallback? onAdClicked;
+  final VoidCallback? onAdClosed;
+  final VoidCallback? onVideoPlayStart;
+  final VoidCallback? onVideoPlayEnd;
   final VideoPlayErrorCallback? onVideoPlayError;
   final VideoSkipToEndCallback? onVideoSkipToEnd;
-  final AdSuccessCallback? onAdReward;
+  final VoidCallback? onAdReward;
 
   const AdCallBack({
     this.onLoadSuccess,
@@ -87,17 +88,17 @@ class AdCallBack {
 }
 
 class RewardVideoCallBack {
-  final AdSuccessCallback? onLoadSuccess;
-  final AdSuccessCallback? onAdCached;
+  final VoidCallback? onLoadSuccess;
+  final VoidCallback? onAdCached;
   final AdFailureCallback? onLoadFailure;
   final AdFailureCallback? onVideoPlayError;
-  final AdSuccessCallback? onAdShow;
-  final AdSuccessCallback? onAdClicked;
-  final AdSuccessCallback? onAdClosed;
-  final AdSuccessCallback? onVideoPlayStart;
-  final AdSuccessCallback? onVideoPlayEnd;
+  final VoidCallback? onAdShow;
+  final VoidCallback? onAdClicked;
+  final VoidCallback? onAdClosed;
+  final VoidCallback? onVideoPlayStart;
+  final VoidCallback? onVideoPlayEnd;
   final VideoSkipToEndCallback? onVideoSkipToEnd;
-  final AdSuccessCallback? onAdReward;
+  final VoidCallback? onAdReward;
 
   const RewardVideoCallBack({
     this.onLoadSuccess,
@@ -115,16 +116,16 @@ class RewardVideoCallBack {
 }
 
 class BannerCallBack {
-  final AdSuccessCallback? onLoadSuccess;
+  final VoidCallback? onLoadSuccess;
   final AdFailureCallback? onLoadFailure;
-  final AdSuccessCallback? onAdShow;
-  final AdSuccessCallback? onAdClicked;
-  final AdSuccessCallback? onAdClosed;
-  final AdSuccessCallback? onVideoPause;
-  final AdSuccessCallback? onVideoReady;
-  final AdSuccessCallback? onVideoResume;
-  final AdSuccessCallback? onVideoPlayStart;
-  final AdSuccessCallback? onVideoPlayEnd;
+  final VoidCallback? onAdShow;
+  final VoidCallback? onAdClicked;
+  final VoidCallback? onAdClosed;
+  final VoidCallback? onVideoPause;
+  final VoidCallback? onVideoReady;
+  final VoidCallback? onVideoResume;
+  final VoidCallback? onVideoPlayStart;
+  final VoidCallback? onVideoPlayEnd;
   final AdFailureCallback? onVideoPlayError;
 
 
@@ -142,6 +143,5 @@ class BannerCallBack {
       this.onVideoResume});
 }
 
-///组件关闭通知接口
-typedef AdWidgetNeedCloseCall = void Function();
+
 typedef AdWidgetSizeCall = void Function(double width,double height);

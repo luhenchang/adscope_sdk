@@ -142,6 +142,9 @@ enum AMPSAdSdkMethodNames {
     // AMPS广告SDK初始化方法名
     static let testMode = "testMode"
     static let sdk_init = "AMPSAdSdk_init"
+    static let getSdkVersion = "AMPSAdSdk_getSdkVersion"
+    static let getInitStatus = "AMPSAdSdk_getInitStatus"
+    static let setPersonalRecommend = "AMPSAdSdk_setPersonalRecommend"
     
     // 开屏广告相关方法
     static let splashCreate = "AMPSSplashAd_create"
@@ -246,7 +249,10 @@ let defaultAdOption = AdOptions(spaceId: StringConstants.emptyString)
 
 // 方法名集合
 let initMethodNames: Set<String> = [
-    AMPSAdSdkMethodNames.sdk_init
+    AMPSAdSdkMethodNames.sdk_init,
+    AMPSAdSdkMethodNames.getSdkVersion,
+    AMPSAdSdkMethodNames.getInitStatus,
+    AMPSAdSdkMethodNames.setPersonalRecommend
 ]
 
 let splashMethodNames: Set<String> = [

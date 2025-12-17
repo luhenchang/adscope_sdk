@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:adscope_sdk/adscope_sdk.dart';
 
 import '../common.dart';
@@ -71,20 +72,18 @@ class AMPSAdSDK {
   }
 }
 
-typedef InitSuccessCallBack = void Function();
-typedef InitializingCallBack = void Function();
-typedef AlreadyInitCallBack = void Function();
+
 typedef InitFailedCallBack = void Function(int? code, String? msg);
 /// 1. 定义回调接口（抽象类）
 class AMPSIInitCallBack {
   /// 初始化成功的回调
-  late final InitSuccessCallBack? initSuccess;
+  late final VoidCallback? initSuccess;
 
   /// 正在初始化的回调
-  late final InitializingCallBack? initializing;
+  late final VoidCallback? initializing;
 
   /// 已经初始化的回调
-  late final  AlreadyInitCallBack? alreadyInit;
+  late final  VoidCallback? alreadyInit;
 
   /// 初始化失败的回调
   late final  InitFailedCallBack? initFailed;

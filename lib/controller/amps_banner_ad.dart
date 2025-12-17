@@ -9,7 +9,7 @@ import '../data/amps_ad.dart';
 class AMPSBannerAd {
   AdOptions config;
   BannerCallBack? mCallBack;
-  AdWidgetNeedCloseCall? mCloseCallBack;
+  VoidCallback? mCloseCallBack;
 
   AMPSBannerAd({required this.config, this.mCallBack}) {
     AdscopeSdk.channel.invokeMethod(
@@ -112,11 +112,11 @@ class AMPSBannerAd {
     AdscopeSdk.channel.invokeMethod(AMPSAdSdkMethodNames.bannerDestroyAd);
   }
 
-  void registerChannel(AdWidgetNeedCloseCall callBack) {
+  void registerChannel(VoidCallback callBack) {
     mCloseCallBack = callBack;
   }
 
-  void setAdCloseCallBack(AdWidgetNeedCloseCall closeCallBack) {
+  void setAdCloseCallBack(VoidCallback closeCallBack) {
     mCloseCallBack = closeCallBack;
   }
 }

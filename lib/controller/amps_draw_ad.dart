@@ -15,7 +15,7 @@ class AMPSDrawAd {
   AdWidgetSizeCall? updateSize;
   Map<String, AdWidgetSizeCall> updateSizeMap = {};
   Map<String, AMPSDrawVideoListener> mVideoPlayerCallBackMap = {};
-  Map<String, AdWidgetNeedCloseCall> mCloseWidgetCallMap = {};
+  Map<String, VoidCallback> mCloseWidgetCallMap = {};
 
   AMPSDrawAd(
       {required this.config,
@@ -188,7 +188,7 @@ class AMPSDrawAd {
 
 
 
-  void setAdCloseCallBack(String adId, AdWidgetNeedCloseCall? closeWidgetCall) {
+  void setAdCloseCallBack(String adId, VoidCallback? closeWidgetCall) {
     if (closeWidgetCall != null) {
       mCloseWidgetCallMap[adId] = closeWidgetCall;
     }

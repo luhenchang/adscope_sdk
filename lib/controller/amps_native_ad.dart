@@ -21,7 +21,7 @@ class AMPSNativeAd {
   Map<String,AdWidgetSizeCall> updateSizeMap = {};
   Map<String,AmpsNativeInteractiveListener> mInteractiveCallBackMap = {};
   Map<String, AmpsVideoPlayListener> mVideoPlayerCallBackMap = {};
-  Map<String, AdWidgetNeedCloseCall> mCloseWidgetCallMap = {};
+  Map<String, VoidCallback> mCloseWidgetCallMap = {};
   Map<String, AMPSUnifiedDownloadListener> mDownloadListenerMap = {};
   Map<String, AMPSNegativeFeedbackListener> mNegativeFeedbackListenerMap = {};
 
@@ -253,7 +253,7 @@ class AMPSNativeAd {
   }
 
 
-  void setAdCloseCallBack(String adId, AdWidgetNeedCloseCall? closeWidgetCall) {
+  void setAdCloseCallBack(String adId, VoidCallback? closeWidgetCall) {
     if (closeWidgetCall != null){
       mCloseWidgetCallMap[adId] = closeWidgetCall;
     }

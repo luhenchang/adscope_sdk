@@ -22,8 +22,17 @@ class AMPSSDKInitManager {
         case AMPSAdSdkMethodNames.sdk_init:
             initAMPSSDK(flutterParams)
             result(true)
+        case AMPSAdSdkMethodNames.getInitStatus:
+            result(AMPSAdSDKManager.sharedInstance().sdkInitializationStatus().rawValue)
+        case AMPSAdSdkMethodNames.getSdkVersion:
+            result(AMPSAdSDKManager.sdkVersion())
+        case AMPSAdSdkMethodNames.setPersonalRecommend:
+            if let recommen = call.arguments as? Bool {
+                AMPSAdSDKManager.sharedInstance().setPersonalizedRecommendState(recommen == true ? AMPSPersonalizedRecommendState.open : AMPSPersonalizedRecommendState.close)
+            }
+            result(nil)
         default:
-            result(FlutterMethodNotImplemented)
+            result(nil)
         }
     }
     

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import '../adscope_sdk.dart';
 import '../common.dart';
 import '../data/amps_ad.dart';
@@ -7,7 +9,7 @@ import '../widget/splash_bottom_widget.dart';
 class AMPSSplashAd {
   AdOptions config;
   AdCallBack? mCallBack;
-  AdWidgetNeedCloseCall? mCloseCallBack;
+  VoidCallback? mCloseCallBack;
   AMPSSplashAd({required this.config, this.mCallBack}) {
     AdscopeSdk.channel.invokeMethod(
       AMPSAdSdkMethodNames.splashCreate,
@@ -119,7 +121,7 @@ class AMPSSplashAd {
         .invokeMethod(AMPSAdSdkMethodNames.splashAddPreGetMediaExtraInfo);
   }
 
-  void registerChannel(AdWidgetNeedCloseCall callBack) {
+  void registerChannel(VoidCallback callBack) {
     mCloseCallBack = callBack;
   }
 }

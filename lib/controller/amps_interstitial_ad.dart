@@ -16,7 +16,7 @@ class AMPSInterstitialAd {
     setMethodCallHandler(null);
   }
 
-  void setMethodCallHandler(AdWidgetNeedCloseCall? closeWidgetCall) {
+  void setMethodCallHandler(VoidCallback? closeWidgetCall) {
     AdscopeSdk.channel.setMethodCallHandler(
       (call) async {
         switch (call.method) {
