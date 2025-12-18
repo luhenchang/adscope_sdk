@@ -26,26 +26,26 @@ class _SplashShowPageState extends State<SplashShowPage> {
       debugPrint("ad load onLoadSuccess");
     }, onRenderOk: () {
       debugPrint("Flutter==onAmpsAdLoaded=renderOK");
-      _splashAd?.showAd(
-          splashBottomWidget: SplashBottomWidget(
-              height: 100,
-              backgroundColor: "#FFFFFFFF",
-              children: [
-            ImageComponent(
-              width: 25,
-              height: 25,
-              x: 170,
-              y: 10,
-              imagePath: 'assets/images/img.png',
-            ),
-            TextComponent(
-              fontSize: 24,
-              color: "#00ff00",
-              x: 140,
-              y: 50,
-              text: 'Hello Android!',
-            ),
-          ]));
+      _splashAd?.showAd();
+          // splashBottomWidget: SplashBottomWidget(
+          //     height: 100,
+          //     backgroundColor: "#FFFFFFFF",
+          //     children: [
+          //   ImageComponent(
+          //     width: 25,
+          //     height: 25,
+          //     x: 170,
+          //     y: 10,
+          //     imagePath: 'assets/images/img.png',
+          //   ),
+          //   TextComponent(
+          //     fontSize: 24,
+          //     color: "#00ff00",
+          //     x: 140,
+          //     y: 50,
+          //     text: 'Hello Android!',
+          //   ),
+          // ]));
       setState(() {
         couldBack = false;
       });
@@ -108,7 +108,7 @@ class _SplashShowPageState extends State<SplashShowPage> {
                     ButtonWidget(
                         buttonText: '点击加载开屏页面',
                         callBack: () {
-                          AdOptions options = AdOptions(spaceId: splashSpaceId, splashAdBottomBuilderHeight: 100);
+                          AdOptions options = AdOptions(spaceId: splashSpaceId);
                           _splashAd = AMPSSplashAd(config: options, mCallBack: _adCallBack);
                           _splashAd?.load();
                         }),

@@ -48,7 +48,7 @@ export struct AMPSUnifiedAdComponent {
                   let clickType: AMPSAdItemClickType =
                     this.getAdItemClickType(this.unifiedModule?.mainImgChildren?.clickType);
                   if (clickType != AMPSAdItemClickType.NONE) {
-                    wrapper.getClickHandler()(this, event, clickType)
+                    wrapper.getClickHandler()(this.getUIContext(), event, clickType)
                   }
                 })
             }
@@ -75,7 +75,7 @@ export struct AMPSUnifiedAdComponent {
                   let clickType: AMPSAdItemClickType =
                     this.getAdItemClickType(this.unifiedModule?.titleChildren?.clickType);
                   if (clickType != AMPSAdItemClickType.NONE) {
-                    wrapper.getClickHandler()(this, event, clickType)
+                    wrapper.getClickHandler()(this.getUIContext(), event, clickType)
                   }
                 })
             }
@@ -92,7 +92,7 @@ export struct AMPSUnifiedAdComponent {
                   let clickType: AMPSAdItemClickType =
                     this.getAdItemClickType(this.unifiedModule?.descChildren?.clickType);
                   if (clickType != AMPSAdItemClickType.NONE) {
-                    wrapper.getClickHandler()(this, event, clickType)
+                    wrapper.getClickHandler()(this.getUIContext(), event, clickType)
                   }
                 })
             }
@@ -108,7 +108,7 @@ export struct AMPSUnifiedAdComponent {
                   let clickType: AMPSAdItemClickType =
                     this.getAdItemClickType(this.unifiedModule?.appIconChildren?.clickType);
                   if (clickType != AMPSAdItemClickType.NONE) {
-                    wrapper.getClickHandler()(this, event, clickType)
+                    wrapper.getClickHandler()(this.getUIContext(), event, clickType)
                   }
                 })
             }
@@ -130,7 +130,7 @@ export struct AMPSUnifiedAdComponent {
                   this.clickIds.addAdId(util.generateRandomUUID()) :
                   this.creativeViewIds.addAdId(util.generateRandomUUID()))
                 .onClick((event) => {
-                  wrapper.getClickHandler()(this, event, AMPSAdItemClickType.CLOSE)
+                  wrapper.getClickHandler()(this.getUIContext(), event, AMPSAdItemClickType.CLOSE)
                 })
             }
           }
