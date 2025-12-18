@@ -7,39 +7,31 @@ import '../data/amps_init_config.dart';
 import '../data/amps_sdk_Init_status.dart';
 ///SDK初始化入口类
 class AMPSAdSDK {
-  final StreamController<String> _controller = StreamController<String>();
-  AMPSIInitCallBack?  _callBack;
-
   static bool testModel = false;
-  AMPSAdSDK() {
+  AMPSAdSDK._();
+  /// 发送数据给native
+  static Future<void> init(AMPSInitConfig sdkConfig,AMPSIInitCallBack callBack) async {
     AdscopeSdk.channel.setMethodCallHandler(
           (call) async {
         switch (call.method) {
           case AMPSInitChannelMethod.initSuccess:
-            _callBack?.initSuccess?.call();
+            callBack.initSuccess?.call();
             break;
           case AMPSInitChannelMethod.initializing:
-            _callBack?.initializing?.call();
+            callBack.initializing?.call();
             break;
           case AMPSInitChannelMethod.alreadyInit:
-            _callBack?.alreadyInit?.call();
+            callBack.alreadyInit?.call();
             break;
           case AMPSInitChannelMethod.initFailed:
             final map = call.arguments as Map<dynamic, dynamic>?;
             final code = map?[AMPSSdkCallBackErrorKey.code];
             final message = map?[AMPSSdkCallBackErrorKey.message];
-            _callBack?.initFailed?.call(code, message);
+            callBack.initFailed?.call(code, message);
             break;
         }
       },
     );
-  }
-
-  Stream<String> get customDataStream => _controller.stream;
-
-  /// 发送数据给native
-  Future<void> init(AMPSInitConfig sdkConfig,AMPSIInitCallBack callBack) async {
-    _callBack = callBack;
     // 使用时
     await AdscopeSdk.channel.invokeMethod(
       AMPSAdSdkMethodNames.init,
@@ -47,7 +39,6 @@ class AMPSAdSDK {
     );
   }
 
-  /// 运行中设置个性化150444
   static Future<void> setPersonalRecommend(bool flag) async {
     await AdscopeSdk.channel.invokeMethod(
       AMPSAdSdkMethodNames.setPersonalRecommend,
@@ -66,7 +57,7 @@ class AMPSAdSDK {
   ///获取SDK状态
   static Future<AMPSSDKInitStatus?> getSdkInitStatus() async {
     final statusCode = await AdscopeSdk.channel.invokeMethod(
-      AMPSAdSdkMethodNames.getInitStatus
+        AMPSAdSdkMethodNames.getInitStatus
     );
     return AMPSSDKInitStatus.fromCode(statusCode);
   }

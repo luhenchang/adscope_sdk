@@ -145,7 +145,7 @@ class _SplashPageState extends State<SplashPage> {
               backgroundColor: getInitColor(initStatus),
               callBack: () {
                 SDKLog.setLogLevel(LogLevel.logLevelAll);
-                AMPSAdSDK().init(sdkConfig, _callBack);
+                AMPSAdSDK.init(sdkConfig, _callBack);
               }
           ),
           const SizedBox(height: 20,width: 0),
