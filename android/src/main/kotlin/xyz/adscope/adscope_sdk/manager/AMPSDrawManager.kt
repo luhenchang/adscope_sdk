@@ -54,6 +54,7 @@ class AMPSDrawManager private constructor() {
                         }
 
                         override fun onAdClosed(view: View?) {
+                            adDestroy(uniqueId)
                             sendMessage(AMPSDrawCallbackChannelMethod.ON_AD_CLOSED, uniqueId)
                         }
 
@@ -147,6 +148,11 @@ class AMPSDrawManager private constructor() {
         }
     }
 
+    private fun adDestroy(uniqueId: String) {
+        AdWrapperManager.getInstance().removeAdView(uniqueId)
+        AdWrapperManager.getInstance().removeDrawAdItem(uniqueId)
+    }
+
 
     fun getBannerAd(): AMPSDrawAd? {
         return this.mDrawAd
@@ -186,6 +192,9 @@ class AMPSDrawManager private constructor() {
             }
 
             AMPSAdSdkMethodNames.DRAW_DESTROY_AD -> {
+                adIdMap.forEach { enty->
+                    adDestroy(enty.value)
+                }
                 mDrawAd?.destroy()
                 result.success(null)
             }

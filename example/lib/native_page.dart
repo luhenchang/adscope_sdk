@@ -41,9 +41,6 @@ class _SplashPageState extends State<NativePage> {
        _nativeAd?.isNativeExpress(adId).then((isNativeExpress){
          debugPrint("isNativeExpress=$isNativeExpress");
        });
-       _nativeAd?.getVideoDuration(adId).then((duration){
-         debugPrint("getVideoDuration=$duration");
-       });
         debugPrint("adId renderCallBack=$adId");
         feedAdList.add(adId);
       });
@@ -91,6 +88,7 @@ class _SplashPageState extends State<NativePage> {
   @override
   void dispose() {
     debugPrint("页面关闭完成");
+    _nativeAd?.destroy();
     super.dispose();
   }
   @override

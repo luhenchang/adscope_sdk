@@ -46,6 +46,12 @@ class AdWrapperManager private constructor() {
         }
     }
 
+    fun removeDrawAdItem(adId: String) {
+        if (adId.isNotBlank()) {
+            adDrawItemMap.remove(adId)
+        }
+    }
+
     /**
      * 根据adId获取View实例
      * @param adId 广告的唯一ID

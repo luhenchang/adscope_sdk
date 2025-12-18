@@ -125,9 +125,6 @@ class AMPSNativeView(
     }
 
     override fun dispose() {
-        adId?.let {
-            AdWrapperManager.getInstance().removeAdItem(it)
-        }
         rootView.removeAllViews()
     }
 

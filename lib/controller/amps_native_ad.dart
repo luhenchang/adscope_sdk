@@ -224,6 +224,23 @@ class AMPSNativeAd {
     }
   }
 
+  ///销毁
+  Future<void> destroy() async {
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.nativeDestroy, nativeType.value);
+  }
+
+  ///失去焦点
+  Future<void> resume() async {
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.nativeResume, nativeType.value);
+  }
+
+  ///失去焦点
+  Future<void> pause() async {
+    return await AdscopeSdk.channel
+        .invokeMethod(AMPSAdSdkMethodNames.nativePause, nativeType.value);
+  }
   ///获取是否有预加载
   Future<bool> isReadyAd(String adId) async {
     final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
@@ -243,13 +260,6 @@ class AMPSNativeAd {
     final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
     return await AdscopeSdk.channel
         .invokeMethod(AMPSAdSdkMethodNames.nativeIsNativeExpress, args);
-  }
-
-  ///获取视频播放时长
-  Future<num> getVideoDuration(String adId) async {
-    final Map<String, dynamic> args = {adNativeType: nativeType.value, adAdId: adId};
-    return await AdscopeSdk.channel
-        .invokeMethod(AMPSAdSdkMethodNames.nativeGetVideoDuration, args);
   }
 
 

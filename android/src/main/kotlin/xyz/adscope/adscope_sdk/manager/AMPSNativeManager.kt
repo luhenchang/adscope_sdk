@@ -65,8 +65,7 @@ class AMPSNativeManager {
 
                         override fun onAdClosed(p0: View?) {
                             adIdMap.remove(item)
-                            AdWrapperManager.getInstance().removeAdItem(uniqueId)
-                            AdWrapperManager.getInstance().removeAdView(uniqueId)
+                            adDestroy(uniqueId)
                             sendMessage(AMPSNativeCallBackChannelMethod.ON_AD_CLOSED, uniqueId)
                         }
 
@@ -137,8 +136,7 @@ class AMPSNativeManager {
 
                         override fun onAdClosed(p0: View?) {
                             adUnifiedIdMap.remove(item)
-                            AdWrapperManager.getInstance().removeAdItem(uniqueId)
-                            AdWrapperManager.getInstance().removeAdView(uniqueId)
+                            adDestroy(uniqueId)
                             sendMessage(AMPSNativeCallBackChannelMethod.ON_AD_CLOSED, uniqueId)
                         }
 
@@ -353,8 +351,14 @@ class AMPSNativeManager {
 
             AMPSAdSdkMethodNames.NATIVE_DESTROY -> {
                 if ((call.arguments as Int) == NativeType.NATIVE.value) {
+                    adIdMap.forEach { enty ->
+                        adDestroy(enty.value)
+                    }
                     mNativeAd?.destroy()
                 } else {
+                    adUnifiedIdMap.forEach { enty ->
+                        adDestroy(enty.value)
+                    }
                     mUnifiedAd?.destroy()
                 }
                 result.success(null)
@@ -440,6 +444,13 @@ class AMPSNativeManager {
             mUnifiedAd?.loadAd()
         }
         result.success(null)
+    }
+
+    private fun adDestroy(uniqueId: String) {
+        AdUnifiedWrapperManager.getInstance().removeAdItem(uniqueId)
+        AdUnifiedWrapperManager.getInstance().removeAdView(uniqueId)
+        AdWrapperManager.getInstance().removeAdItem(uniqueId)
+        AdWrapperManager.getInstance().removeAdView(uniqueId)
     }
 
     private fun sendMessage(method: String, args: Any? = null) {
