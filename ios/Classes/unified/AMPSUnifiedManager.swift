@@ -158,7 +158,13 @@ extension AmpsIosUnifiedNativeManager: AMPSUnifiedNativeViewDelegate,AMPSMediaVi
     }
     func ampsNativeAdDidClose(_ nativeView: AMPSUnifiedNativeView) {
         if let adId = self.getadId(unifiedAd: nativeView){
+            self.adIdMap.removeValue(forKey: adId)
             sendMessage(AMPSNativeCallBackChannelMethod.onAdClosed,adId)
+        }
+        if self.adIdMap.isEmpty {
+            self.unifiedNative?.remove()
+            self.unifiedNative?.delegate = nil
+            self.unifiedNative = nil
         }
         
     }

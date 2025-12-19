@@ -120,12 +120,10 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
         // 设置广告Logo
         let adLogoImageView = UIImageView(frame: CGRect(x: adView.frame.width - 50, y: adView.frame.width - 20, width: 36, height: 14))
         adLogoImageView.contentMode = .scaleAspectFit
-        if let imgModel = model.unifiedWidget?.children?.first(where: { child in
+        if !ad.adLogoUrl.isEmpty, let imgModel = model.unifiedWidget?.children?.first(where: { child in
             child.type == .adSourceLogo
         }){
            adLogoImageView.frame = CGRect(x: imgModel.x ?? adView.frame.width - 50, y: imgModel.y ?? adView.frame.width - 20, width: imgModel.width ?? 36, height: imgModel.height ?? 14)
-        }
-        if  !ad.adLogoUrl.isEmpty {
             let adLogoUrl = ad.adLogoUrl
             if URL(string: adLogoUrl) != nil {
                 Tools.fetchImageData(from: adLogoUrl) { [weak adLogoImageView] result in
@@ -134,41 +132,42 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
                     }
                 }
             }
+            adView.addSubview(adLogoImageView)
         }
-
-        // 创建图标iconImageView
+        
         let iconImageView = UIImageView()
-        if  !ad.iconUrl.isEmpty {
-            let iconUrl = ad.iconUrl
-            iconImageView.frame = CGRect(x: 5, y: 165, width: 65, height: 65)
-            iconImageView.contentMode = .scaleAspectFit
-            if let _ = URL(string: iconUrl) {
-                Tools.fetchImageData(from: iconUrl) { [weak iconImageView] result in
-                    if case let .success(data) = result {
-                        iconImageView?.image = UIImage(data: data)
-                    }
-                }
-            }
-        }
+        // 创建图标iconImageView
         if let imgModel = model.unifiedWidget?.children?.first(where: { child in
             child.type == .appIcon
         }){
-            iconImageView.frame = CGRectMake(imgModel.x ?? 0, imgModel.y ?? 0, imgModel.width ?? 0, imgModel.height ?? 0)
+            if  !ad.iconUrl.isEmpty {
+                let iconUrl = ad.iconUrl
+                iconImageView.frame = CGRectMake(
+                    imgModel.x ?? 0,
+                    imgModel.y ?? 0,
+                    imgModel.width ?? 0,
+                    imgModel.height ?? 0
+                )
+                iconImageView.contentMode = .scaleAspectFit
+                if let _ = URL(string: iconUrl) {
+                    Tools
+                        .fetchImageData(from: iconUrl) { [weak iconImageView] result in
+                            if case let .success(data) = result {
+                                iconImageView?.image = UIImage(data: data)
+                            }
+                        }
+                }
+            }
+            adView.addSubview(iconImageView)
         }
 
         // 创建标题Label
         let titleLabel = UILabel()
-        titleLabel.frame = CGRect(
-            x: iconImageView.frame.width + 10,
-            y: 165,
-            width: adView.frame.width - 85,
-            height: 30
-        )
-        titleLabel.text = ad.title
-        titleLabel.textColor = .darkGray
-        if let imgModel = model.unifiedWidget?.children?.first(where: { child in
+        if !ad.title.isEmpty ,let imgModel = model.unifiedWidget?.children?.first(where: { child in
             child.type == .mainTitle
         }){
+            titleLabel.text = ad.title
+            titleLabel.textColor = .darkGray
             titleLabel.frame = CGRectMake(imgModel.x ?? 0, imgModel.y ?? 0, adView.frame.width - 40, imgModel.height ?? 20)
             if let bgColor = imgModel.backgroundColor {
                 titleLabel.backgroundColor = UIColor(hexString: bgColor)
@@ -179,24 +178,26 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
             if let color = imgModel.color {
                 titleLabel.textColor = UIColor(hexString: color)
             }
+            adView.addSubview(titleLabel)
         }
         
         // 创建描述Label
         let descLabel = UILabel()
-        descLabel.frame = CGRect(
-            x: iconImageView.frame.width + 10,
-            y: 200,
-            width: adView.frame.width - 85,
-            height: 30
-        )
-        descLabel.text = ad.desc
-        descLabel.font = .systemFont(ofSize: 21.0)
-        descLabel.textColor = .gray
-        
         if let imgModel = model.unifiedWidget?.children?.first(where: { child in
             child.type == .descText
         }){
+            descLabel.frame = CGRect(
+                x: iconImageView.frame.width + 10,
+                y: 0,
+                width: adView.frame.width - 85,
+                height: 30
+            )
+            descLabel.text = ad.desc
+            descLabel.font = .systemFont(ofSize: 21.0)
+            descLabel.textColor = .gray
+            
             descLabel.frame = CGRectMake(imgModel.x ?? 0, imgModel.y ?? 0, imgModel.width ?? adView.frame.width - 40, imgModel.height ?? 30)
+            print("imageModel:\(imgModel)")
             if let bgColor = imgModel.backgroundColor {
                 descLabel.backgroundColor = UIColor(hexString: bgColor)
             }
@@ -206,13 +207,8 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
             if let color = imgModel.color {
                 descLabel.textColor = UIColor(hexString: color)
             }
+            adView.addSubview(descLabel)
         }
-        // 添加子视图
-        adView.addSubview(adLogoImageView)
-        adView.addSubview(iconImageView)
-        adView.addSubview(titleLabel)
-        adView.addSubview(descLabel)
-       
         
         clickViews.append(contentsOf: [iconImageView,titleLabel,descLabel])
         // 注册可点击视图

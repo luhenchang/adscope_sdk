@@ -31,7 +31,7 @@ class AMPSRewardVideoManager: NSObject {
         case AMPSAdSdkMethodNames.rewardVideoPreLoad:
             result(nil)
         case AMPSAdSdkMethodNames.rewardVideoDestroyAd:
-            rewardVideoAd = nil
+            cleanupViewsAfterAdClosed()
             result(nil)
         case AMPSAdSdkMethodNames.rewardVideoIsReadyAd:
             result(rewardVideoAd != nil)

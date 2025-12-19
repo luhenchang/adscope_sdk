@@ -171,6 +171,9 @@ extension AMPSNativeManager: AMPSNativeExpressViewDelegate{
             sendMessage(AMPSNativeCallBackChannelMethod.onAdClosed,adID)
         }
         self.adIdMap.removeValue(forKey: nativeView)
+        if adIdMap.isEmpty {
+            self.nativeAd?.remove()
+        }
     }
     
     
