@@ -35,6 +35,13 @@
     ],
     "requestPermissions": [
       {"name" :  "ohos.permission.INTERNET"},
+      {
+        "name": "ohos.permission.APP_TRACKING_CONSENT",
+        "usedScene": {
+          "abilities": []
+        },
+        "reason": "$string:OAID_reason"
+      }
     ]
   }
 }

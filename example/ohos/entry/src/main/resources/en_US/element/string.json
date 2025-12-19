@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "adscope_sdk_example"
+    },
+    {
+      "name": "OAID_reason",
+      "value": "for personal ads"
     }
   ]
 }
