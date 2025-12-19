@@ -30,7 +30,21 @@ flutter_ios_podfile_setup
 target 'Runner' do
   use_frameworks! :linkage => :static
   use_modular_headers!
-
+  
+#按需导入以下渠道
+  pod 'AMPSASNPAdapter', '~> 5.1.5200.1' #asnp
+  pod 'AMPSBZAdapter', '~> 5.1.490700.1'  #倍孜
+  pod 'AMPSCSJAdapter', '~> 5.1.7200.2' #穿山甲
+  pod 'AMPSGDTAdapter', '~> 5.1.41560.3'  #优量汇
+  pod 'AMPSKSAdapter', '~> 5.1.4920.1'  #快手
+  pod 'AMPSGMAdapter', '~> 5.1.7200.2' #gromore
+  pod 'AMPSBDAdapter', '~> 5.1.10020.1'  #百度
+  pod 'AMPSSGAdapter', '~> 5.1.4203.0'  #sigmob
+#  pod 'AMPSJDAdapter', '~> 5.1.268.0'   #京东
+#  pod 'AMPSQMAdapter', '~> 5.1.137.0'   #趣盟
+#  pod 'AMPSOCTAdapter', '~> 5.1.2510.0'  #章鱼
+#  pod 'AMPSMSAdapter', '~> 5.1.2772.0'   #美数
+  
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
     inherit! :search_paths

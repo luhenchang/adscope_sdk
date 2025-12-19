@@ -215,12 +215,24 @@ class _SplashPageState extends State<NativeUnifiedPage> {
           ),
           UnifiedDescWidget(
             fontSize: 14,
-            width: 180,
+            width: expressWidth - 8,
             color: "#4E5969",
             ellipsize: Ellipsize.end,
             maxLines: 1,
-            x: 2,
+            x: 37,
             y: expressHeight - 30,
+          ),
+          UnifiedAppIconWidget(
+            width: 25,
+            height: 25,
+            x: 10,
+            y: expressHeight - 30,
+          ),
+          UnifiedAdSourceLogoWidget(
+            width: 50,
+            height: 25,
+            x: expressWidth - 50,
+            y: expressHeight - 30
           ),
           UnifiedActionButtonWidget(
             fontSize: 12,
@@ -229,7 +241,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
             fontColor: '#FFFFFF',
             backgroundColor: '#2F80ED',
             x: expressWidth - 60,
-            y: expressHeight - 32,
+            y: expressHeight - 60,
           ),
         ];
       case 2:
