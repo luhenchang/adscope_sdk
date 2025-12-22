@@ -21,7 +21,6 @@ class _InterstitialShowPageState extends State<InterstitialShowPage> {
     super.initState();
     _adCallBack = AdCallBack(
         onRenderOk: () {
-          couldBack = false;
           _interAd?.showAd();
           debugPrint("ad load onRenderOk");
         },
@@ -47,6 +46,9 @@ class _InterstitialShowPageState extends State<InterstitialShowPage> {
           debugPrint("ad load onAdReward");
         },
         onAdShow: () {
+          setState(() {
+            couldBack = false;
+          });
           debugPrint("ad load onAdShow");
         },
         onAdShowError: (code, msg) {

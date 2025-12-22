@@ -92,8 +92,6 @@ class AMPSInitConfigKey {
   /// 对应 customUA 的序列化键
   static const String customUA = 'customUA';
 
-  static const String androidId = "AndroidID";
-
   static const String customGAID = "customGAID";
 
   static const String optionInfo = "optionInfo";

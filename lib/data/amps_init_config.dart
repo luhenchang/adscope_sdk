@@ -399,7 +399,6 @@ class AMPSInitConfig {
       AMPSInitConfigKey.countryCN: countryCN,
       AMPSInitConfigKey.appName: appName,
       AMPSInitConfigKey.customUA: customUA,
-      AMPSInitConfigKey.androidId: androidID,
       AMPSInitConfigKey.customGAID: customGAID,
       AMPSInitConfigKey.optionInfo: optionInfo,
       AMPSInitConfigKey.userId: userId,
@@ -457,12 +456,6 @@ class AMPSBuilder {
   /// 设置自定义UserAgent
   AMPSBuilder setCustomUA(String ua) {
     customUA = ua;
-    return this;
-  }
-
-  /// 设置AndroidID
-  AMPSBuilder setAndroidID(String id) {
-    androidID = id;
     return this;
   }
 
