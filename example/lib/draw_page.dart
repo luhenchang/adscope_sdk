@@ -202,33 +202,6 @@ class _DrawPageState extends State<DrawPage> with WidgetsBindingObserver {
 
   int get totalItemCount => mergedFeedList.length;
 
-  // 抖音风格加载占位图
-  Widget _buildPlaceholder() {
-    return Container(
-      color: const Color(0xFF121212),
-      child: const Center(
-        child: CircularProgressIndicator(
-          color: Colors.white,
-          strokeWidth: 2,
-        ),
-      ),
-    );
-  }
-
-  // 抖音风格错误占位图
-  Widget _buildErrorWidget() {
-    return Container(
-      color: const Color(0xFF121212),
-      child: const Center(
-        child: Icon(
-          Icons.broken_image,
-          color: Colors.grey,
-          size: 48,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     // 全屏尺寸

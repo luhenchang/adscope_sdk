@@ -22,11 +22,10 @@ class _SplashShowPageState extends State<SplashShowPage> {
   @override
   void initState() {
     super.initState();
-    _adCallBack = AdCallBack(onLoadSuccess: () {
-      debugPrint("ad load onLoadSuccess");
-    }, onRenderOk: () {
-      debugPrint("Flutter==onAmpsAdLoaded=renderOK");
+    _adCallBack = AdCallBack(
+        onRenderOk: () {
       _splashAd?.showAd();
+          //TODO 如果添加了底部自定义，那么开屏的高度 = size.height - 100（这里的100是底部自定义部分的高度）
           // splashBottomWidget: SplashBottomWidget(
           //     height: 100,
           //     backgroundColor: "#FFFFFFFF",
@@ -46,9 +45,6 @@ class _SplashShowPageState extends State<SplashShowPage> {
           //     text: 'Hello Android!',
           //   ),
           // ]));
-      setState(() {
-        couldBack = false;
-      });
       debugPrint("ad load onRenderOk");
     }, onLoadFailure: (code, msg) {
       debugPrint("ad load failure=$code;$msg");
@@ -67,27 +63,22 @@ class _SplashShowPageState extends State<SplashShowPage> {
         couldBack = true;
       });
       debugPrint("ad load onAdClosed");
-    }, onAdReward: () {
-      debugPrint("ad load onAdReward");
     }, onAdShow: () {
       debugPrint("ad load onAdShow");
-    }, onAdShowError: (code, msg) {
-      debugPrint("ad load onAdShowError");
-    }, onRenderFailure: () {
-      debugPrint("ad load onRenderFailure");
-    }, onVideoPlayStart: () {
-      debugPrint("ad load onVideoPlayStart");
-    }, onVideoPlayError: (code, msg) {
-      debugPrint("ad load onVideoPlayError");
-    }, onVideoPlayEnd: () {
-      debugPrint("ad load onVideoPlayEnd");
-    }, onVideoSkipToEnd: (duration) {
-      debugPrint("ad load onVideoSkipToEnd=$duration");
+      setState(() {
+        couldBack = false;
+      });
     });
-
-    AdOptions options = AdOptions(spaceId: splashSpaceId, splashAdBottomBuilderHeight: 100);
-    _splashAd = AMPSSplashAd(config: options, mCallBack: _adCallBack);
-    _splashAd?.load();
+    //TODO 保证开屏的宽高获取到
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        var size = MediaQuery.of(context).size;
+        AdOptions options = AdOptions(
+            spaceId: splashSpaceId,expressSize: [size.width,size.height]);
+        _splashAd = AMPSSplashAd(config: options, mCallBack: _adCallBack);
+        _splashAd?.load();
+      }
+    });
   }
 
   @override
@@ -108,7 +99,9 @@ class _SplashShowPageState extends State<SplashShowPage> {
                     ButtonWidget(
                         buttonText: '点击加载开屏页面',
                         callBack: () {
-                          AdOptions options = AdOptions(spaceId: splashSpaceId);
+                          var size = MediaQuery.of(context).size;
+                          AdOptions options = AdOptions(
+                              spaceId: splashSpaceId,expressSize: [size.width,size.height]);
                           _splashAd = AMPSSplashAd(config: options, mCallBack: _adCallBack);
                           _splashAd?.load();
                         }),

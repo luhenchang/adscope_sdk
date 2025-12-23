@@ -16,11 +16,8 @@ class NativeUnifiedPage extends StatefulWidget {
 
 class _SplashPageState extends State<NativeUnifiedPage> {
   late AMPSNativeAdListener _adCallBack;
-  // late AMPSNegativeFeedbackListener _negativeFeedBackListener;
   late AMPSNativeRenderListener _renderCallBack;
   late AmpsNativeInteractiveListener _interactiveCallBack;
-  late AmpsVideoPlayListener _videoPlayerCallBack;
-  late AMPSUnifiedDownloadListener _downloadListener;
   AMPSNativeAd? _nativeAd;
   List<String> feedList = [];
   List<String> feedAdList = [];
@@ -72,28 +69,6 @@ class _SplashPageState extends State<NativeUnifiedPage> {
         feedAdList.remove(adId);
       });
     });
-    _videoPlayerCallBack = AmpsVideoPlayListener(onVideoPause: (adId) {
-      debugPrint("视频暂停");
-    }, onVideoPlayError: (adId, code, message) {
-      debugPrint("视频播放错误");
-    }, onVideoResume: (adId) {
-      debugPrint("视频恢复播放");
-    }, onVideoReady: (adId) {
-      debugPrint("视频准备就绪");
-    }, onVideoPlayStart: (adId) {
-      debugPrint("视频开始播放");
-    }, onVideoPlayComplete: (adId) {
-      debugPrint("视频播放完成");
-    });
-    _downloadListener = AMPSUnifiedDownloadListener(
-        onDownloadProgressUpdate: (position, adId) {
-          debugPrint("下载进度=${position}adId=$adId");
-        },
-        onDownloadFailed: (adId) {},
-        onDownloadPaused: (position, adId) {},
-        onDownloadFinished: (adId) {},
-        onDownloadStarted: (adId) {},
-        onInstalled: (adId) {});
     AdOptions options = AdOptions(
         spaceId: unifiedSpaceId,
         adCount: 1,
@@ -126,7 +101,6 @@ class _SplashPageState extends State<NativeUnifiedPage> {
                     UnifiedWidget(
                       _nativeAd,
                       mInteractiveCallBack: _interactiveCallBack,
-                      mVideoPlayerCallBack: _videoPlayerCallBack,
                       key: ValueKey(adId),
                       adId: adId,
                       unifiedContent: NativeUnifiedWidget(
@@ -134,7 +108,6 @@ class _SplashPageState extends State<NativeUnifiedPage> {
                           height: expressHeight,
                           backgroundColor: '#80F7FF',
                           children:_getChildrenByType(adPattern.value)),
-                      downloadListener: _downloadListener,
                     ),
                     Positioned(
                       top: 8,

@@ -59,7 +59,7 @@ class _BannerWidgetPageState extends State<BannerWidgetPage> {
 
   @override
   void dispose() {
-    //_bannerAd?.destroy();
+    _bannerAd?.destroy();
     super.dispose();
   }
 
@@ -75,23 +75,7 @@ class _BannerWidgetPageState extends State<BannerWidgetPage> {
             const BlurredBackground(),
             Column(children: [
               if (splashVisible) BannerWidget(_bannerAd),
-              const SizedBox(height: 100, width: 0),
-              ButtonWidget(
-                  buttonText: '获取竞价=$eCpm',
-                  callBack: () async {
-                    _bannerAd?.getMediaExtraInfo().then((mediaInfo)=>{
-                       debugPrint("mediaInfo=${mediaInfo.toString()}")
-                    });
-                    bool? isReadyAd = await _bannerAd?.isReadyAd();
-                    debugPrint("isReadyAd=$isReadyAd");
-                    if (_bannerAd != null) {
-                      num ecPmResult = await _bannerAd!.getECPM();
-                      debugPrint("ecPm请求结果=$eCpm");
-                      setState(() {
-                        eCpm = ecPmResult;
-                      });
-                    }
-                  }),
+              const SizedBox(height: 100, width: 0)
             ]),
           ],
         ));

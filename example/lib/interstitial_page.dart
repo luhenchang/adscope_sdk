@@ -27,20 +27,7 @@ class _InterstitialPageState extends State<InterstitialPage> {
           setState(() {
             visibleAd = true;
           });
-          //_interAd?.showAd();
           debugPrint("ad load onRenderOk");
-        },
-        onLoadFailure: (code, msg) {
-          debugPrint("ad load failure=$code;$msg");
-        },
-        onAdClicked: () {
-          setState(() {
-            couldBack = true;
-          });
-          debugPrint("ad load onAdClicked");
-        },
-        onAdExposure: () {
-          debugPrint("ad load onAdExposure");
         },
         onAdClosed: () {
           setState(() {
@@ -49,32 +36,11 @@ class _InterstitialPageState extends State<InterstitialPage> {
           });
           debugPrint("ad load onAdClosed");
         },
-        onAdReward: () {
-          debugPrint("ad load onAdReward");
-        },
         onAdShow: () {
           setState(() {
             couldBack = false;
           });
           debugPrint("ad load onAdShow");
-        },
-        onAdShowError: (code, msg) {
-          debugPrint("ad load onAdShowError");
-        },
-        onRenderFailure: () {
-          debugPrint("ad load onRenderFailure");
-        },
-        onVideoPlayStart: () {
-          debugPrint("ad load onVideoPlayStart");
-        },
-        onVideoPlayError: (code,msg) {
-          debugPrint("ad load onVideoPlayError");
-        },
-        onVideoPlayEnd: () {
-          debugPrint("ad load onVideoPlayEnd");
-        },
-        onVideoSkipToEnd: (duration) {
-          debugPrint("ad load onVideoSkipToEnd=$duration");
         });
 
     AdOptions options = AdOptions(spaceId: interstitialSpaceId);
@@ -82,7 +48,6 @@ class _InterstitialPageState extends State<InterstitialPage> {
   }
   @override
   void dispose() {
-    debugPrint("差评销毁来了11");
     super.dispose();
   }
   @override
@@ -104,20 +69,7 @@ class _InterstitialPageState extends State<InterstitialPage> {
                       debugPrint("差评调用来了11");
                       _interAd?.load();
                     },
-                  ),
-                  ButtonWidget(
-                      buttonText: '获取竞价=$eCpm',
-                      callBack: () async {
-                        bool? isReadyAd = await _interAd?.isReadyAd();
-                        debugPrint("isReadyAd=$isReadyAd");
-                        if (_interAd != null) {
-                          num ecPmResult = await _interAd!.getECPM();
-                          setState(() {
-                            eCpm = ecPmResult;
-                            debugPrint("ecPm请求结果=$eCpm");
-                          });
-                        }
-                      })
+                  )
                 ]),
                 if (visibleAd) const InterstitialWidget()
               ],

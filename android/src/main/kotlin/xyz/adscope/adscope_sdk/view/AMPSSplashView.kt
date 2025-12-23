@@ -106,14 +106,10 @@ class AMPSSplashView(
      * 清理广告相关资源，用于 onDismiss 和 dispose。
      */
     private fun cleanupAdResources() {
-        // 1. 销毁广告实例，这是最重要的
+        adContainerInPlatformView.removeAllViews()
+        rootPlatformView.removeAllViews()
         mSplashAd?.destroy()
         mSplashAd = null
-        // 2. 清理视图层级，防止内存泄漏
-        // adContainerInPlatformView 内部的子视图是广告SDK添加的，removeAllViews 是好的
-        adContainerInPlatformView.removeAllViews()
-        // 如果根视图是 RelativeLayout，需要将子视图移除
-        rootPlatformView.removeAllViews()
         SplashBottomModule.current = null
     }
 

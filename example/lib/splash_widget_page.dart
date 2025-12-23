@@ -54,9 +54,18 @@ class _SplashWidgetPageState extends State<SplashWidgetPage> {
       debugPrint("ad load onAdClosed");
     });
 
-    AdOptions options = AdOptions(spaceId: splashSpaceId, splashAdBottomBuilderHeight: 100);
-    _splashAd = AMPSSplashAd(config: options, mCallBack: _adCallBack);
-    _splashAd?.load();
+    //TODO 保证开屏的宽高获取到
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        var size = MediaQuery.of(context).size;
+        AdOptions options = AdOptions(spaceId: splashSpaceId, expressSize: [
+          size.width,
+          size.height - 100 //TODO 需要注意添加了底部自定义高度是100所以需要减去
+        ]);
+        _splashAd = AMPSSplashAd(config: options, mCallBack: _adCallBack);
+        _splashAd?.load();
+      }
+    });
   }
 
   @override

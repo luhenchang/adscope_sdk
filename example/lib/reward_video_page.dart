@@ -75,19 +75,6 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
                         buttonText: '点击加载激励视频',
                         callBack: () {
                           _rewardVideoAd?.load();
-                        }),
-                    ButtonWidget(
-                        buttonText: '获取竞价=$eCpm',
-                        callBack: () async {
-                          bool? isReadyAd = await _rewardVideoAd?.isReadyAd();
-                          debugPrint("isReadyAd=$isReadyAd");
-                          if (_rewardVideoAd != null) {
-                            num ecPmResult = await _rewardVideoAd!.getECPM();
-                            debugPrint("ecPm请求结果=$eCpm");
-                            setState(() {
-                              eCpm = ecPmResult;
-                            });
-                          }
                         })
                   ],
                 )

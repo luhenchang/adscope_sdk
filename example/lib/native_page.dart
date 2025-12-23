@@ -15,7 +15,6 @@ class _SplashPageState extends State<NativePage> {
   late AMPSNativeAdListener _adCallBack;
   late AMPSNativeRenderListener _renderCallBack;
   late AmpsNativeInteractiveListener _interactiveCallBack;
-  late AmpsVideoPlayListener _videoPlayerCallBack;
   AMPSNativeAd? _nativeAd;
   List<String> feedList = [];
   List<String> feedAdList = [];
@@ -38,10 +37,6 @@ class _SplashPageState extends State<NativePage> {
 
     _renderCallBack = AMPSNativeRenderListener(renderSuccess: (adId) {
       setState(() {
-       _nativeAd?.isNativeExpress(adId).then((isNativeExpress){
-         debugPrint("isNativeExpress=$isNativeExpress");
-       });
-        debugPrint("adId renderCallBack=$adId");
         feedAdList.add(adId);
       });
     }, renderFailed: (adId, code, message) {
@@ -59,19 +54,6 @@ class _SplashPageState extends State<NativePage> {
       setState(() {
         feedAdList.remove(adId);
       });
-    });
-    _videoPlayerCallBack = AmpsVideoPlayListener(onVideoPause: (adId) {
-      debugPrint("视频暂停");
-    }, onVideoPlayError: (adId ,code, message) {
-      debugPrint("视频播放错误");
-    }, onVideoResume: (adId) {
-      debugPrint("视频恢复播放");
-    }, onVideoReady: (adId) {
-      debugPrint("视频准备就绪");
-    }, onVideoPlayStart: (adId) {
-      debugPrint("视频开始播放");
-    }, onVideoPlayComplete: (adId) {
-      debugPrint("视频播放完成");
     });
 
     AdOptions options = AdOptions(
@@ -108,7 +90,6 @@ class _SplashPageState extends State<NativePage> {
 
               return NativeWidget(_nativeAd,
                   mInteractiveCallBack: _interactiveCallBack,
-                  mVideoPlayerCallBack: _videoPlayerCallBack,
                   key: ValueKey(adId),
                   adId: adId);
 
