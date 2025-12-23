@@ -420,7 +420,7 @@ class AMPSInitConfig {
 class AMPSBuilder {
   String appId;
   String appName = "";
-  bool isDebugSetting = false;
+  bool isDebugSetting = true;
   bool isUseHttps = false;
   String userId = "";
   String? customUA;
