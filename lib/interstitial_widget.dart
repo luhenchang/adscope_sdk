@@ -41,10 +41,10 @@ class _InterstitialWidgetState extends State<InterstitialWidget> {
     return view;
   }
   ///通知关闭开屏显示组件内容，避免关闭广告之后用户可见。
-  void _onPlatformViewCreated(int id) {
-    // debugPrint("ad load  _onPlatformViewCreated");
-    // setState(() {
-    //   widgetNeedClose = true;
-    // });
-  }
+  // void _onPlatformViewCreated(int id) {
+  //   debugPrint("ad load  _onPlatformViewCreated");
+  //   setState(() {
+  //     widgetNeedClose = true;
+  //   });
+  // }
 }

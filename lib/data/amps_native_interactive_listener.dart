@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 ///原生和原生自渲染广告相关回调
 ///原生广告加载回调
 typedef AdLoadCallback = void Function(List<String> adIds);

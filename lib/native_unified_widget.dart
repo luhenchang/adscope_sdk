@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'common.dart';
-import 'widget/native_unified_widget.dart';
 
 class UnifiedWidget extends StatefulWidget {
   /// 返回的广告 id，这里不是广告位id

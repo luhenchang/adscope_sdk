@@ -1,6 +1,7 @@
 library;
 export 'package:adscope_sdk/data/amps_ad.dart';
 export 'package:adscope_sdk/data/amps_init_config.dart';
+export 'package:adscope_sdk/data/amps_sdk_init_status.dart';
 export 'package:adscope_sdk/data/amps_native_interactive_listener.dart';
 export 'package:adscope_sdk/data/amps_sdk_api_keys.dart';
 export 'package:adscope_sdk/data/amps_ad_video_play_config.dart';
@@ -24,7 +25,7 @@ export 'package:adscope_sdk/controller/amps_ad_sdk.dart';
 export 'package:adscope_sdk/controller/amps_reward_video_ad.dart';
 export 'package:adscope_sdk/controller/amps_banner_ad.dart';
 export 'package:adscope_sdk/controller/amps_draw_ad.dart';
-export 'package:adscope_sdk/controller/amps_sdk_Log.dart';
+export 'package:adscope_sdk/controller/amps_sdk_log.dart';
 
 export 'package:adscope_sdk/interstitial_widget.dart';
 export 'package:adscope_sdk/native_widget.dart';
