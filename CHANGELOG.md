@@ -1,3 +1,3 @@
 ## 0.0.1
 
-* TODO: Describe initial release.
+* 倍孜Flutter聚合SDK首次发版。
