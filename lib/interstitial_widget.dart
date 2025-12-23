@@ -1,5 +1,8 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
+
+import 'common.dart';
 ///插屏组件
 class InterstitialWidget extends StatefulWidget {
   const InterstitialWidget({super.key});
@@ -41,10 +44,6 @@ class _InterstitialWidgetState extends State<InterstitialWidget> {
     return view;
   }
   ///通知关闭开屏显示组件内容，避免关闭广告之后用户可见。
-  // void _onPlatformViewCreated(int id) {
-  //   debugPrint("ad load  _onPlatformViewCreated");
-  //   setState(() {
-  //     widgetNeedClose = true;
-  //   });
-  // }
+  void _onPlatformViewCreated(int id) {
+  }
 }
