@@ -39,13 +39,13 @@ class _SplashWidgetState extends State<SplashWidget> {
     } else if (Platform.isIOS) {
       view =  const Center(child: Text("IOS端暂不支持组件方式"));
     }
-    // else if (Platform.isOhos) {
-    //   view =  OhosView(
-    //       viewType: AMPSPlatformViewRegistry.ampsSdkSplashViewId,
-    //       onPlatformViewCreated: _onPlatformViewCreated,
-    //       creationParams: splashParam,
-    //       creationParamsCodec: const StandardMessageCodec());
-    // }
+    else if (Platform.isOhos) {
+      view =  OhosView(
+          viewType: AMPSPlatformViewRegistry.ampsSdkSplashViewId,
+          onPlatformViewCreated: _onPlatformViewCreated,
+          creationParams: splashParam,
+          creationParamsCodec: const StandardMessageCodec());
+    }
     else {
       view =  const Center(child: Text("暂不支持此平台"));
     }

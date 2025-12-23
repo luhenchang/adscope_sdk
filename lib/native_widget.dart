@@ -87,13 +87,13 @@ class _NativeWidgetState extends State<NativeWidget>
           onPlatformViewCreated: _onPlatformViewCreated,
           creationParamsCodec: const StandardMessageCodec());
     }
-    // else if (Platform.isOhos) {
-    //   view =  OhosView(
-    //       viewType: AMPSPlatformViewRegistry.ampsSdkNativeViewId,
-    //       onPlatformViewCreated: _onPlatformViewCreated,
-    //       creationParams: creationParams,
-    //       creationParamsCodec: const StandardMessageCodec());
-    // }
+    else if (Platform.isOhos) {
+      view =  OhosView(
+          viewType: AMPSPlatformViewRegistry.ampsSdkNativeViewId,
+          onPlatformViewCreated: _onPlatformViewCreated,
+          creationParams: creationParams,
+          creationParamsCodec: const StandardMessageCodec());
+    }
     else {
       view = const Center(child: Text("暂不支持此平台"));
     }
