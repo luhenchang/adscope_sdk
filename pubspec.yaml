@@ -1,6 +1,6 @@
 name: adscope_sdk
 description: "倍孜聚合广告Flutter插件，媒体可轻松通过统一API接入多端手机系统（Android,Ios,Harmony）"
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/luhenchang/adscope_sdk.git
 
 environment:
