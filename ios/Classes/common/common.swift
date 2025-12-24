@@ -159,7 +159,7 @@ enum AMPSAdSdkMethodNames {
     static let interstitialCreate = "AMPSInterstitial_create"
     static let interstitialLoad = "AMPSInterstitial_load"
     static let interstitialShowAd = "AMPSInterstitial_showAd"
-    static let interstitialGetEcpm = "AMPSSInterstitial_getECPM"
+    static let interstitialGetEcpm = "AMPSInterstitial_getECPM"
 //    static let interstitialNotifyRtbWin = "AMPSInterstitial_notifyRTBWin"
 //    static let interstitialNotifyRtbLoss = "AMPSInterstitial_notifyRTBLoss"
     static let interstitialIsReadyAd = "AMPSInterstitial_isReadyAd"
