@@ -56,7 +56,7 @@ interface AdControllerPropKeyInterface {
   readonly IS_SUPPORT_PERSONALIZED: string;
   readonly GET_UNDERAGE_TAG: string;
   readonly USER_AGENT: string;
-  readonly IS_CAN_USE_SENSOR: string;
+  readonly IS_CAN_USE_SHAKE: string;
   readonly IS_LOCATION_ENABLED: string;
   readonly LOCATION: string;
 }
@@ -119,7 +119,7 @@ export const AdControllerPropKey: AdControllerPropKeyInterface = {
   IS_SUPPORT_PERSONALIZED: "isSupportPersonalized",
   GET_UNDERAGE_TAG: "getUnderageTag",
   USER_AGENT: "userAgent",
-  IS_CAN_USE_SENSOR: "isCanUseSensor",
+  IS_CAN_USE_SHAKE: "isCanUseShakeAd",
   IS_LOCATION_ENABLED: "isLocationEnabled",
   LOCATION: "location"
 };
@@ -275,7 +275,7 @@ export class AMPSInitConfigConverter {
         if (userAgent != undefined) {
           ampsCustomController.userAgent = userAgent;
         }
-        const isCanUseSensor = adCmController.get(AdControllerPropKey.IS_CAN_USE_SENSOR) as boolean;
+        const isCanUseSensor = adCmController.get(AdControllerPropKey.IS_CAN_USE_SHAKE) as boolean;
         if (isCanUseSensor != undefined) {
           ampsCustomController.isCanUseSensor = isCanUseSensor;
         }

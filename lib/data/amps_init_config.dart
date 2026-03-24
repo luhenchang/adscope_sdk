@@ -136,9 +136,6 @@ class AMPSCustomController {
   /// userAgent
   String? userAgent;
 
-  /// 是否可以使用传感器
-  bool isCanUseSensor;
-
   /// 是否允许SDK自身获取定位
   bool isLocationEnabled;
 
@@ -171,7 +168,6 @@ class AMPSCustomController {
         isSupportPersonalized = param?.isSupportPersonalized ?? true,
         getUnderageTag = param?.getUnderageTag ?? UnderageTag.unknown,
         userAgent = param?.userAgent,
-        isCanUseSensor = param?.isCanUseSensor ?? true,
         getAppList = param?.getAppList,
         isLocationEnabled = param?.isLocationEnabled ?? true,
         location = param?.location,
@@ -201,7 +197,6 @@ class AMPSCustomController {
       AMPSControllerKey.isSupportPersonalized: isSupportPersonalized,
       AMPSControllerKey.getUnderageTag: getUnderageTag.value, // 枚举用名称传递
       AMPSControllerKey.userAgent: userAgent,
-      AMPSControllerKey.isCanUseSensor: isCanUseSensor,
       AMPSControllerKey.isLocationEnabled: isLocationEnabled,
       AMPSControllerKey.location: location?.toJson(), // 嵌套对象序列化
       AMPSControllerKey.isCanUseWifiState: isCanUseWifiState,
@@ -245,9 +240,6 @@ class AMPSCustomControllerParam {
   /// userAgent
   final String? userAgent;
 
-  /// 是否可以使用传感器
-  final bool? isCanUseSensor;
-
   /// 是否允许SDK自身获取定位
   final bool? isLocationEnabled;
 
@@ -282,7 +274,6 @@ class AMPSCustomControllerParam {
     this.isSupportPersonalized,
     this.getUnderageTag,
     this.userAgent,
-    this.isCanUseSensor,
     this.isLocationEnabled,
     this.location,
     this.isCanUseWifiState,
