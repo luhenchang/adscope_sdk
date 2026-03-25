@@ -520,6 +520,11 @@ class AMPSBuilder {
     return this;
   }
 
+  /// 设置选项字段
+  AMPSBuilder setOptionFields(Map<String, dynamic> optionFields) {
+    this.optionFields = optionFields;
+    return this;
+  }
 
   /// 设置货币类型
   AMPSBuilder setCurrency(String currency) {
