@@ -119,6 +119,6 @@ struct AMPSIOSInitModel:Codable {
     let currency: String?
     let _isDebugSetting: Bool?
     let appName: String?
-//    let optionalInfor: [String:Any]?
+    let optionInfo: String?
 }
 
