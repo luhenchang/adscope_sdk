@@ -341,7 +341,6 @@ class AMPSInitConfig {
 
   final bool isUseSplashPunchLine;
 
-  final Map<String, dynamic> optionFields;
 
   final AMPSCustomController adController;
   final bool isMediation;
@@ -358,7 +357,6 @@ class AMPSInitConfig {
         _isDebugSetting = builder.isDebugSetting,
         _isUseHttps = builder.isUseHttps,
         userId = builder.userId,
-        optionFields = builder.optionFields,
         currency = builder.currency,
         countryCN = builder.countryCN,
         customUA = builder.customUA,
@@ -401,7 +399,6 @@ class AMPSInitConfig {
       AMPSInitConfigKey.uiModel: uiModel.name, // 假设 UiModel 是枚举
       AMPSInitConfigKey.adapterNames: adapterNames,
       AMPSInitConfigKey.extensionParam: extensionParam,
-      AMPSInitConfigKey.optionFields: optionFields,
       AMPSInitConfigKey.isUseSplashPunchLine: isUseSplashPunchLine,
       AMPSInitConfigKey.adController: adController.toJson(),
     };
@@ -418,7 +415,6 @@ class AMPSBuilder {
   String? androidID;
   String? optionInfo;
   String? customGAID;
-  Map<String, dynamic> optionFields = {};
   String currency = "";
   int countryCN = CountryType.countryTypeChinaMainland;
   bool isTestAd = false;
