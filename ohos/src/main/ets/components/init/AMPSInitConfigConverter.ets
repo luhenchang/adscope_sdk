@@ -45,6 +45,7 @@ interface ParamsKeyInterface {
   // 扩展与配置参数
   readonly EXTENSION_PARAM: string;
   readonly OPTION_FIELDS: string;
+  readonly OPTION_INFO: string
   readonly AD_CONTROLLER: string;
   readonly ADAPTER_STATUS_BAR_HEIGHT: string;
 }
@@ -108,6 +109,7 @@ export const ParamsKey: ParamsKeyInterface = {
   // 扩展与配置参数
   EXTENSION_PARAM: "extensionParam",
   OPTION_FIELDS: "optionFields",
+  OPTION_INFO: "optionInfo",
   AD_CONTROLLER: "adController",
   ADAPTER_STATUS_BAR_HEIGHT: "adapterStatusBarHeight"
 };
@@ -241,6 +243,11 @@ export class AMPSInitConfigConverter {
       const optionFields = flutterParams.get(ParamsKey.OPTION_FIELDS) as OptionFieldsType;
       if (optionFields) {
         ampsInitConfigBuilder?.setOptionFields(optionFields);
+      }
+
+      const optionInfo = flutterParams.get(ParamsKey.OPTION_INFO) as string;
+      if (optionInfo) {
+        ampsInitConfigBuilder?.setOptionInfo(optionInfo);
       }
 
       // 状态栏高度适配

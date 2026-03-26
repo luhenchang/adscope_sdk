@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 import 'amps_sdk_api_keys.dart';
 
 ///UI模式【自动、黑色、浅色】
@@ -330,7 +332,7 @@ class AMPSInitConfig {
   /// androidID
   final String? androidID;
 
-  ///optionInfo Android特有
+  ///optionInfo 三端统一
   final String? optionInfo;
 
   /// 聚合模式下，提前初始化的第三方广告渠道平台
@@ -379,6 +381,7 @@ class AMPSInitConfig {
 
   /// 转为 Map（用于JSON序列化）
   Map<String, dynamic> toMap(bool testModel) {
+    debugPrint("-----optionInfo-----: $optionInfo" );
     return {
       /// 基础类型直接传递
       AMPSInitConfigKey.testModel: testModel,

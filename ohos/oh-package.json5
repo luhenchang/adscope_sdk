@@ -6,6 +6,6 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "xyz.adscope.amps": "file: ./libs/AMPSAdSDK_5.1.7.har",
+    "xyz.adscope.amps": "file: ./libs/AMPSAdSDK_5.1.8.har",
   }
 }
