@@ -4,7 +4,7 @@ import 'package:adscope_sdk/adscope_sdk.dart';
 import 'package:flutter/material.dart';
 import '../common.dart';
 import '../data/amps_init_config.dart';
-import '../data/amps_sdk_Init_status.dart';
+import '../data/amps_sdk_init_status.dart';
 ///SDK初始化入口类
 class AMPSAdSDK {
   static const String _initHandlerKey = "sdk_init_handler";
