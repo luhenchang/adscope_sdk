@@ -7,9 +7,9 @@
   "author": "",
   "license": "",
   "overrides": {
-    "xyz.adscope.amps": "file:./libs/AMPSAdSDK_5.1.8.har",
+    "xyz.adscope.amps": "file:./libs/AMPSAdSDK_5.2.0.har",
     "ksadsdk": "file:./libs/KSAdSDK-3.0.10.har",
-    '@gdt/gdt-union-sdk': "file:./libs/GDTUnionSDK-1.2.0.har",
+    '@gdt/gdt-union-sdk': "file:./libs/GDTUnionSDK-1.2.0.har"
   },
   "dependencies": {},
   "devDependencies": {

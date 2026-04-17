@@ -7,11 +7,11 @@
         "material": {
           "certpath": "/Users/dzq_bookpro/.ohos/config/default_ohos_lIAHRka0ovwIzakWxeBCCDoXNNAPkWBMODxXjr1ZNvU=.cer",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001A0339C41AC08434C4A6FFCACA3AF0151519CE6743251E93813C237869682E8B427E4B27A1A95E",
+          "keyPassword": "0000001B7BB7930CDBFFF85E50FD7E2C5FAC17E88D10B93687FC171915FDC4493E6000C94310D052D10361",
           "profile": "/Users/dzq_bookpro/.ohos/config/default_ohos_lIAHRka0ovwIzakWxeBCCDoXNNAPkWBMODxXjr1ZNvU=.p7b",
           "signAlg": "SHA256withECDSA",
           "storeFile": "/Users/dzq_bookpro/.ohos/config/default_ohos_lIAHRka0ovwIzakWxeBCCDoXNNAPkWBMODxXjr1ZNvU=.p12",
-          "storePassword": "0000001AE7EF1B0A1D9562E9EE5E11131A03CBA3B834BDC50550857F1C0F3584960813199D8E4B4B3E59"
+          "storePassword": "0000001B21EA305723D4CFE9E453E99A071484C96AD6B3D6977EBBA231E6BA975DECD8206F7E63A61A7FB0"
         }
       }
     ],
