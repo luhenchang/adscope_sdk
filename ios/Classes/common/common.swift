@@ -200,6 +200,10 @@ enum AMPSAdSdkMethodNames {
     static let nativeSetVideoPlayConfig = "AMPSNative_setVideoPlayConfig"
     static let nativeGetUnifiedPattern = "AMPSNative_getUnifiedPattern"
     static let nativeGetDownLoad  = "AMPSNative_getDownLoad"
+    static let nativeDestroy = "AMPSNative_destroy"
+    static let nativeResume = "AMPSNative_resume"
+    static let nativePause = "AMPSNative_pause"
+    static let nativeGetMediaExtraInfo = "AMPSNative_getMediaExtraInfo"
     
     //激励视频
     static let rewardVideoCreate = "AMPSRewardVideo_create"
@@ -257,6 +261,8 @@ enum ArgumentKeys {
     static let adOption = "AdOption"
     static let config = "config"
     static let splashBottom = "SplashBottomView"
+    static let splashInstanceId = "splashInstanceId"
+    static let adInstanceId = "adInstanceId"
     static let videoSound = "videoSoundEnable"
     static let videoPlayType = "videoAutoPlayType"
     static let videoLoopReplay = "videoLoopReplay"
@@ -308,7 +314,11 @@ let nativeMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.nativeGetVideoDuration,
     AMPSAdSdkMethodNames.nativeSetVideoPlayConfig,
     AMPSAdSdkMethodNames.nativeGetUnifiedPattern,
-    AMPSAdSdkMethodNames.nativeGetDownLoad
+    AMPSAdSdkMethodNames.nativeGetDownLoad,
+    AMPSAdSdkMethodNames.nativeDestroy,
+    AMPSAdSdkMethodNames.nativeResume,
+    AMPSAdSdkMethodNames.nativePause,
+    AMPSAdSdkMethodNames.nativeGetMediaExtraInfo
 ]
 let rewardVideoMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.rewardVideoCreate,

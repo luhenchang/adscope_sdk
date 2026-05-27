@@ -222,6 +222,14 @@ class AMPSAdSdkMethodNames {
   static const String drawResumeAd = "AMPSDraw_resume";
   static const String drawGetMediaExtraInfo = "AMPSDraw_getMediaExtraInfo";
 }
+/// 开屏多实例标识（Flutter 与原生 MethodChannel 参数、回调共用）
+class AMPSSplashInstanceKey {
+  static const String splashInstanceId = "splashInstanceId";
+}
+class AMPSAdInstanceKey {
+  static const String adInstanceId = "adInstanceId";
+}
+
 ///Error对应的key
 class AMPSSdkCallBackErrorKey {
   static const String adId = "adId";

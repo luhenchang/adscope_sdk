@@ -1,4 +1,3 @@
-
 import {
   Any, MethodCall, MethodResult
 } from '@ohos/flutter_ohos';
@@ -11,95 +10,25 @@ import {
   AMPSDrawRenderListener
 } from 'xyz.adscope.amps';
 import {
+  AD_INSTANCE_ID,
   AMPSAdSdkMethodNames,
   AmpsDrawCallbackChannelMethod
 } from '../common/common';
 import { AdOptionsModule } from '../common/AdOptionsModule';
 import { window } from '@kit.ArkUI';
-import { AdWrapperManager } from '../native/AdWrapperManager';
 import { AMPSEventManager } from '../common/AMPSEventManager';
+
+class DrawSlot {
+  instanceId: string = '';
+  ad?: AMPSDrawAd;
+  adItemMap: Map<string, AMPSDrawAdWrapper> = new Map();
+}
 
 export class AMPSDrawAdManager {
   private static instance: AMPSDrawAdManager;
-  // 使用private修饰符限制访问，并添加明确类型
   private mWindowStage?: window.WindowStage;
-  private mDrawAd?: AMPSDrawAd;
-  private adItemMap: Map<string,AMPSDrawAdWrapper> = new Map()
-
-  getAdItem(id:string){
-    return this.adItemMap.get(id)
-  }
-  addAdItem(adWrapper: AMPSDrawAdWrapper){
-    this.adItemMap.set(adWrapper.adId,adWrapper)
-  }
-
-
-
-  private mAdWrapperCallBack: AMPSNativeInteractiveListener = {
-    onAdShow: (adId?: string | undefined): void => {
-      // this.sendMessage(AmpsDrawCallbackChannelMethod.onAdShow, adId)
-    },
-    onAdExposure: (adId?: string | undefined): void => {
-      this.sendMessage(AmpsDrawCallbackChannelMethod.onAdShow, adId)
-    },
-    onAdClicked: (adId?: string | undefined): void => {
-      this.sendMessage(AmpsDrawCallbackChannelMethod.onAdClicked, adId)
-    },
-    toCloseAd: (adId?: string | undefined): void => {
-      if (adId) {
-        AdWrapperManager.getInstance().removeAd(adId);
-        this.sendMessage(AmpsDrawCallbackChannelMethod.onAdClosed, adId)
-      }
-    }
-  }
-  private mRenderCallBack: AMPSDrawRenderListener = {
-    renderSuccess: (adWrapper: AMPSDrawAdWrapper): void => {
-      this.sendMessage(AmpsDrawCallbackChannelMethod.onRenderSuccess, adWrapper.adId)
-      adWrapper.interactCallBack = this.mAdWrapperCallBack;
-      adWrapper.videoPlayCallBack = {
-        onVideoReady: () => {
-          // this.sendMessage(AmpsDrawCallbackChannelMethod.onVideoPlayStart, adWrapper.adId)
-        },
-        onVideoPlayStart: () => {
-          this.sendMessage(AmpsDrawCallbackChannelMethod.onVideoPlayStart, adWrapper.adId)
-        },
-        onVideoPause: () => {
-          this.sendMessage(AmpsDrawCallbackChannelMethod.onVideoPlayPause, adWrapper.adId)
-        },
-        onVideoResume: () => {
-          this.sendMessage(AmpsDrawCallbackChannelMethod.onVideoAdContinuePlay, adWrapper.adId)
-        },
-        onVideoPlayComplete: () => {
-          this.sendMessage(AmpsDrawCallbackChannelMethod.onVideoAdComplete, adWrapper.adId)
-        },
-        onVideoPlayError: (code, extra) => {
-          let adId = adWrapper.adId
-          this.sendMessage(AmpsDrawCallbackChannelMethod.onVideoError, { adId, code, extra })
-        }
-      };
-
-      //需要缓存到单利。使用完毕之后移除
-      this.addAdItem(adWrapper);
-    },
-    renderFailed: (adWrapper: AMPSDrawAdWrapper): void => {
-      this.sendMessage(AmpsDrawCallbackChannelMethod.onRenderFail, adWrapper.adId)
-    }
-  }
-  private callback: AMPSDrawAdListener = {
-    loadOk: (adItems: AMPSDrawAdWrapper[]): void => {
-      const adIdList: string[] = adItems.map(ad => ad.adId);
-      //回调给Flutter端
-      this.sendMessage(AmpsDrawCallbackChannelMethod.onLoadSuccess, adIdList)
-      //render
-      adItems.forEach((item) => {
-        item.renderCallBack = this.mRenderCallBack;
-        item.renderAd();
-      })
-    },
-    loadFail: (code: number, message: string): void => {
-      this.sendMessage(AmpsDrawCallbackChannelMethod.onLoadFailure, { code, message })
-    }
-  };
+  private slots: Map<string, DrawSlot> = new Map();
+  private adIdToInstance: Map<string, string> = new Map();
 
   public static getInstance(): AMPSDrawAdManager {
     if (!AMPSDrawAdManager.instance) {
@@ -108,69 +37,205 @@ export class AMPSDrawAdManager {
     return AMPSDrawAdManager.instance;
   }
 
+  /** 提供给 view 组件按 adId 查询 wrapper（全局 UUID 唯一）。 */
+  getAdItem(adId: string): AMPSDrawAdWrapper | undefined {
+    const instanceId = this.adIdToInstance.get(adId);
+    if (!instanceId) {
+      return undefined;
+    }
+    return this.slots.get(instanceId)?.adItemMap.get(adId);
+  }
+
+  private extractInstanceId(args: Any): string | undefined {
+    if (args === null || args === undefined) {
+      return undefined;
+    }
+    const map = args as Record<string, Object>;
+    const id = map[AD_INSTANCE_ID];
+    return typeof id === 'string' ? id : undefined;
+  }
+
+  private getSlot(instanceId: string): DrawSlot | undefined {
+    return this.slots.get(instanceId);
+  }
+
+  private ensureSlot(instanceId: string): DrawSlot {
+    let slot = this.slots.get(instanceId);
+    if (!slot) {
+      slot = new DrawSlot();
+      slot.instanceId = instanceId;
+      this.slots.set(instanceId, slot);
+    }
+    return slot;
+  }
+
+  private cleanUp(instanceId: string): void {
+    const slot = this.slots.get(instanceId);
+    if (!slot) {
+      return;
+    }
+    slot.adItemMap.forEach((_, adId) => {
+      this.adIdToInstance.delete(adId);
+    });
+    slot.adItemMap.clear();
+    this.slots.delete(instanceId);
+  }
+
+  private buildInteractiveCallback(instanceId: string, slot: DrawSlot): AMPSNativeInteractiveListener {
+    return {
+      onAdShow: (_adId?: string): void => {
+        // 与 Native 一致：onAdShow 由 onAdExposure 触发，避免重复回调。
+      },
+      onAdExposure: (adId?: string): void => {
+        this.sendMessage(instanceId, AmpsDrawCallbackChannelMethod.onAdShow, { adId });
+      },
+      onAdClicked: (adId?: string): void => {
+        this.sendMessage(instanceId, AmpsDrawCallbackChannelMethod.onAdClicked, { adId });
+      },
+      toCloseAd: (adId?: string): void => {
+        if (adId) {
+          slot.adItemMap.delete(adId);
+          this.adIdToInstance.delete(adId);
+          this.sendMessage(instanceId, AmpsDrawCallbackChannelMethod.onAdClosed, { adId });
+        }
+      }
+    };
+  }
+
+  private buildRenderCallback(instanceId: string, slot: DrawSlot): AMPSDrawRenderListener {
+    return {
+      renderSuccess: (adWrapper: AMPSDrawAdWrapper): void => {
+        this.sendMessage(instanceId, AmpsDrawCallbackChannelMethod.onRenderSuccess, { adId: adWrapper.adId });
+        adWrapper.interactCallBack = this.buildInteractiveCallback(instanceId, slot);
+        adWrapper.videoPlayCallBack = {
+          onVideoReady: () => { },
+          onVideoPlayStart: () => {
+            this.sendMessage(instanceId, AmpsDrawCallbackChannelMethod.onVideoPlayStart, { adId: adWrapper.adId });
+          },
+          onVideoPause: () => {
+            this.sendMessage(instanceId, AmpsDrawCallbackChannelMethod.onVideoPlayPause, { adId: adWrapper.adId });
+          },
+          onVideoResume: () => {
+            this.sendMessage(instanceId, AmpsDrawCallbackChannelMethod.onVideoAdContinuePlay, { adId: adWrapper.adId });
+          },
+          onVideoPlayComplete: () => {
+            this.sendMessage(instanceId, AmpsDrawCallbackChannelMethod.onVideoAdComplete, { adId: adWrapper.adId });
+          },
+          onVideoPlayError: (code, extra) => {
+            this.sendMessage(instanceId, AmpsDrawCallbackChannelMethod.onVideoError, { adId: adWrapper.adId, code, extra });
+          }
+        };
+        slot.adItemMap.set(adWrapper.adId, adWrapper);
+        this.adIdToInstance.set(adWrapper.adId, instanceId);
+      },
+      renderFailed: (adWrapper: AMPSDrawAdWrapper): void => {
+        this.sendMessage(instanceId, AmpsDrawCallbackChannelMethod.onRenderFail, { adId: adWrapper.adId });
+      }
+    };
+  }
+
+  private buildLoadCallback(instanceId: string, slot: DrawSlot): AMPSDrawAdListener {
+    const renderCb = this.buildRenderCallback(instanceId, slot);
+    return {
+      loadOk: (adItems: AMPSDrawAdWrapper[]): void => {
+        const adIdList: string[] = adItems.map((ad) => ad.adId);
+        this.sendMessage(instanceId, AmpsDrawCallbackChannelMethod.onLoadSuccess, { adIds: adIdList });
+        adItems.forEach((item) => {
+          item.renderCallBack = renderCb;
+          item.renderAd();
+        });
+      },
+      loadFail: (code: number, message: string): void => {
+        this.sendMessage(instanceId, AmpsDrawCallbackChannelMethod.onLoadFailure, { code, message });
+      }
+    };
+  }
+
   handleMethodCall(call: MethodCall, result: MethodResult) {
+    const instanceId = this.extractInstanceId(call.args);
     switch (call.method) {
       case AMPSAdSdkMethodNames.drawCreate:
-        this.handleCreate(call, result)
-        break
+        this.handleCreate(call, result);
+        break;
       case AMPSAdSdkMethodNames.drawLoad:
-        this.handleLoadAd(call, result);
+        if (!instanceId) {
+          result.error('INVALID_ARGS', 'adInstanceId is required', undefined);
+          return;
+        }
+        this.handleLoadAd(instanceId, result);
         break;
       case AMPSAdSdkMethodNames.drawGetEcpm:
-        const foundWrapper: AMPSDrawAdWrapper | undefined = this.getAdWrapper(call.args);
-        const mEcpm = foundWrapper?.getECPM() ?? 0
-        result.success(mEcpm);
+        result.success(this.getAdWrapper(call.args)?.getECPM() ?? 0);
         break;
       case AMPSAdSdkMethodNames.drawIsReadyAd:
-        result.success(this.mDrawAd?.isReadyAd())
+        result.success(this.getSlot(instanceId ?? '')?.ad?.isReadyAd() ?? false);
         break;
-      case AMPSAdSdkMethodNames.drawPauseAd:
+      case AMPSAdSdkMethodNames.drawDestroyAd:
+        if (instanceId) {
+          this.cleanUp(instanceId);
+        }
         result.success(null);
         break;
+      case AMPSAdSdkMethodNames.drawPauseAd:
       case AMPSAdSdkMethodNames.drawResumeAd:
         result.success(null);
         break;
-
       default:
         result.success(null);
     }
   }
 
   private getAdWrapper(arg: ESObject): AMPSDrawAdWrapper | undefined {
-    const targetAdId = (arg as Map<string, Any>)["adId"] as string
+    const map = arg as Record<string, Object>;
+    const targetAdId = map['adId'] as string;
     return this.getAdItem(targetAdId);
   }
 
   private handleCreate(call: MethodCall, result: MethodResult): void {
     try {
-      const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(call.args);
-      let context = AMPSEventManager.getInstance().getContext()
-      this.mWindowStage = context?.windowStage;
-      if (this.mWindowStage) {
-        let mWindow = this.mWindowStage.getMainWindowSync();
-        if (mWindow) {
-          this.mDrawAd = new AMPSDrawAd(mWindow.getUIContext(), adOption, this.callback);
-        } else {
-          result.error('LOAD_FAILED', '获取窗口或UI上下文失败', undefined);
-        }
-      } else {
-        result.error('LOAD_FAILED', 'WindowStage未初始化', undefined);
+      const instanceId = this.extractInstanceId(call.args);
+      if (!instanceId) {
+        result.error('INVALID_ARGS', 'adInstanceId is required', undefined);
+        return;
       }
+      const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(call.args);
+      const context = AMPSEventManager.getInstance().getContext();
+      this.mWindowStage = context?.windowStage;
+      if (!this.mWindowStage) {
+        result.error('LOAD_FAILED', 'WindowStage未初始化', undefined);
+        return;
+      }
+      const mWindow = this.mWindowStage.getMainWindowSync();
+      if (!mWindow) {
+        result.error('LOAD_FAILED', '获取窗口或UI上下文失败', undefined);
+        return;
+      }
+      const slot = this.ensureSlot(instanceId);
+      slot.ad = new AMPSDrawAd(mWindow.getUIContext(), adOption, this.buildLoadCallback(instanceId, slot));
+      result.success(true);
     } catch (error) {
       result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
     }
   }
 
-  // 处理开屏广告加载
-  private handleLoadAd(call: MethodCall, result: MethodResult): void {
+  private handleLoadAd(instanceId: string, result: MethodResult): void {
     try {
-      this.mDrawAd?.load();
+      this.getSlot(instanceId)?.ad?.load();
+      result.success(true);
     } catch (error) {
       result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
     }
   }
 
-  public sendMessage = (method: string, args?: Any) => {
-    AMPSEventManager.getInstance().sendMessageToFlutter(method, args)
+  public sendMessage(instanceId: string, method: string, args?: Any) {
+    const payload: Record<string, Object> = {};
+    payload[AD_INSTANCE_ID] = instanceId;
+    if (args !== null && args !== undefined) {
+      const extra = args as Record<string, Object>;
+      Object.keys(extra).forEach((key: string) => {
+        payload[key] = extra[key];
+      });
+    }
+    AMPSEventManager.getInstance().sendMessageToFlutter(method, payload);
   }
 }

@@ -31,6 +31,7 @@ class AMPSNativeView: NSObject, FlutterPlatformView {
               let adView = AMPSNativeManager.shared.getAdView(adId: adId) else { return }
 
         iosView.adId = adId
+        iosView.adInstanceId = param[ArgumentKeys.adInstanceId] as? String
         iosView.clipsToBounds = true
         if adView.superview !== iosView {
             adView.removeFromSuperview()
@@ -48,6 +49,7 @@ class IOSView: UIView {
     
     weak var adView: UIView?   // 弱引用，避免循环持有（adView 已被外部管理器持有）
     var adId: String?
+    var adInstanceId: String?
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -70,6 +72,7 @@ class IOSView: UIView {
             AMPSNativeCallBackChannelMethod.nativeSizeUpdate,
             arg: [
                 "adId":   adId ?? "",
+                ArgumentKeys.adInstanceId: adInstanceId ?? "",
                 "width":  targetFrame.width,
                 "height": targetFrame.height
             ]

@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.FrameLayout
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.platform.PlatformView
+import xyz.adscope.adscope_sdk.data.AD_INSTANCE_ID
 import xyz.adscope.adscope_sdk.data.NATIVE_HEIGHT
 import xyz.adscope.adscope_sdk.data.NATIVE_WIDTH
 import xyz.adscope.adscope_sdk.manager.AMPSBannerManager
@@ -20,8 +21,9 @@ class AMPSBannerView(
     args: Any?
 ) : PlatformView {
     private val platformViewContainer: FrameLayout = FrameLayout(context)
+    private val creationArgs: Map<*, *>
     init {
-        val creationArgs = parseCreationArgs(args)
+        creationArgs = parseCreationArgs(args)
         val adContainer = FrameLayout(context).apply {
             layoutParams = createAdContainerParams(creationArgs)
         }
@@ -61,7 +63,8 @@ class AMPSBannerView(
      */
     private fun showAdInContainer(container: FrameLayout) {
         runCatching {
-            AMPSBannerManager.getInstance().getBannerAd()?.show(container)
+            val instanceId = creationArgs[AD_INSTANCE_ID] as? String
+            AMPSBannerManager.getInstance().getBannerAd(instanceId)?.show(container)
         }.onFailure {
             Log.e(BannerTAG, "Failed to show banner ad", it)
         }

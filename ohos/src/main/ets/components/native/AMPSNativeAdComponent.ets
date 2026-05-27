@@ -10,6 +10,7 @@ import { OhosPlatformNativeView } from './OhosPlatformNativeView';
 export struct AMPSNativeAdComponent {
   @Prop params: Params
   @Prop adId: string
+  @Prop adInstanceId: string
   @State customView: OhosPlatformNativeView = this.params.platformView as OhosPlatformNativeView
   @State wrapper: AMPSNativeAdWrapper | undefined = undefined
   @State closeAd: boolean = false
@@ -30,7 +31,8 @@ export struct AMPSNativeAdComponent {
             return
           }
           let map: Map<string, Any> = new Map()
-          map.set("adId",this.adId)
+          map.set("adId", this.adId)
+          map.set("adInstanceId", this.adInstanceId)
           map.set("width", size.width as number)
           map.set("height", size.height as number)
           console.log("nativeSizeUpdate-w:" + size.width + "h:" + size.height)

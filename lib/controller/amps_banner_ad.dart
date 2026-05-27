@@ -4,121 +4,102 @@ import 'package:flutter/cupertino.dart';
 import '../adscope_sdk.dart';
 import '../common.dart';
 import '../data/amps_ad.dart';
+import 'banner_callback_router.dart';
 
 ///开屏广告类
 class AMPSBannerAd {
-  static const String _bannerAdHandlerKey = "banner_ad_handler";
+  static int _instanceCounter = 0;
+  final String instanceId;
   AdOptions config;
   BannerCallBack? mCallBack;
   VoidCallback? mCloseCallBack;
 
-  AMPSBannerAd({required this.config, this.mCallBack}) {
+  AMPSBannerAd({required this.config, this.mCallBack, String? instanceId})
+      : instanceId = instanceId ?? _generateInstanceId() {
+    BannerCallbackRouter.instance.register(this.instanceId, mCallBack, mCloseCallBack);
     AdscopeSdk.invokeMethod(
       AMPSAdSdkMethodNames.bannerCreate,
-      config.toMap(),
+      _wrapArgs(config.toMap()),
     );
-    setMethodCallHandler();
+  }
+
+  static String _generateInstanceId() {
+    _instanceCounter += 1;
+    return 'banner_${_instanceCounter}_${DateTime.now().microsecondsSinceEpoch}';
+  }
+
+  Map<String, dynamic> _wrapArgs(Map<dynamic, dynamic> args) {
+    return {
+      AMPSAdInstanceKey.adInstanceId: instanceId,
+      ...args,
+    };
+  }
+
+  Map<String, dynamic> _instanceOnlyArgs() {
+    return {AMPSAdInstanceKey.adInstanceId: instanceId};
   }
 
   void setMethodCallHandler() {
-    AdscopeSdk.removeMethodCallHandler(_bannerAdHandlerKey);
-    AdscopeSdk.addMethodCallHandler(_bannerAdHandlerKey,
-      (call) async {
-        switch (call.method) {
-          case AMPSBannerCallBackChannelMethod.onLoadSuccess:
-            mCallBack?.onLoadSuccess?.call();
-            break;
-          case AMPSBannerCallBackChannelMethod.onLoadFailure:
-            mCloseCallBack?.call();
-            var map = call.arguments as Map<dynamic, dynamic>;
-            mCallBack?.onLoadFailure?.call(map[AMPSSdkCallBackErrorKey.code],
-                map[AMPSSdkCallBackErrorKey.message]);
-            break;
-          case AMPSBannerCallBackChannelMethod.onAdShow:
-            mCallBack?.onAdShow?.call();
-            break;
-          case AMPSBannerCallBackChannelMethod.onAdClicked:
-            mCallBack?.onAdClicked?.call();
-            break;
-          case AMPSBannerCallBackChannelMethod.onAdClosed:
-            mCloseCallBack?.call();
-            mCallBack?.onAdClosed?.call();
-            break;
-          case AMPSBannerCallBackChannelMethod.onVideoPlayStart:
-            mCallBack?.onVideoPlayStart?.call();
-            break;
-          case AMPSBannerCallBackChannelMethod.onVideoPlayEnd:
-            mCallBack?.onVideoPlayEnd?.call();
-            break;
-          case AMPSBannerCallBackChannelMethod.onVideoPlayError:
-            var map = call.arguments as Map<dynamic, dynamic>;
-            mCallBack?.onVideoPlayError?.call(map[AMPSSdkCallBackErrorKey.code],
-                map[AMPSSdkCallBackErrorKey.message]);
-            break;
-          case AMPSBannerCallBackChannelMethod.onVideoReady:
-            mCallBack?.onVideoReady?.call();
-            break;
-          case AMPSBannerCallBackChannelMethod.onVideoPause:
-            mCallBack?.onVideoPause?.call();
-            break;
-          case AMPSBannerCallBackChannelMethod.onVideoResume:
-            mCallBack?.onVideoResume?.call();
-            break;
-        }
-      },
-    );
+    BannerCallbackRouter.instance.register(instanceId, mCallBack, mCloseCallBack);
   }
 
   ///开屏广告加载调用
   void load() async {
-    await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.bannerLoad);
+    await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.bannerLoad, _instanceOnlyArgs());
   }
 
   ///开屏广预加载
   void preLoad() async {
-    await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.bannerPreLoad);
+    await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.bannerPreLoad, _instanceOnlyArgs());
   }
 
   ///开屏广告显示调用
   void setSlideTime(Int time) async {
     await AdscopeSdk.invokeMethod(
-        AMPSAdSdkMethodNames.bannerSetSlideTime, time);
+        AMPSAdSdkMethodNames.bannerSetSlideTime, {
+      ..._instanceOnlyArgs(),
+      "slideTime": time,
+    });
   }
 
   ///开屏广告是否有预加载
   Future<bool> isReadyAd() async {
     return await AdscopeSdk
-        .invokeMethod(AMPSAdSdkMethodNames.bannerIsReadyAd);
+        .invokeMethod(AMPSAdSdkMethodNames.bannerIsReadyAd, _instanceOnlyArgs());
   }
 
   ///获取ecpm
   Future<num> getECPM() async {
     return await AdscopeSdk
-        .invokeMethod(AMPSAdSdkMethodNames.bannerGetECPM);
+        .invokeMethod(AMPSAdSdkMethodNames.bannerGetECPM, _instanceOnlyArgs());
   }
 
   ///调用addPreLoadAdInfo
   void addPreLoadAdInfo() async {
     await AdscopeSdk
-        .invokeMethod(AMPSAdSdkMethodNames.bannerAddPreLoadAdInfo);
+        .invokeMethod(AMPSAdSdkMethodNames.bannerAddPreLoadAdInfo, _instanceOnlyArgs());
   }
 
   ///调用addPreGetMediaExtraInfo
   Future<dynamic> getMediaExtraInfo() async {
     return await AdscopeSdk
-        .invokeMethod(AMPSAdSdkMethodNames.bannerGetMediaExtraInfo);
+        .invokeMethod(AMPSAdSdkMethodNames.bannerGetMediaExtraInfo, _instanceOnlyArgs());
   }
 
   ///销毁视频广告
   destroy() async {
-    AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.bannerDestroyAd);
+    BannerCallbackRouter.instance.unregister(instanceId);
+    AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.bannerDestroyAd, _instanceOnlyArgs());
   }
 
   void registerChannel(VoidCallback callBack) {
     mCloseCallBack = callBack;
+    BannerCallbackRouter.instance.register(instanceId, mCallBack, mCloseCallBack);
   }
 
   void setAdCloseCallBack(VoidCallback closeCallBack) {
     mCloseCallBack = closeCallBack;
+    // 重新注册到 router，保证 close 回调引用与字段同步。
+    BannerCallbackRouter.instance.register(instanceId, mCallBack, mCloseCallBack);
   }
 }

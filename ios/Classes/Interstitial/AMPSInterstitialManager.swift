@@ -1,12 +1,8 @@
 //
-//  AMPS interstitialManager.swift
-//  amps_sdk
-//
-//  Created by duzhaoquan on 2025/10/23.
+//  AMPSInterstitialManager.swift
 //
 
 import Foundation
-
 import Flutter
 import AMPSAdSDK
 
@@ -15,103 +11,146 @@ class AMPSInterstitialManager: NSObject {
     static let shared = AMPSInterstitialManager()
     private override init() {super.init()}
     
-    private var interstitialAd: AMPSInterstitialAd?
+    private var interstitialAds: [String: AMPSInterstitialAd] = [:]
     
-    // MARK: - Public Methods
-    func handleMethodCall(_ call: FlutterMethodCall, result: FlutterResult) {
+    func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as? [String: Any]
+        let instanceId = instanceId(from: arguments)
         switch call.method {
         case AMPSAdSdkMethodNames.interstitialCreate:
             handleInterstitialCreate(arguments: arguments, result: result)
         case AMPSAdSdkMethodNames.interstitialLoad:
-            handleInterstitialLoad(arguments: arguments, result: result)
+            guard let instanceId = instanceId else {
+                result(FlutterError(code: "INVALID_ARGS", message: "adInstanceId is required", details: nil))
+                return
+            }
+            handleInterstitialLoad(instanceId: instanceId, result: result)
         case AMPSAdSdkMethodNames.interstitialShowAd:
-            handleInterstitialShowAd(arguments: arguments, result: result)
+            guard let instanceId = instanceId else {
+                result(FlutterError(code: "INVALID_ARGS", message: "adInstanceId is required", details: nil))
+                return
+            }
+            handleInterstitialShowAd(instanceId: instanceId, result: result)
         case AMPSAdSdkMethodNames.interstitialGetEcpm:
-            result(interstitialAd?.eCPM() ?? 0)
+            result(interstitialAds[instanceId ?? ""]?.eCPM() ?? 0)
         case AMPSAdSdkMethodNames.interstitialDestroy:
-            cleanupViewsAfterAdClosed()
+            if let instanceId = instanceId {
+                cleanupViewsAfterAdClosed(instanceId: instanceId)
+            }
             result(nil)
         case AMPSAdSdkMethodNames.interstitialIsReadyAd:
-            result(interstitialAd != nil)
-        default:
-            result(false)
-        }
-    }
-//
-//    // MARK: - Private Methods
-    private func handleInterstitialCreate(arguments: [String: Any]?, result: FlutterResult) {
-    
-        guard let param = arguments else {
+            if let instanceId = instanceId {
+                result(interstitialAds[instanceId] != nil)
+            } else {
+                result(false)
+            }
+        case AMPSAdSdkMethodNames.interstitialPreLoad:
+            if let instanceId = instanceId {
+                interstitialAds[instanceId]?.preLoad()
+            }
             result(nil)
-            return
+        default:
+            result(FlutterMethodNotImplemented)
         }
-        
-        let config = AdOptionModule.getAdConfig(para: param)
-        interstitialAd = AMPSInterstitialAd(spaceId: config.spaceId, adConfiguration: config)
-        result(true)
     }
-    private func handleInterstitialLoad(arguments: [String: Any]?, result: FlutterResult) {
     
-        interstitialAd?.delegate = self
-        interstitialAd?.load()
-        result(true)
+    private func instanceId(from arguments: [String: Any]?) -> String? {
+        return arguments?[ArgumentKeys.adInstanceId] as? String
     }
-        
-    private func handleInterstitialShowAd(arguments: [String: Any]?, result: FlutterResult) {
-        guard let interstitialAd = interstitialAd else {
+    
+    private func interstitialId(for ad: AMPSInterstitialAd) -> String? {
+        return interstitialAds.first { $0.value === ad }?.key
+    }
+    
+    private func handleInterstitialCreate(arguments: [String: Any]?, result: @escaping FlutterResult) {
+        guard let param = arguments else {
             result(false)
             return
         }
+        guard let instanceId = instanceId(from: param) else {
+            result(FlutterError(code: "INVALID_ARGS", message: "adInstanceId is required", details: nil))
+            return
+        }
+        let config = AdOptionModule.getAdConfig(para: param)
+        let ad = AMPSInterstitialAd(spaceId: config.spaceId, adConfiguration: config)
+        ad.delegate = self
+        interstitialAds[instanceId] = ad
+        result(true)
+    }
+    
+    private func handleInterstitialLoad(instanceId: String, result: @escaping FlutterResult) {
+        guard let interstitialAd = interstitialAds[instanceId] else {
+            result(FlutterError(code: "LOAD_FAILED", message: "Interstitial ad instance not found", details: instanceId))
+            return
+        }
+        interstitialAd.delegate = self
+        interstitialAd.load()
+        result(true)
+    }
         
+    private func handleInterstitialShowAd(instanceId: String, result: @escaping FlutterResult) {
+        guard let interstitialAd = interstitialAds[instanceId] else {
+            result(false)
+            return
+        }
         guard let vc = getKeyWindow()?.rootViewController else {
-            
             result(false)
             return
         }
         interstitialAd.show(withRootViewController: vc)
-    
-       
+        result(true)
     }
     
-    
-    
-    private func cleanupViewsAfterAdClosed() {
-        interstitialAd?.delegate = nil
-        interstitialAd?.remove()
-        interstitialAd = nil
+    private func cleanupViewsAfterAdClosed(instanceId: String) {
+        interstitialAds[instanceId]?.delegate = nil
+        interstitialAds[instanceId]?.remove()
+        interstitialAds.removeValue(forKey: instanceId)
     }
     
-    private func sendMessage(_ method: String, _ args: Any? = nil) {
-        AMPSEventManager.shared.sendToFlutter(method, arg: args)
+    private func sendMessage(_ method: String, instanceId: String, args: [String: Any]? = nil) {
+        var payload: [String: Any] = [ArgumentKeys.adInstanceId: instanceId]
+        if let args = args {
+            for (k, v) in args { payload[k] = v }
+        }
+        AMPSEventManager.shared.sendToFlutter(method, arg: payload)
     }
-    
 }
-
 
 extension AMPSInterstitialManager : AMPSInterstitialAdDelegate {
     func ampsInterstitialAdLoadSuccess(_ interstitialAd: AMPSInterstitialAd) {
-        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onLoadSuccess)
-        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onRenderOk)
+        guard let id = interstitialId(for: interstitialAd) else { return }
+        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onLoadSuccess, instanceId: id)
+        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onRenderOk, instanceId: id)
     }
     func ampsInterstitialAdLoadFail(_ interstitialAd: AMPSInterstitialAd, error: (any Error)?) {
-        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onLoadFailure, ["code": (error as? NSError)?.code ?? 0,"message":(error as? NSError)?.localizedDescription ?? ""])
+        guard let id = interstitialId(for: interstitialAd) else { return }
+        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onLoadFailure, instanceId: id, args: [
+            "code": (error as? NSError)?.code ?? 0,
+            "message": (error as? NSError)?.localizedDescription ?? ""
+        ])
     }
     func ampsInterstitialAdDidShow(_ interstitialAd: AMPSInterstitialAd) {
-        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdShow)
+        guard let id = interstitialId(for: interstitialAd) else { return }
+        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdShow, instanceId: id)
     }
     func ampsInterstitialAdExposured(_ interstitialAd: AMPSInterstitialAd){
-        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdExposure)
+        guard let id = interstitialId(for: interstitialAd) else { return }
+        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdExposure, instanceId: id)
     }
     func ampsInterstitialAdDidClick(_ interstitialAd: AMPSInterstitialAd) {
-        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdClicked)
+        guard let id = interstitialId(for: interstitialAd) else { return }
+        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdClicked, instanceId: id)
     }
-    
     func ampsInterstitialAdShowFail(_ interstitialAd: AMPSInterstitialAd, error: (any Error)?) {
-        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdShowError,["code": (error as? NSError)?.code ?? 0,"message":(error as? NSError)?.localizedDescription ?? ""])
+        guard let id = interstitialId(for: interstitialAd) else { return }
+        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdShowError, instanceId: id, args: [
+            "code": (error as? NSError)?.code ?? 0,
+            "message": (error as? NSError)?.localizedDescription ?? ""
+        ])
     }
     func ampsInterstitialAdDidClose(_ interstitialAd: AMPSInterstitialAd) {
-        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdClosed)
-        cleanupViewsAfterAdClosed()
+        guard let id = interstitialId(for: interstitialAd) else { return }
+        sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdClosed, instanceId: id)
+        cleanupViewsAfterAdClosed(instanceId: id)
     }
 }

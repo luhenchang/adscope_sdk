@@ -10,7 +10,7 @@ struct AMPSSplashComponent {
   splashAd?: AMPSSplashAd
 
   aboutToAppear(): void {
-    this.splashAd = AMPSSplashManager.getInstance().getSplashAd()
+    this.splashAd = AMPSSplashManager.getInstance().getSplashAd(undefined)
   }
 
   build() {

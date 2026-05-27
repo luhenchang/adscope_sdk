@@ -67,7 +67,12 @@ class _NativeWidgetState extends State<NativeWidget>
         width = expressSizeList[0]?.toDouble() ?? width;
         height = expressSizeList[1]?.toDouble() ?? height;
       }
-      creationParams = <String, dynamic>{"adId": widget.adId, "width": width};
+      creationParams = <String, dynamic>{
+        "adId": widget.adId,
+        "width": width,
+        if (widget.adNative != null)
+          AMPSAdInstanceKey.adInstanceId: widget.adNative!.instanceId,
+      };
     }
 
     if (width <= 0 || height <= 0 || widgetNeedClose) {

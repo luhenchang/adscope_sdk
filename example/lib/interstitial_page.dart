@@ -1,6 +1,5 @@
 import 'package:adscope_sdk/amps_sdk_export.dart';
 import 'package:adscope_sdk_example/data/common.dart';
-import 'package:adscope_sdk_example/widgets/button_widget.dart';
 import 'package:flutter/material.dart';
 
 class InterstitialPage extends StatefulWidget {
@@ -13,67 +12,120 @@ class InterstitialPage extends StatefulWidget {
 }
 
 class _InterstitialPageState extends State<InterstitialPage> {
-  late AdCallBack _adCallBack;
-  AMPSInterstitialAd? _interAd;
+  final Map<String, AMPSInterstitialAd> _interAds = {};
   bool visibleAd = false;
   bool couldBack = true;
+  String? _visibleLabel;
+  bool _bRenderReady = false;
+  bool _pendingShowB = false;
 
-  num eCpm = -1;
-  @override
-  void initState() {
-    super.initState();
-    _adCallBack = AdCallBack(
-        onRenderOk: () {
-          setState(() {
-            visibleAd = true;
-          });
-          debugPrint("ad load onRenderOk");
-        },
-        onAdClosed: () {
-          setState(() {
-            couldBack = true;
-            visibleAd = false;
-          });
-          debugPrint("ad load onAdClosed");
-        },
-        onAdShow: () {
-          setState(() {
-            couldBack = false;
-          });
-          debugPrint("ad load onAdShow");
+  AdCallBack _callbackFor(String label) {
+    return AdCallBack(
+      onRenderOk: () {
+        final ad = _interAds[label];
+        debugPrint('[$label] interstitial onRenderOk id=${ad?.instanceId}');
+        if (label == 'A') {
+          ad?.showAd();
+        } else if (label == 'B') {
+          _bRenderReady = true;
+          if (_pendingShowB) {
+            _pendingShowB = false;
+            ad?.showAd();
+          }
+        }
+      },
+      onLoadFailure: (code, msg) {
+        debugPrint('[$label] interstitial failure=$code;$msg');
+      },
+      onAdClosed: () {
+        setState(() {
+          couldBack = true;
+          visibleAd = false;
+          _visibleLabel = null;
         });
-
-    AdOptions options = AdOptions(spaceId: interstitialSpaceId);
-    _interAd = AMPSInterstitialAd(config: options, mCallBack: _adCallBack);
+        debugPrint('[$label] interstitial onAdClosed');
+        if (label == 'A') {
+          final b = _interAds['B'];
+          if (b != null) {
+            if (_bRenderReady) {
+              b.showAd();
+            } else {
+              _pendingShowB = true;
+            }
+          }
+        }
+      },
+      onAdShow: () {
+        setState(() {
+          couldBack = false;
+          visibleAd = true;
+          _visibleLabel = label;
+        });
+        debugPrint('[$label] interstitial onAdShow');
+      },
+    );
   }
+
+  void _createInstance(String label) {
+    final options = AdOptions(spaceId: interstitialSpaceId);
+    final ad = AMPSInterstitialAd(config: options, mCallBack: _callbackFor(label));
+    _interAds[label] = ad;
+    debugPrint('[$label] created interstitial instanceId=${ad.instanceId}');
+    ad.load();
+  }
+
+  void _destroyAll() {
+    for (final ad in _interAds.values) {
+      ad.destroy();
+    }
+    _interAds.clear();
+    _bRenderReady = false;
+    _pendingShowB = false;
+  }
+
+  void _startSequentialTest() {
+    _destroyAll();
+    _createInstance('A');
+    _createInstance('B');
+  }
+
   @override
   void dispose() {
+    _destroyAll();
     super.dispose();
-    _interAd?.destroy();
   }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
-        canPop: true,
-        child: Scaffold(
-            appBar: AppBar(
-              title: Text(widget.title),
-            ),
-            body: Stack(
-              alignment: AlignmentDirectional.center,
+      canPop: true,
+      child: Scaffold(
+        appBar: AppBar(title: Text(widget.title)),
+        body: Stack(
+          alignment: AlignmentDirectional.center,
+          children: [
+            Column(
               children: [
-                Column(children: [
-                  ElevatedButton(
-                    child: const Text('点击展示插屏'),
-                    onPressed: () {
-                      // 返回上一页
-                      debugPrint("差评调用来了11");
-                      _interAd?.load();
-                    },
-                  )
-                ]),
-                if (visibleAd) const InterstitialWidget()
+                ElevatedButton(
+                  onPressed: _startSequentialTest,
+                  child: const Text('同时创建A、B（A关闭后展示B）'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _createInstance('A'),
+                  child: const Text('创建实例A并加载插屏'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _createInstance('B'),
+                  child: const Text('创建实例B并加载插屏'),
+                ),
+                if (_visibleLabel != null)
+                  Text('当前展示回调来自: $_visibleLabel'),
               ],
-            )));
+            ),
+            if (visibleAd) const InterstitialWidget(),
+          ],
+        ),
+      ),
+    );
   }
 }

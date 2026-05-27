@@ -5,7 +5,8 @@ import { AMPSDrawComponent } from './AMPSDrawComponent';
 
 @Observed
 export class OhosPlatformDrawView extends PlatformView {
-  static adId?:string
+  static adId?: string
+  static adInstanceId?: string
   constructor() {
     super();
   }

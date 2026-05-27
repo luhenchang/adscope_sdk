@@ -27,7 +27,9 @@ class AMPSBannerView: NSObject, FlutterPlatformView {
         self.iosView = IOSBannerView(frame: frame)
         super.init()
         
-        guard let adView = AMPSBannerManager.shared.getBannerView() else { return }
+        let argsMap = args as? [String: Any]
+        let instanceId = argsMap?[ArgumentKeys.adInstanceId] as? String
+        guard let adView = AMPSBannerManager.shared.getBannerView(instanceId: instanceId) else { return }
         
         iosView.clipsToBounds = true
         if adView.superview !== iosView {

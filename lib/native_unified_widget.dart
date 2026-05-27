@@ -51,7 +51,9 @@ class _UnifiedWidgetState extends State<UnifiedWidget> with AutomaticKeepAliveCl
     }
     creationParams = <String, dynamic>{
       "adId": widget.adId,
-      'unifiedWidget': widget.unifiedContent?.toMap()
+      'unifiedWidget': widget.unifiedContent?.toMap(),
+      if (widget.adNative != null)
+        AMPSAdInstanceKey.adInstanceId: widget.adNative!.instanceId,
     };
     super.initState();
 

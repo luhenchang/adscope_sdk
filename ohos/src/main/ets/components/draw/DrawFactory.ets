@@ -16,8 +16,10 @@ export class DrawFactory extends  PlatformViewFactory {
   }
 
   public create(context: common.Context, viewId: number, args: Object): PlatformView {
-    let adID = (args as Map<string,string>).get("adId")
+    let adID = (args as Map<string, string>).get("adId")
+    let instanceId = (args as Map<string, string>).get("adInstanceId")
     OhosPlatformDrawView.adId = adID
+    OhosPlatformDrawView.adInstanceId = instanceId
     return new OhosPlatformDrawView();
   }
 }

@@ -1,5 +1,3 @@
-
-
 import 'dart:io';
 import 'package:adscope_sdk/amps_sdk_export.dart';
 import 'package:adscope_sdk_example/data/common.dart';
@@ -17,135 +15,137 @@ class RewardVideoPage extends StatefulWidget {
 }
 
 class _RewardVideoPageState extends State<RewardVideoPage> {
-  AMPSRewardVideoAd? _rewardVideoAd;
-  late RewardVideoCallBack _adCallBack;
-  num eCpm = 0;
-  bool initSuccess = false;
+  final Map<String, AMPSRewardVideoAd> _rewardAds = {};
   bool couldBack = true;
+  bool _bLoaded = false;
+  bool _pendingShowB = false;
+
+  RewardVideoCallBack _callbackFor(String label) {
+    return RewardVideoCallBack(
+      onLoadSuccess: () {
+        final ad = _rewardAds[label];
+        debugPrint('[$label] reward onLoadSuccess id=${ad?.instanceId}');
+        if (label == 'A') {
+          ad?.showAd();
+          setState(() => couldBack = false);
+        } else if (label == 'B') {
+          _bLoaded = true;
+          if (_pendingShowB) {
+            _pendingShowB = false;
+            ad?.showAd();
+          }
+        }
+      },
+      onLoadFailure: (code, msg) {
+        debugPrint('[$label] reward failure=$code;$msg');
+      },
+      onAdClicked: () {
+        setState(() => couldBack = true);
+        debugPrint('[$label] reward onAdClicked');
+      },
+      onAdClosed: () {
+        setState(() => couldBack = true);
+        debugPrint('[$label] reward onAdClosed');
+        if (label == 'A') {
+          final b = _rewardAds['B'];
+          if (b != null) {
+            if (_bLoaded) {
+              b.showAd();
+            } else {
+              _pendingShowB = true;
+            }
+          }
+        }
+      },
+      onAdReward: () => debugPrint('[$label] reward onAdReward'),
+      onAdShow: () => debugPrint('[$label] reward onAdShow'),
+      onVideoPlayStart: () => debugPrint('[$label] reward onVideoPlayStart'),
+      onVideoPlayEnd: () => debugPrint('[$label] reward onVideoPlayEnd'),
+      onVideoSkipToEnd: (duration) {
+        debugPrint('[$label] reward onVideoSkipToEnd=$duration');
+      },
+      onServerRewardFailed: (code, msg) {
+        debugPrint('[$label] reward onServerRewardFailed=$code;$msg');
+      },
+    );
+  }
+
+  AdOptions _buildOptions() {
+    const data = 'xxxxxx';
+    const useId = 'xxxxx';
+    if (Platform.isAndroid) {
+      return AdOptions(
+        spaceId: rewardVideoSpaceId,
+        extraDataMap: <String, String>{'adn_amps': data},
+      );
+    }
+    if (Platform.isIOS) {
+      return AdOptions(spaceId: rewardVideoSpaceId, extra: data, userId: useId);
+    }
+    return AdOptions(spaceId: rewardVideoSpaceId);
+  }
+
+  void _createInstance(String label) {
+    final ad = AMPSRewardVideoAd(
+      config: _buildOptions(),
+      adCallBack: _callbackFor(label),
+    );
+    _rewardAds[label] = ad;
+    debugPrint('[$label] created reward instanceId=${ad.instanceId}');
+    ad.load();
+  }
+
+  void _destroyAll() {
+    for (final ad in _rewardAds.values) {
+      ad.destroy();
+    }
+    _rewardAds.clear();
+    _bLoaded = false;
+    _pendingShowB = false;
+  }
+
+  void _startSequentialTest() {
+    _destroyAll();
+    _createInstance('A');
+    _createInstance('B');
+  }
 
   @override
-  void initState() {
-    super.initState();
-    _adCallBack = RewardVideoCallBack(onLoadSuccess: () {
-      _rewardVideoAd?.showAd();
-      setState(() {
-        couldBack = false;
-      });
-    }, onLoadFailure: (code, msg) {
-      debugPrint("ad load failure=$code;$msg");
-    }, onAdClicked: () {
-      setState(() {
-        couldBack = true;
-      });
-      debugPrint("ad load onAdClicked");
-    }, onAdClosed: () {
-      setState(() {
-        couldBack = true;
-      });
-      debugPrint("ad load onAdClosed");
-    }, onAdReward: () {
-      debugPrint("ad load onAdReward");
-    }, onAdShow: () {
-      debugPrint("ad load onAdShow");
-    }, onVideoPlayStart: () {
-      debugPrint("ad load onVideoPlayStart");
-    }, onVideoPlayEnd: () {
-      debugPrint("ad load onVideoPlayEnd");
-    }, onVideoSkipToEnd: (duration) {
-      debugPrint("ad load onVideoSkipToEnd=$duration");
-    },onServerRewardFailed: (code, msg) {
-      debugPrint("ad load onServerRewardFailed = $code;$msg");
-    });
-
-
-// 2. 需要给渠道氮素设置时候再选择渠道设置。
-/****
-    String? useId = "xxxxx";//UserInfoManager.instance.getUserId().tostring()
-    Map<String, dynamic>? extraDataMap;
-    if (Platform.isAndroid) {
-      const data = 'xxxxxxx';
-      extraDataMap = <String, String>{
-        AmpsAndroidConstants.ampsAdnCsj: data,
-        AmpsAndroidConstants.ampsAdnGm: data,
-        AmpsAndroidConstants.ampsAdnKs: data,
-        AmpsAndroidConstants.ampsAdnBd: data,
-        AmpsAndroidConstants.ampsAdnGdt: data,
-      };
-    } else if (Platform.isIOS) {
-      const data = 'xxxxxx';
-      //TODO IOS端KEY必须和下面一致:userID,extra
-      extraDataMap = {
-        AmpsIosConstants.ampsAdnGdt: {
-          "userID": useId,
-          "extra": data,
-        },
-        AmpsIosConstants.ampsAdnKs: {
-          "userID": useId,
-          "extra": data,
-        },
-        AmpsIosConstants.ampsAdnCsj: {
-          "userID": useId,
-          "extra": data,
-        },
-        AmpsIosConstants.ampsAdnGm: {
-          "userID": useId,
-          "extra": data,
-        },
-        AmpsIosConstants.ampsAdnBd: {
-          "userID": useId,
-          "extra": data,
-        },
-      };
-    }
-****/
-    AdOptions options = AdOptions(
-      spaceId: rewardVideoSpaceId,
-    );
-
-    String? useId = "xxxxx";
-    const data = 'xxxxxx'; //激励视频回掉参数
-    Map<String, dynamic>? extraDataMap;
-    if (Platform.isAndroid) {
-      extraDataMap = <String, String>{
-        "adn_amps": data,
-      };
-      options = AdOptions(
-        spaceId: rewardVideoSpaceId,
-        extraDataMap: extraDataMap,
-      );
-    } else if (Platform.isIOS){
-      options = AdOptions(
-        spaceId: rewardVideoSpaceId,
-        extra: data,
-        userId: useId,
-      );
-    }
-    _rewardVideoAd = AMPSRewardVideoAd(config: options, adCallBack: _adCallBack);
+  void dispose() {
+    _destroyAll();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-        canPop: couldBack,
-        child: Scaffold(
-            appBar: AppBar(
-              title: Text(widget.title),
-            ),
-            body: Stack(
-              alignment: AlignmentDirectional.center,
+      canPop: couldBack,
+      child: Scaffold(
+        appBar: AppBar(title: Text(widget.title)),
+        body: Stack(
+          alignment: AlignmentDirectional.center,
+          children: [
+            const BlurredBackground(),
+            Column(
               children: [
-                const BlurredBackground(),
-                Column(
-                  children: [
-                    const SizedBox(height: 100, width: 0),
-                    ButtonWidget(
-                        buttonText: '点击加载激励视频',
-                        callBack: () {
-                          _rewardVideoAd?.load();
-                        })
-                  ],
-                )
+                const SizedBox(height: 100, width: 0),
+                ButtonWidget(
+                  buttonText: '同时创建A、B（A关闭后展示B）',
+                  callBack: _startSequentialTest,
+                ),
+                ButtonWidget(
+                  buttonText: '创建实例A并加载激励',
+                  callBack: () => _createInstance('A'),
+                ),
+                ButtonWidget(
+                  buttonText: '创建实例B并加载激励',
+                  callBack: () => _createInstance('B'),
+                ),
               ],
-            )));
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

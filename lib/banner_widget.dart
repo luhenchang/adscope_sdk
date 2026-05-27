@@ -45,7 +45,12 @@ class _BannerWidgetState extends State<BannerWidget>
         width = expressSizeList[0]?.toDouble() ?? width;
         height = expressSizeList[1]?.toDouble() ?? height;
       }
-      creationParams = <String, dynamic>{"width": width, "height": height};
+      creationParams = <String, dynamic>{
+        "width": width,
+        "height": height,
+        if (widget.adBanner != null)
+          AMPSAdInstanceKey.adInstanceId: widget.adBanner!.instanceId,
+      };
     }
 
     if (width <= 0 || height <= 0 || widgetNeedClose) {

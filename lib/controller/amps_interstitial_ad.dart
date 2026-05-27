@@ -3,121 +3,85 @@ import 'package:flutter/services.dart';
 import '../adscope_sdk.dart';
 import '../common.dart';
 import '../data/amps_ad.dart';
+import 'interstitial_callback_router.dart';
 ///插屏广告对象入口类
 class AMPSInterstitialAd {
-  static const String _interstitialAdHandlerKey = "interstitial_ad_handler";
+  static int _instanceCounter = 0;
+  final String instanceId;
   AdOptions config;
   AdCallBack? mCallBack;
+  VoidCallback? _closeWidgetCall;
 
-  AMPSInterstitialAd({required this.config, this.mCallBack}) {
+  AMPSInterstitialAd({required this.config, this.mCallBack, String? instanceId})
+      : instanceId = instanceId ?? _generateInstanceId() {
+    InterstitialCallbackRouter.instance.register(this.instanceId, mCallBack, _closeWidgetCall);
     AdscopeSdk.invokeMethod(
       AMPSAdSdkMethodNames.interstitialCreate,
-      config.toMap(),
+      _wrapArgs(config.toMap()),
     );
-    setMethodCallHandler(null);
+  }
+
+  static String _generateInstanceId() {
+    _instanceCounter += 1;
+    return 'interstitial_${_instanceCounter}_${DateTime.now().microsecondsSinceEpoch}';
+  }
+
+  Map<String, dynamic> _wrapArgs(Map<dynamic, dynamic> args) {
+    return {
+      AMPSAdInstanceKey.adInstanceId: instanceId,
+      ...args,
+    };
+  }
+
+  Map<String, dynamic> _instanceOnlyArgs() {
+    return {AMPSAdInstanceKey.adInstanceId: instanceId};
   }
 
   void setMethodCallHandler(VoidCallback? closeWidgetCall) {
-    // 注册前先移除旧的（如果存在），确保全局只有一个初始化回调在运行
-    AdscopeSdk.removeMethodCallHandler(_interstitialAdHandlerKey);
-    AdscopeSdk.addMethodCallHandler(_interstitialAdHandlerKey,
-      (call) async {
-        switch (call.method) {
-          case AMPSInterstitialAdCallBackChannelMethod.onLoadSuccess:
-            mCallBack?.onLoadSuccess?.call();
-            break;
-          case AMPSInterstitialAdCallBackChannelMethod.onLoadFailure:
-            var map = call.arguments as Map<dynamic, dynamic>;
-            mCallBack?.onLoadFailure?.call(map[AMPSSdkCallBackErrorKey.code],
-                map[AMPSSdkCallBackErrorKey.message]);
-            break;
-          case AMPSInterstitialAdCallBackChannelMethod.onRenderOk:
-            mCallBack?.onRenderOk?.call();
-            break;
-          case AMPSInterstitialAdCallBackChannelMethod.onAdShow:
-            mCallBack?.onAdShow?.call();
-            break;
-          case AMPSInterstitialAdCallBackChannelMethod.onAdExposure:
-            mCallBack?.onAdExposure?.call();
-            break;
-          case AMPSInterstitialAdCallBackChannelMethod.onAdClicked:
-            closeWidgetCall?.call();
-            mCallBack?.onAdClicked?.call();
-            break;
-          case AMPSInterstitialAdCallBackChannelMethod.onAdClosed:
-            closeWidgetCall?.call();
-            mCallBack?.onAdClosed?.call();
-            break;
-          case AMPSInterstitialAdCallBackChannelMethod.onRenderFailure:
-            mCallBack?.onRenderFailure?.call();
-            break;
-          case AMPSInterstitialAdCallBackChannelMethod.onAdShowError:
-            var map = call.arguments as Map<dynamic, dynamic>;
-            mCallBack?.onAdShowError?.call(map[AMPSSdkCallBackErrorKey.code],
-                map[AMPSSdkCallBackErrorKey.message]);
-            break;
-          case AMPSInterstitialAdCallBackChannelMethod.onVideoPlayStart:
-            mCallBack?.onVideoPlayStart?.call();
-            break;
-          case AMPSInterstitialAdCallBackChannelMethod.onVideoPlayEnd:
-            mCallBack?.onVideoPlayEnd?.call();
-            break;
-          case AMPSInterstitialAdCallBackChannelMethod.onVideoPlayError:
-            var map = call.arguments as Map<dynamic, dynamic>;
-            mCallBack?.onVideoPlayError?.call(map[AMPSSdkCallBackErrorKey.code],
-                map[AMPSSdkCallBackErrorKey.message]);
-            break;
-          case AMPSInterstitialAdCallBackChannelMethod.onVideoSkipToEnd:
-            var map = call.arguments as Map<dynamic, dynamic>;
-            mCallBack?.onVideoSkipToEnd?.call(map[AMPSSdkCallBackParamsKey.playDurationMs]);
-            break;
-          case AMPSInterstitialAdCallBackChannelMethod.onAdReward:
-            mCallBack?.onAdReward?.call();
-            break;
-        }
-      },
-    );
+    _closeWidgetCall = closeWidgetCall;
+    InterstitialCallbackRouter.instance.register(instanceId, mCallBack, _closeWidgetCall);
   }
   ///广告加载调用方法
   void load() async {
-    setMethodCallHandler(null);
     await AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.interstitialLoad
+      AMPSAdSdkMethodNames.interstitialLoad,
+      _instanceOnlyArgs(),
     );
   }
 
   ///广预加载
   void  preLoad() async {
     await AdscopeSdk
-        .invokeMethod(AMPSAdSdkMethodNames.interstitialPreLoad);
+        .invokeMethod(AMPSAdSdkMethodNames.interstitialPreLoad, _instanceOnlyArgs());
   }
 
   ///插屏广告显示调用方法
   void showAd() async {
-    await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.interstitialShowAd);
+    await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.interstitialShowAd, _instanceOnlyArgs());
   }
   ///是否有预加载
   Future<bool> isReadyAd() async {
-    return await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.interstitialIsReadyAd);
+    return await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.interstitialIsReadyAd, _instanceOnlyArgs());
   }
   ///获取ecpm
   Future<num> getECPM() async {
-    return await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.interstitialGetEcpm);
+    return await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.interstitialGetEcpm, _instanceOnlyArgs());
   }
   
   ///调用addPreLoadAdInfo
   void addPreLoadAdInfo() async {
     await AdscopeSdk
-        .invokeMethod(AMPSAdSdkMethodNames.interstitialAddPreLoadAdInfo);
+        .invokeMethod(AMPSAdSdkMethodNames.interstitialAddPreLoadAdInfo, _instanceOnlyArgs());
   }
 
   ///调用addPreGetMediaExtraInfo
   Future<dynamic> addPreGetMediaExtraInfo() async {
-    return await AdscopeSdk.invokeMapMethod(AMPSAdSdkMethodNames.interstitialGetMediaExtraInfo);
+    return await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.interstitialGetMediaExtraInfo, _instanceOnlyArgs());
   }
 
   Future destroy() {
+    InterstitialCallbackRouter.instance.unregister(instanceId);
     return AdscopeSdk
-        .invokeMethod(AMPSAdSdkMethodNames.interstitialDestroy);
+        .invokeMethod(AMPSAdSdkMethodNames.interstitialDestroy, _instanceOnlyArgs());
   }
 }

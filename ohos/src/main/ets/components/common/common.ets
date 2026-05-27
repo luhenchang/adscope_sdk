@@ -45,6 +45,23 @@ export class AMPSAdCallBackChannelMethod {
   static readonly onVideoSkipToEnd = "onVideoSkipToEnd";
   static readonly onAdReward = "onAdReward";
 }
+export class AMPSInterstitialAdCallBackChannelMethod {
+  static readonly onLoadSuccess = "Interstitial_onLoadSuccess";
+  static readonly onLoadFailure = "Interstitial_onLoadFailure";
+  static readonly onRenderOk = "Interstitial_onRenderOk";
+  static readonly onAdShow = "Interstitial_onAdShow";
+  static readonly onAdExposure = "Interstitial_onAdExposure";
+  static readonly onAdClicked = "Interstitial_onAdClicked";
+  static readonly onAdClosed = "Interstitial_onAdClosed";
+  static readonly onRenderFailure = "Interstitial_onRenderFailure";
+  static readonly onAdShowError = "Interstitial_onAdShowError";
+  static readonly onVideoPlayStart = "Interstitial_onVideoPlayStart";
+  static readonly onVideoPlayEnd = "Interstitial_onVideoPlayEnd";
+  static readonly onVideoPlayError = "Interstitial_onVideoPlayError";
+  static readonly onVideoSkipToEnd = "Interstitial_onVideoSkipToEnd";
+  static readonly onAdReward = "Interstitial_onAdReward";
+}
+
 // 1. 激励视频回调方法常量（参考示例格式）
 export class AMPSRewardedVideoCallBackChannelMethod {
   static readonly onLoadSuccess = "RewardedVideo_onLoadSuccess";
@@ -141,6 +158,7 @@ export class AMPSAdSdkMethodNames {
   static readonly interstitialAddPreLoadAdInfo = "AMPSInterstitial_addPreLoadAdInfo";
   static readonly interstitialGetMediaExtraInfo = "AMPSInterstitial_getMediaExtraInfo";
   static readonly interstitialIsReadyAd = 'AMPSInterstitial_isReadyAd';
+  static readonly interstitialDestroy = 'AMPSInterstitial_destroy';
 
 
   static readonly nativeLoad = 'AMPSNative_load';
@@ -153,6 +171,9 @@ export class AMPSAdSdkMethodNames {
   static readonly nativeGetVideoDuration = 'AMPSNative_getVideoDuration';
   // static readonly nativeSetVideoPlayConfig = 'AMPSNative_setVideoPlayConfig';
   static readonly nativeGetMediaExtraInfo = "AMPSNative_getMediaExtraInfo";
+  static readonly nativeDestroy = 'AMPSNative_destroy';
+  static readonly nativeResume = 'AMPSNative_resume';
+  static readonly nativePause = 'AMPSNative_pause';
 
 
   static readonly rewardVideoCreate = 'AMPSRewardVideo_create';
@@ -195,6 +216,8 @@ export const AD_LOSS_REASON = 'lossReason'
 export const AD_OPTION = 'AdOption';
 export const CONFIG = "config";
 export const SPLASH_BOTTOM = "SplashBottomView";
+export const SPLASH_INSTANCE_ID = "splashInstanceId";
+export const AD_INSTANCE_ID = "adInstanceId";
 export const VIDEO_SOUND = "videoSoundEnable";
 export const VIDEO_PLAY_TYPE = "videoAutoPlayType";
 export const VIDEO_LOOP_REPLAY = "videoLoopReplay";

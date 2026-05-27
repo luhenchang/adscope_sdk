@@ -2,6 +2,7 @@ package xyz.adscope.adscope_sdk.manager
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel.Result
+import xyz.adscope.adscope_sdk.data.AD_INSTANCE_ID
 import xyz.adscope.adscope_sdk.data.AMPSAdSdkMethodNames
 import xyz.adscope.adscope_sdk.data.AMPSBannerCallbackChannelMethod
 import xyz.adscope.adscope_sdk.data.AdOptionsModule
@@ -11,10 +12,10 @@ import xyz.adscope.amps.ad.banner.AMPSBannerAd
 import xyz.adscope.amps.ad.banner.AMPSBannerLoadEventListener
 import xyz.adscope.amps.common.AMPSError
 import xyz.adscope.common.v2.gsonlite.Gson
-import java.util.Objects
+import java.util.concurrent.ConcurrentHashMap
 
 class AMPSBannerManager private constructor() {
-    private var mBannerAd: AMPSBannerAd? = null
+    private val bannerAds = ConcurrentHashMap<String, AMPSBannerAd>()
 
     companion object {
         @Volatile
@@ -27,25 +28,26 @@ class AMPSBannerManager private constructor() {
         }
     }
 
-    private val adCallback = object : AMPSBannerLoadEventListener {
+    private fun createAdCallback(instanceId: String) = object : AMPSBannerLoadEventListener {
         override fun onAmpsAdLoaded() {
-            sendMessage(AMPSBannerCallbackChannelMethod.ON_LOAD_SUCCESS)
+            sendMessage(instanceId, AMPSBannerCallbackChannelMethod.ON_LOAD_SUCCESS)
         }
 
         override fun onAmpsAdShow() {
-            sendMessage(AMPSBannerCallbackChannelMethod.ON_AD_SHOW)
+            sendMessage(instanceId, AMPSBannerCallbackChannelMethod.ON_AD_SHOW)
         }
 
         override fun onAmpsAdClicked() {
-            sendMessage(AMPSBannerCallbackChannelMethod.ON_AD_CLICKED)
+            sendMessage(instanceId, AMPSBannerCallbackChannelMethod.ON_AD_CLICKED)
         }
 
         override fun onAmpsAdDismiss() {
-            sendMessage(AMPSBannerCallbackChannelMethod.ON_AD_CLOSED)
+            sendMessage(instanceId, AMPSBannerCallbackChannelMethod.ON_AD_CLOSED)
         }
 
         override fun onAmpsAdFailed(error: AMPSError?) {
             sendMessage(
+                instanceId,
                 AMPSBannerCallbackChannelMethod.ON_LOAD_FAILURE,
                 mapOf(
                     ErrorModel.CODE to (error?.code?.toInt() ?: -1),
@@ -56,9 +58,16 @@ class AMPSBannerManager private constructor() {
 
     }
 
+    @Suppress("UNCHECKED_CAST")
+    private fun argsAsMap(call: MethodCall): Map<String, Any>? = call.arguments as? Map<String, Any>
+    private fun instanceIdFrom(call: MethodCall): String? = argsAsMap(call)?.get(AD_INSTANCE_ID) as? String
 
-    fun getBannerAd(): AMPSBannerAd? {
-        return this.mBannerAd
+
+    fun getBannerAd(instanceId: String? = null): AMPSBannerAd? {
+        if (!instanceId.isNullOrEmpty()) {
+            return bannerAds[instanceId]
+        }
+        return bannerAds.values.lastOrNull()
     }
 
 
@@ -69,25 +78,29 @@ class AMPSBannerManager private constructor() {
                 splashAdCreate(call, result)
             }
 
-            AMPSAdSdkMethodNames.BANNER_LOAD -> handleSplashLoad(result)
+            AMPSAdSdkMethodNames.BANNER_LOAD -> handleSplashLoad(call, result)
             AMPSAdSdkMethodNames.BANNER_GET_ECPM -> {
-                result.success(mBannerAd?.ecpm ?: 0)
+                result.success(bannerAds[instanceIdFrom(call)]?.ecpm ?: 0)
             }
 
             AMPSAdSdkMethodNames.BANNER_GET_MEDIA_EXTRA_INFO -> {
                 var mediaExtraInfo: String? = null
-                if (mBannerAd?.mediaExtraInfo != null) {
-                    mediaExtraInfo = Gson().toJson(mBannerAd?.mediaExtraInfo)
+                val ad = bannerAds[instanceIdFrom(call)]
+                if (ad?.mediaExtraInfo != null) {
+                    mediaExtraInfo = Gson().toJson(ad.mediaExtraInfo)
                 }
                 result.success(mediaExtraInfo)
             }
 
             AMPSAdSdkMethodNames.BANNER_IS_READY_AD -> {
-                result.success(mBannerAd?.isReady ?: false)
+                result.success(bannerAds[instanceIdFrom(call)]?.isReady ?: false)
             }
 
             AMPSAdSdkMethodNames.BANNER_DESTROY_AD -> {
-                mBannerAd?.destroy()
+                val instanceId = instanceIdFrom(call)
+                if (instanceId != null) {
+                    bannerAds.remove(instanceId)?.destroy()
+                }
                 result.success(null)
             }
 
@@ -101,22 +114,34 @@ class AMPSBannerManager private constructor() {
             result.error("LOAD_FAILED", "Activity not available for loading banner ad.", null)
             return
         }
-        val adOptionsMap = call.arguments<Map<String, Any>?>()
+        val adOptionsMap = argsAsMap(call)
+        val instanceId = adOptionsMap?.get(AD_INSTANCE_ID) as? String
+        if (instanceId.isNullOrEmpty()) {
+            result.error("LOAD_FAILED", "adInstanceId missing", null)
+            return
+        }
         val adOption = AdOptionsModule.getAdOptionFromMap(adOptionsMap, activity)
         try {
-            mBannerAd = AMPSBannerAd(activity, adOption, adCallback)
+            bannerAds[instanceId] = AMPSBannerAd(activity, adOption, createAdCallback(instanceId))
             result.success(true)
         } catch (e: Exception) {
             result.error("LOAD_EXCEPTION", "Error loading banner ad: ${e.message}", e.toString())
         }
     }
 
-    private fun handleSplashLoad(result: Result) {
-        mBannerAd?.loadAd()
+    private fun handleSplashLoad(call: MethodCall, result: Result) {
+        bannerAds[instanceIdFrom(call)]?.loadAd()
         result.success(true)
     }
 
-    private fun sendMessage(method: String, args: Any? = null) {
-        AMPSEventManager.getInstance().sendMessageToFlutter(method, args)
+    private fun sendMessage(instanceId: String, method: String, args: Any? = null) {
+        val payload = mutableMapOf<String, Any?>(AD_INSTANCE_ID to instanceId)
+        if (args is Map<*, *>) {
+            @Suppress("UNCHECKED_CAST")
+            payload.putAll(args as Map<String, Any?>)
+        } else if (args != null) {
+            payload["data"] = args
+        }
+        AMPSEventManager.getInstance().sendMessageToFlutter(method, payload)
     }
 }
