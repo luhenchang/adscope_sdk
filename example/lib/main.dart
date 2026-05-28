@@ -1,11 +1,13 @@
 import 'package:adscope_sdk/amps_sdk_export.dart';
 import 'package:adscope_sdk_example/reward_video_page.dart';
+import 'package:adscope_sdk_example/splash_widget_page.dart';
 import 'package:adscope_sdk_example/union_download_app_info_page.dart';
 import 'package:flutter/material.dart';
 import 'banner_widget_page.dart';
 import 'data/common.dart';
 import 'data/init_data.dart';
 import 'draw_page.dart';
+import 'interstitial_page.dart';
 import 'interstitial_show_page.dart';
 import 'native_page.dart';
 import 'native_unified_page.dart';
@@ -25,7 +27,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorObservers: [AMPSAdSDK.routeObserver],
       debugShowCheckedModeBanner: false,
       initialRoute: 'SplashPage',
       // 使用变量管理路由，避免硬编码字符串
@@ -37,7 +38,9 @@ class MyApp extends StatelessWidget {
     return {
       'SplashPage': (context) => const SplashPage(title: '主控面板'),
       'SplashShowPage':(context)=>const SplashShowPage(title: '开屏show页面'),
+      'SplashWidgetPage':(context)=>const SplashWidgetPage(title: '开屏页面'),
       'InterstitialShowPage':(context)=> const InterstitialShowPage(title: '插屏show页面'),
+      'InterstitialPage':(context)=> const InterstitialPage(title: '插屏组件页面'),
       'NativePage':(context)=> const NativePage(title: '原生页面'),
       'NativeUnifiedPage':(context)=> const NativeUnifiedPage(title: '原生自渲染页面'),
       'RewardVideoPage':(context)=> const RewardVideoPage(title: '激励视频页面'),
@@ -64,7 +67,9 @@ class _SplashPageState extends State<SplashPage> {
   // 1. 将重复的按钮配置数据化，方便维护
   final List<Map<String, String>> _menuConfig = [
     {'text': '开屏show案例页面', 'route': 'SplashShowPage'},
+    {'text': '开屏组件案例页面', 'route': 'SplashWidgetPage'},
     {'text': '插屏show案例页面', 'route': 'InterstitialShowPage'},
+    {'text': '插屏组件案例页面', 'route': 'InterstitialPage'},
     {'text': '点击跳转原生页面', 'route': 'NativePage'},
     {'text': '点击跳转自渲染页面', 'route': 'NativeUnifiedPage'},
     {'text': '点击跳转激励视频页面', 'route': 'RewardVideoPage'},

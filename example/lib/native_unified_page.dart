@@ -11,20 +11,24 @@ class NativeUnifiedPage extends StatefulWidget {
   final String title;
 
   @override
-  State<NativeUnifiedPage> createState() => _SplashPageState();
+  State<NativeUnifiedPage> createState() => _NativeUnifiedPageState();
 }
 
-class _SplashPageState extends State<NativeUnifiedPage> {
-  late AMPSNativeAdListener _adCallBack;
-  late AMPSNativeRenderListener _renderCallBack;
-  late AmpsNativeInteractiveListener _interactiveCallBack;
-  AMPSNativeAd? _nativeAd;
+class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
+  final Map<String, AMPSNativeAd> _nativeAds = {};
+  final Map<String, List<String>> _adIdsByLabel = {'A': [], 'B': []};
+  final Map<String, String> _adIdToLabel = {};
+  final Map<String, UnifiedAdDownloadAppInfo?> _downloadInfoByAdId = {};
+  final Map<String, AMPSUnifiedPattern> _patternByAdId = {};
+
   List<String> feedList = [];
   List<String> feedAdList = [];
-  late double expressWidth = 350;
-  late double expressHeight = 180;
-  UnifiedAdDownloadAppInfo? downLoadAppInfo;
-  AMPSUnifiedPattern adPattern = AMPSUnifiedPattern.adPatternUnknown;
+
+  bool _sequentialMode = false;
+  List<String> _pendingBAdIds = [];
+
+  final double expressWidth = 350;
+  final double expressHeight = 180;
 
   @override
   void initState() {
@@ -32,153 +36,271 @@ class _SplashPageState extends State<NativeUnifiedPage> {
     for (var i = 0; i < 30; i++) {
       feedList.add("item name =$i");
     }
-    setState(() {});
-    _adCallBack = AMPSNativeAdListener(
-        loadOk: (adIds) {},
-        loadFail: (code, message) => {debugPrint("自渲染广告加载失败")});
+  }
 
-    _renderCallBack = AMPSNativeRenderListener(renderSuccess: (adId) {
-      _nativeAd?.getUnifiedPattern(adId).then((pattern){
-        setState(() {
-          debugPrint("pattern==$pattern");
-          adPattern = pattern;
-        });
-      });
-      _nativeAd?.getDownLoadInfo(adId).then((info){
-        setState(() {
-          downLoadAppInfo = info;
-        });
-      });
-      setState(() {
-        debugPrint("adId renderCallBack=$adId");
-        feedAdList.add(adId);
-      });
-    }, renderFailed: (adId, code, message) {
-      debugPrint("渲染失败=$code,$message");
-    });
+  @override
+  void dispose() {
+    for (final ad in _nativeAds.values) {
+      ad.destroy();
+    }
+    super.dispose();
+  }
 
-    _interactiveCallBack = AmpsNativeInteractiveListener(onAdShow: (adId) {
-      debugPrint("广告展示=$adId");
-    }, onAdExposure: (adId) {
-      debugPrint("广告曝光=$adId");
-    }, onAdClicked: (adId) {
-      debugPrint("广告点击=$adId");
-    }, toCloseAd: (adId) {
-      debugPrint("广告关闭=$adId");
-      setState(() {
-        feedAdList.remove(adId);
-      });
+  AMPSNativeAdListener _adListenerFor(String label) {
+    return AMPSNativeAdListener(
+      loadOk: (adIds) {
+        debugPrint('[$label] unified loadOk adIds=$adIds instanceId=${_nativeAds[label]?.instanceId}');
+      },
+      loadFail: (code, message) {
+        debugPrint('[$label] unified loadFail=$code, $message');
+      },
+    );
+  }
+
+  AMPSNativeRenderListener _renderListenerFor(String label) {
+    return AMPSNativeRenderListener(
+      renderSuccess: (adId) {
+        debugPrint('[$label] unified renderSuccess adId=$adId');
+        final ad = _nativeAds[label];
+        ad?.getUnifiedPattern(adId).then((pattern) {
+          if (!mounted) return;
+          setState(() {
+            _patternByAdId[adId] = pattern;
+          });
+        });
+        ad?.getDownLoadInfo(adId).then((info) {
+          if (!mounted) return;
+          setState(() {
+            _downloadInfoByAdId[adId] = info;
+          });
+        });
+        _adIdsByLabel[label]?.add(adId);
+        _adIdToLabel[adId] = label;
+        if (_sequentialMode && label == 'B') {
+          final aAdIds = _adIdsByLabel['A'] ?? const <String>[];
+          final aHasShown = aAdIds.any(feedAdList.contains);
+          if (aHasShown) {
+            _pendingBAdIds.add(adId);
+            return;
+          }
+        }
+        setState(() => feedAdList.add(adId));
+      },
+      renderFailed: (adId, code, message) {
+        debugPrint('[$label] unified renderFailed=$code, $message');
+      },
+    );
+  }
+
+  AmpsNativeInteractiveListener _interactiveListenerFor(String label) {
+    return AmpsNativeInteractiveListener(
+      onAdShow: (adId) => debugPrint('[$label] unified onAdShow=$adId'),
+      onAdExposure: (adId) => debugPrint('[$label] unified onAdExposure=$adId'),
+      onAdClicked: (adId) => debugPrint('[$label] unified onAdClicked=$adId'),
+      toCloseAd: (adId) {
+        debugPrint('[$label] unified onClose=$adId');
+        _handleAdClosed(label, adId);
+      },
+    );
+  }
+
+  void _handleAdClosed(String label, String? adId) {
+    if (adId == null) return;
+    setState(() {
+      feedAdList.remove(adId);
     });
-    AdOptions options = AdOptions(
-        spaceId: unifiedSpaceId,
-        adCount: 1,
-        expressSize: [expressWidth, expressHeight]);
-    _nativeAd = AMPSNativeAd(
-        config: options,
-        nativeType: NativeType.unified,
-        mCallBack: _adCallBack,
-        mRenderCallBack: _renderCallBack);
-    _nativeAd?.load();
+    _adIdsByLabel[label]?.remove(adId);
+    _adIdToLabel.remove(adId);
+    _downloadInfoByAdId.remove(adId);
+    _patternByAdId.remove(adId);
+    if (_sequentialMode && label == 'A') {
+      final remaining = _adIdsByLabel['A'] ?? const <String>[];
+      final aStillVisible = remaining.any(feedAdList.contains);
+      if (!aStillVisible && _pendingBAdIds.isNotEmpty) {
+        setState(() {
+          feedAdList.addAll(_pendingBAdIds);
+        });
+        _pendingBAdIds = [];
+      }
+    }
+  }
+
+  void _createInstance(String label, {int adCount = 1}) {
+    _nativeAds[label]?.destroy();
+    _adIdsByLabel[label] = [];
+    final options = AdOptions(
+      spaceId: unifiedSpaceId,
+      adCount: adCount,
+      expressSize: [expressWidth, expressHeight],
+    );
+    final ad = AMPSNativeAd(
+      config: options,
+      nativeType: NativeType.unified,
+      mCallBack: _adListenerFor(label),
+      mRenderCallBack: _renderListenerFor(label),
+    );
+    _nativeAds[label] = ad;
+    debugPrint('[$label] created unified instanceId=${ad.instanceId}');
+    ad.load();
+  }
+
+  void _destroyAll() {
+    for (final ad in _nativeAds.values) {
+      ad.destroy();
+    }
+    _nativeAds.clear();
+    _adIdsByLabel['A'] = [];
+    _adIdsByLabel['B'] = [];
+    _adIdToLabel.clear();
+    _downloadInfoByAdId.clear();
+    _patternByAdId.clear();
+    _pendingBAdIds = [];
+    setState(() => feedAdList.clear());
+  }
+
+  void _startSequentialTest() {
+    _destroyAll();
+    _sequentialMode = true;
+    _createInstance('A', adCount: 1);
+    _createInstance('B', adCount: 1);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
-        body: ListView.builder(
-          itemCount: feedList.length + feedAdList.length, // 列表项总数
-          itemBuilder: (BuildContext context, int index) {
-            int adIndex = index ~/ 5;
-            int feedIndex = index - adIndex;
-            if (index % 5 == 4 && adIndex < feedAdList.length) {
-              String adId = feedAdList[adIndex];
-              debugPrint(adId);
-              return SizedBox.fromSize(
-                  size: Size(expressWidth, expressHeight),
-                  child:Stack(alignment: AlignmentDirectional.center, children: [
-                    UnifiedWidget(
-                      _nativeAd,
-                      mInteractiveCallBack: _interactiveCallBack,
-                      key: ValueKey(adId),
-                      adId: adId,
-                      unifiedContent: NativeUnifiedWidget(
-                          width: expressWidth ,
-                          height: expressHeight,
-                          backgroundColor: '#80F7FF',
-                          children:_getChildrenByType(adPattern.value)),
-                    ),
-                    Positioned(
-                      top: 8,
-                      right: 26,
-                      child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              feedAdList.remove(adId);
-                            });
-                          },
-                          borderRadius: BorderRadius.circular(16), // 水波纹圆角
-                          child: Image.asset('assets/images/close.png',
-                              width: 18, height: 18)),
-                    ),
-                    if (downLoadAppInfo != null && downLoadAppInfoIsOk(downLoadAppInfo))
-                      Positioned(
-                        left: 28,
-                        top: 100,
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(
-                                context, 'UnionDownloadAppInfoPage',
-                                arguments: AppInfoArguments(
-                                  titleContent: downLoadAppInfo?.appName ?? "",
-                                  permissionContent:
-                                  downLoadAppInfo?.appPermission ?? "",
-                                  privacyContent:
-                                  downLoadAppInfo?.appPrivacy ?? "",
-                                  introContent: downLoadAppInfo?.appIntro ?? "",
-                                ).toMap());
-                          },
-                          borderRadius: BorderRadius.circular(16), // 水波纹圆角
-                          child: Text(
-                              "应用名称：${downLoadAppInfo?.appName} | 开发者：${downLoadAppInfo?.appDeveloper}",
-                              style: const TextStyle(
-                                  color: Colors.blue,
-                                  backgroundColor: Colors.white)),
+      appBar: AppBar(title: Text(widget.title)),
+      body: Column(
+        children: [
+          Wrap(
+            spacing: 8,
+            children: [
+              ElevatedButton(
+                onPressed: _startSequentialTest,
+                child: const Text('同时创建A、B（A关闭后展示B）'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  _sequentialMode = false;
+                  _createInstance('A', adCount: 1);
+                },
+                child: const Text('创建实例A'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  _sequentialMode = false;
+                  _createInstance('B', adCount: 1);
+                },
+                child: const Text('创建实例B'),
+              ),
+              ElevatedButton(
+                onPressed: _destroyAll,
+                child: const Text('销毁全部'),
+              ),
+            ],
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: feedList.length + feedAdList.length,
+              itemBuilder: (BuildContext context, int index) {
+                int adIndex = index ~/ 5;
+                int feedIndex = index - adIndex;
+                if (index % 5 == 4 && adIndex < feedAdList.length) {
+                  final adId = feedAdList[adIndex];
+                  final label = _adIdToLabel[adId] ?? '?';
+                  final nativeAd = _nativeAds[label];
+                  final pattern = _patternByAdId[adId] ?? AMPSUnifiedPattern.adPatternUnknown;
+                  final downloadInfo = _downloadInfoByAdId[adId];
+                  return Column(
+                    children: [
+                      Text('实例[$label] adId=$adId'),
+                      SizedBox.fromSize(
+                        size: Size(expressWidth, expressHeight),
+                        child: Stack(
+                          alignment: AlignmentDirectional.center,
+                          children: [
+                            UnifiedWidget(
+                              nativeAd,
+                              mInteractiveCallBack: _interactiveListenerFor(label),
+                              key: ValueKey(adId),
+                              adId: adId,
+                              unifiedContent: NativeUnifiedWidget(
+                                width: expressWidth,
+                                height: expressHeight,
+                                backgroundColor: '#80F7FF',
+                                children: _getChildrenByType(pattern.value),
+                              ),
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 26,
+                              child: InkWell(
+                                onTap: () => _handleAdClosed(label, adId),
+                                borderRadius: BorderRadius.circular(16),
+                                child: Image.asset('assets/images/close.png',
+                                    width: 18, height: 18),
+                              ),
+                            ),
+                            if (downloadInfo != null && downLoadAppInfoIsOk(downloadInfo))
+                              Positioned(
+                                left: 28,
+                                top: 100,
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      'UnionDownloadAppInfoPage',
+                                      arguments: AppInfoArguments(
+                                        titleContent: downloadInfo.appName ?? "",
+                                        permissionContent: downloadInfo.appPermission ?? "",
+                                        privacyContent: downloadInfo.appPrivacy ?? "",
+                                        introContent: downloadInfo.appIntro ?? "",
+                                      ).toMap(),
+                                    );
+                                  },
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Text(
+                                    "应用名称：${downloadInfo.appName} | 开发者：${downloadInfo.appDeveloper}",
+                                    style: const TextStyle(
+                                      color: Colors.blue,
+                                      backgroundColor: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-                      )
-                  ]));
-            }
-            return Column(
-              children: [
-                const Divider(height: 5, color: Colors.white),
-                Container(
-                  height: expressHeight,
-                  width: expressWidth,
-                  color: Colors.blueAccent,
-                  alignment: Alignment.centerLeft,
-                  child: Text('List item ${feedList[feedIndex]}'),
-                ),
-                if (index % 5 == 3 && adIndex < feedAdList.length)
-                  const Divider(height: 5, color: Colors.white)
-              ],
-            );
-          },
-        ));
+                      ),
+                    ],
+                  );
+                }
+                return Column(
+                  children: [
+                    const Divider(height: 5, color: Colors.white),
+                    Container(
+                      height: expressHeight,
+                      width: expressWidth,
+                      color: Colors.blueAccent,
+                      alignment: Alignment.centerLeft,
+                      child: Text('List item ${feedList[feedIndex]}'),
+                    ),
+                    if (index % 5 == 3 && adIndex < feedAdList.length)
+                      const Divider(height: 5, color: Colors.white)
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
-// 根据类型获取对应的子组件列表
+
   List<LayoutWidget> _getChildrenByType(int type) {
     debugPrint("type=$type");
     switch (type) {
       case 0:
-      // 类型0：基础组合（标题 + 图片 + 描述 + 操作按钮）
         return [
-          UnifiedTitleWidget(
-            fontSize: 18,
-            color: "#1D2129",
-            x: 2,
-            y: 3,
-          ),
+          UnifiedTitleWidget(fontSize: 18, color: "#1D2129", x: 2, y: 3),
           UnifiedMainImgWidget(
             width: expressWidth,
             height: expressHeight - 60,
@@ -195,17 +317,12 @@ class _SplashPageState extends State<NativeUnifiedPage> {
             x: 37,
             y: expressHeight - 30,
           ),
-          UnifiedAppIconWidget(
-            width: 25,
-            height: 25,
-            x: 10,
-            y: expressHeight - 30,
-          ),
+          UnifiedAppIconWidget(width: 25, height: 25, x: 10, y: expressHeight - 30),
           UnifiedAdSourceLogoWidget(
             width: 50,
             height: 25,
             x: expressWidth - 50,
-            y: expressHeight - 30
+            y: expressHeight - 30,
           ),
           UnifiedActionButtonWidget(
             fontSize: 12,
@@ -218,26 +335,15 @@ class _SplashPageState extends State<NativeUnifiedPage> {
           ),
         ];
       case 2:
-      // 类型1：视频组合（标题 + 视频 + 应用图标 + 操作按钮）
         return [
-          UnifiedTitleWidget(
-            fontSize: 18,
-            color: "#1D2129",
-            x: 2,
-            y: 3,
-          ),
+          UnifiedTitleWidget(fontSize: 18, color: "#1D2129", x: 2, y: 3),
           UnifiedVideoWidget(
             width: expressWidth,
             height: expressHeight - 60,
             x: 0,
             y: 30,
           ),
-          UnifiedAppIconWidget(
-            width: 25,
-            height: 25,
-            x: 10,
-            y: expressHeight - 30,
-          ),
+          UnifiedAppIconWidget(width: 25, height: 25, x: 10, y: expressHeight - 30),
           UnifiedActionButtonWidget(
             fontSize: 12,
             width: 50,
@@ -249,14 +355,8 @@ class _SplashPageState extends State<NativeUnifiedPage> {
           ),
         ];
       case 1:
-      // 类型2：抖动效果组合（标题 + 图片 + 抖动组件 + 描述）
         return [
-          UnifiedTitleWidget(
-            fontSize: 18,
-            color: "#1D2129",
-            x: 2,
-            y: 3,
-          ),
+          UnifiedTitleWidget(fontSize: 18, color: "#1D2129", x: 2, y: 3),
           UnifiedMainImgWidget(
             width: expressWidth,
             height: expressHeight - 60,
@@ -264,12 +364,7 @@ class _SplashPageState extends State<NativeUnifiedPage> {
             y: 28,
             backgroundColor: '#FFFFFF',
           ),
-          ShakeWidget(
-            width: 100,
-            height: 100,
-            x: 100,
-            y: 50,
-          ),
+          ShakeWidget(width: 100, height: 100, x: 100, y: 50),
           UnifiedDescWidget(
             fontSize: 14,
             width: 180,
@@ -281,14 +376,8 @@ class _SplashPageState extends State<NativeUnifiedPage> {
           ),
         ];
       case 3:
-      // 类型3：全量组合（所有组件都包含）
         return [
-          UnifiedTitleWidget(
-            fontSize: 18,
-            color: "#1D2129",
-            x: 2,
-            y: 3,
-          ),
+          UnifiedTitleWidget(fontSize: 18, color: "#1D2129", x: 2, y: 3),
           UnifiedMainImgWidget(
             width: expressWidth,
             height: expressHeight - 60,
@@ -320,50 +409,24 @@ class _SplashPageState extends State<NativeUnifiedPage> {
             x: expressWidth - 60,
             y: expressHeight - 32,
           ),
-          UnifiedAppIconWidget(
-            width: 25,
-            height: 25,
-            x: 10,
-            y: expressHeight - 30,
-          ),
-          ShakeWidget(
-            width: 100,
-            height: 100,
-            x: 100,
-            y: 50,
-          ),
+          UnifiedAppIconWidget(width: 25, height: 25, x: 10, y: expressHeight - 30),
+          ShakeWidget(width: 100, height: 100, x: 100, y: 50),
         ];
       default:
-      // 默认返回基础组合（类型0）
         return [];
     }
   }
 
   bool downLoadAppInfoIsOk(UnifiedAdDownloadAppInfo? downLoadAppInfo) {
-    if(downLoadAppInfo == null) return false;
+    if (downLoadAppInfo == null) return false;
     bool result = true;
-    if(downLoadAppInfo.appName == null){
-      result =  false;
-    }
-    if(downLoadAppInfo.appPermission == null) {
-      result =  false;
-    }
-    if(downLoadAppInfo.appDeveloper == null) {
-      result =  false;
-    }
-    if(downLoadAppInfo.appVersion == null) {
-      result =  false;
-    }
-    if(downLoadAppInfo.appPrivacy == null) {
-      result =  false;
-    }
-    if(downLoadAppInfo.appIntro == null) {
-      result =  false;
-    }
-    if(downLoadAppInfo.appPackageName == null) {
-      result =  false;
-    }
+    if (downLoadAppInfo.appName == null) result = false;
+    if (downLoadAppInfo.appPermission == null) result = false;
+    if (downLoadAppInfo.appDeveloper == null) result = false;
+    if (downLoadAppInfo.appVersion == null) result = false;
+    if (downLoadAppInfo.appPrivacy == null) result = false;
+    if (downLoadAppInfo.appIntro == null) result = false;
+    if (downLoadAppInfo.appPackageName == null) result = false;
     return result;
   }
-
 }

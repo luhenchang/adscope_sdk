@@ -14,126 +14,125 @@ class SplashShowPage extends StatefulWidget {
 }
 
 class _SplashShowPageState extends State<SplashShowPage> {
-  AMPSSplashAd? _splashAd;
-  late AdCallBack _adCallBack;
-  num eCpm = 0;
-  bool initSuccess = false;
+  final Map<String, AMPSSplashAd> _splashAds = {};
+  bool _bRenderReady = false;
+  bool _pendingShowB = false;
   bool couldBack = true;
-  @override
-  void initState() {
-    super.initState();
-    _adCallBack = AdCallBack(
-        onRenderOk: () {
-          _splashAd?.showAd(
-            //TODO 如果添加了底部自定义，那么开屏的高度 = size.height - 100（这里的100是底部自定义部分的高度）
-              splashBottomWidget: SplashBottomWidget(
-                  height: 100,
-                  backgroundColor: "#FFFFFFFF",
-                  children: [
-                    ImageComponent(
-                      width: 25,
-                      height: 25,
-                      x: 120,
-                      y: 50,
-                      imagePath: 'assets/images/img.png',
-                    ),
-                    TextComponent(
-                      fontSize: 24,
-                      color: "#00ff00",
-                      x: 150,
-                      y: 48,
-                      text: 'Hello Android!',
-                    ),
-                    TextComponent(
-                      fontSize: 24,
-                      color: "#00ff00",
-                      x: 150,
-                      y: 62,
-                      text: 'Hello Android is Harmony IOS!',
-                    ),
-                  ]));
-          debugPrint("ad load onRenderOk");
-        }, onLoadFailure: (code, msg) {
-      debugPrint("ad load failure=$code;$msg");
-    }, onAdClicked: () {
-      setState(() {
-        couldBack = true;
-      });
-      debugPrint("ad load onAdClicked");
-    }, onAdExposure: () {
-      setState(() {
-        couldBack = false;
-      });
-      debugPrint("ad load onAdExposure");
-    }, onAdClosed: () {
-      setState(() {
-        couldBack = true;
-      });
-      debugPrint("ad load onAdClosed");
-    }, onAdShow: () {
-      debugPrint("ad load onAdShow");
-      setState(() {
-        couldBack = false;
-      });
-    });
-    //TODO 保证开屏的宽高获取到
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        var size = MediaQuery.of(context).size;
-        AdOptions options = AdOptions(
-            splashAdBottomBuilderHeight: 100,
-            spaceId: splashSpaceId,expressSize: [size.width,size.height]);
-        _splashAd = AMPSSplashAd(config: options, mCallBack: _adCallBack);
-        _splashAd?.load();
-      }
-    });
+
+  AdCallBack _callbackFor(String label) {
+    return AdCallBack(
+      onRenderOk: () {
+        final ad = _splashAds[label];
+        debugPrint('[$label] splash onRenderOk id=${ad?.instanceId}');
+        if (label == 'A') {
+          ad?.showAd();
+        } else if (label == 'B') {
+          _bRenderReady = true;
+          if (_pendingShowB) {
+            _pendingShowB = false;
+            ad?.showAd();
+          }
+        }
+      },
+      onLoadFailure: (code, msg) {
+        debugPrint('[$label] splash failure=$code;$msg');
+      },
+      onAdClicked: () {
+        setState(() => couldBack = true);
+        debugPrint('[$label] splash onAdClicked');
+      },
+      onAdExposure: () {
+        setState(() => couldBack = false);
+        debugPrint('[$label] splash onAdExposure');
+      },
+      onAdClosed: () {
+        setState(() => couldBack = true);
+        debugPrint('[$label] splash onAdClosed');
+        if (label == 'A') {
+          final b = _splashAds['B'];
+          if (b != null) {
+            if (_bRenderReady) {
+              b.showAd();
+            } else {
+              _pendingShowB = true;
+            }
+          }
+        }
+      },
+      onAdShow: () {
+        debugPrint('[$label] splash onAdShow');
+        setState(() => couldBack = false);
+      },
+    );
   }
+
+  void _createInstance(String label) {
+    final size = MediaQuery.of(context).size;
+    final options = AdOptions(
+      spaceId: splashSpaceId,
+      expressSize: [size.width, size.height],
+    );
+    final ad = AMPSSplashAd(config: options, mCallBack: _callbackFor(label));
+    _splashAds[label] = ad;
+    debugPrint('[$label] created splash instanceId=${ad.instanceId}');
+    ad.load();
+  }
+
+  void _destroyAll() {
+    for (final ad in _splashAds.values) {
+      ad.destroy();
+    }
+    _splashAds.clear();
+    _bRenderReady = false;
+    _pendingShowB = false;
+  }
+
+  void _startSequentialTest() {
+    _destroyAll();
+    _createInstance('A');
+    _createInstance('B');
+  }
+
   @override
   void dispose() {
+    _destroyAll();
     super.dispose();
-    _splashAd?.destroy();
   }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
-        canPop: couldBack,
-        child: Scaffold(
-            appBar: AppBar(
-              title: Text(widget.title),
-            ),
-            body: Stack(
-              alignment: AlignmentDirectional.center,
+      canPop: couldBack,
+      child: Scaffold(
+        appBar: AppBar(title: Text(widget.title)),
+        body: Stack(
+          alignment: AlignmentDirectional.center,
+          children: [
+            const BlurredBackground(),
+            Column(
               children: [
-                const BlurredBackground(),
-                Column(
-                  children: [
-                    const SizedBox(height: 100, width: 0),
-                    ButtonWidget(
-                        buttonText: '点击加载开屏页面',
-                        callBack: () {
-                          var size = MediaQuery.of(context).size;
-                          AdOptions options = AdOptions(
-                              splashAdBottomBuilderHeight: 100,
-                              spaceId: splashSpaceId,expressSize: [size.width,size.height]);
-                          _splashAd = AMPSSplashAd(config: options, mCallBack: _adCallBack);
-                          _splashAd?.load();
-                        }),
-                    ButtonWidget(
-                        buttonText: '获取竞价=$eCpm',
-                        callBack: () async {
-                          bool? isReadyAd = await _splashAd?.isReadyAd();
-                          debugPrint("isReadyAd=$isReadyAd");
-                          if(_splashAd != null){
-                            num ecPmResult =  await _splashAd!.getECPM();
-                            debugPrint("ecPm请求结果=$eCpm");
-                            setState(() {
-                              eCpm = ecPmResult;
-                            });
-                          }
-                        })
-                  ],
-                )
+                const SizedBox(height: 80, width: 0),
+                ButtonWidget(
+                  buttonText: '同时创建A、B（A关闭后展示B）',
+                  callBack: _startSequentialTest,
+                ),
+                ButtonWidget(
+                  buttonText: '创建实例A并加载开屏',
+                  callBack: () => _createInstance('A'),
+                ),
+                ButtonWidget(
+                  buttonText: '创建实例B并加载开屏',
+                  callBack: () => _createInstance('B'),
+                ),
+                ButtonWidget(
+                  buttonText: '销毁全部实例',
+                  callBack: _destroyAll,
+                ),
               ],
-            )));
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
