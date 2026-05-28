@@ -41,8 +41,10 @@ class AMPSNativeExpressSlot: NSObject {
         sendMessage(method, payload)
     }
     
-    func handleAdLoaded() {
-        guard let nativeAd = self.nativeAd else { return }
+    /// 准备 adId 映射并通知 Flutter 加载成功。注意：实际的 `view.render()` 必须在外部
+    /// 设置完 `view.delegate` 之后再触发，否则 render 回调收不到。
+    func prepareIdsAndNotifyLoaded() -> [AMPSNativeExpressView] {
+        guard let nativeAd = self.nativeAd else { return [] }
         self.adIdMap.removeAll()
         let ids: [String] = nativeAd.viewsArray.map { view in
             let id = UUID().uuidString
@@ -51,9 +53,7 @@ class AMPSNativeExpressSlot: NSObject {
             return id
         }
         sendMessage(AMPSNativeCallBackChannelMethod.loadOk, ["adIds": ids])
-        nativeAd.viewsArray.forEach { view in
-            view.render()
-        }
+        return nativeAd.viewsArray
     }
     
     func handleAdLoadFail(_ error: (any Error)?) {
@@ -254,9 +254,14 @@ class AMPSNativeManager: NSObject {
 extension AMPSNativeManager: AMPSNativeExpressManagerDelegate {
     func ampsNativeAdLoadSuccess(_ nativeAd: AMPSNativeExpressManager) {
         guard let slot = expressSlots.values.first(where: { $0.nativeAd === nativeAd }) else { return }
-        slot.handleAdLoaded()
+        // 1. 必须先把 delegate 挂上，否则 render 回调收不到。
         nativeAd.viewsArray.forEach { view in
             view.delegate = self
+        }
+        // 2. 注册 adId 映射 + 通知 Flutter，并触发 render。
+        let views = slot.prepareIdsAndNotifyLoaded()
+        views.forEach { view in
+            view.render()
         }
     }
     

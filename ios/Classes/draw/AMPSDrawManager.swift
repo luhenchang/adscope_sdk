@@ -41,8 +41,10 @@ class AMPSDrawSlot: NSObject {
         sendMessage(method, payload)
     }
     
-    func handleAdLoaded() {
-        guard let drawAd = self.drawAd else { return }
+    /// 准备 adId 映射并通知 Flutter 加载成功。注意：实际的 `view.render()` 必须在外部
+    /// 设置完 `view.delegate` 之后再触发，否则 render 回调收不到。
+    func prepareIdsAndNotifyLoaded() -> [AMPSDrawAdView] {
+        guard let drawAd = self.drawAd else { return [] }
         self.adIdMap.removeAll()
         let ids: [String] = drawAd.drawAdsArray.map { view in
             let id = UUID().uuidString
@@ -50,9 +52,7 @@ class AMPSDrawSlot: NSObject {
             return id
         }
         sendMessage(AmpsDrawCallbackChannelMethod.onLoadSuccess, ["adIds": ids])
-        drawAd.drawAdsArray.forEach { view in
-            view.render()
-        }
+        return drawAd.drawAdsArray
     }
     
     func handleAdLoadFail(_ error: (any Error)?) {
@@ -198,9 +198,14 @@ class AMPSDrawManager: NSObject {
 extension AMPSDrawManager: AMPSDrawAdManagerDelegate {
     func ampsDrawAdLoadSuccess(_ drawVideoAd: AMPSDrawAdManager) {
         guard let slot = drawSlots.values.first(where: { $0.drawAd === drawVideoAd }) else { return }
-        slot.handleAdLoaded()
+        // 1. 必须先把 delegate 挂上，否则 render 回调收不到。
         drawVideoAd.drawAdsArray.forEach { view in
             view.delegate = self
+        }
+        // 2. 注册 adId 映射 + 通知 Flutter，并触发 render。
+        let views = slot.prepareIdsAndNotifyLoaded()
+        views.forEach { view in
+            view.render()
         }
     }
     
