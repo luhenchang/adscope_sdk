@@ -1,41 +1,34 @@
-import { Any, MethodCall, MethodResult } from '@ohos/flutter_ohos';
+import { MethodCall, MethodResult } from '@ohos/flutter_ohos';
 import {
-  AD_LOSS_REASON,
-  AD_SEC_PRICE, AD_WIN_PRICE, AMPSInterstitialAdCallBackChannelMethod, AMPSAdSdkMethodNames } from '../common/common';
+  AD_INSTANCE_ID,
+  AMPSInterstitialAdCallBackChannelMethod,
+  AMPSAdSdkMethodNames
+} from '../common/common';
 import { AMPSEventManager } from '../common/AMPSEventManager';
 import { ampsAd, AMPSInterstitialAd } from 'xyz.adscope.amps';
 import { AdOptionsModule } from '../common/AdOptionsModule';
-import { HashMap } from '@kit.ArkTS';
-import { StringConstants } from '../common/StringConstants';
-import { thirdPaymentService } from '@kit.PaymentKit';
+import { window } from '@kit.ArkUI';
+
+class InterstitialCallbackPayload {
+  adInstanceId: string = ''
+  code?: number = undefined
+  message?: string = undefined
+  playDurationMs?: number = undefined
+}
+
+class InterstitialShowAdOptions {
+  windowStage: window.WindowStage
+  uiContext: UIContext
+
+  constructor(windowStage: window.WindowStage, uiContext: UIContext) {
+    this.windowStage = windowStage
+    this.uiContext = uiContext
+  }
+}
 
 export class AMPSInterstitialManager {
   private static instance: AMPSInterstitialManager;
-  private interstitialAd?: AMPSInterstitialAd
-  // 优化回调定义，减少重复代码
-  private callback: ampsAd.CallBack = {
-    onLoadSuccess: () => this.sendMessage(AMPSInterstitialAdCallBackChannelMethod.onLoadSuccess),
-    onLoadFailure: (code: number, message: string) =>
-    this.sendMessage(AMPSInterstitialAdCallBackChannelMethod.onLoadFailure, { code, message }),
-    onRenderOk: () => this.sendMessage(AMPSInterstitialAdCallBackChannelMethod.onRenderOk),
-    onAdShow: () => this.sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdShow),
-    onAdExposure: () => this.sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdExposure),
-    onAdClicked: () => this.sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdClicked),
-    onAdClosed: () => {
-      this.cleanUp()
-      this.sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdClosed)
-    },
-    onRenderFailure: () => this.sendMessage(AMPSInterstitialAdCallBackChannelMethod.onRenderFailure),
-    onAdShowError: (code: number, message: string) =>
-    this.sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdShowError, { code, message }),
-    onVideoPlayStart: () => this.sendMessage(AMPSInterstitialAdCallBackChannelMethod.onVideoPlayStart),
-    onVideoPlayEnd: () => this.sendMessage(AMPSInterstitialAdCallBackChannelMethod.onVideoPlayEnd),
-    onVideoPlayError: (code: number, message: string) =>
-    this.sendMessage(AMPSInterstitialAdCallBackChannelMethod.onVideoPlayEnd, { code, message }),
-    onVideoSkipToEnd: (playDurationMs?: number) =>
-    this.sendMessage(AMPSInterstitialAdCallBackChannelMethod.onVideoSkipToEnd, { playDurationMs }),
-    onAdReward: () => this.sendMessage(AMPSInterstitialAdCallBackChannelMethod.onAdReward)
-  };
+  private interstitialAds: Map<string, AMPSInterstitialAd> = new Map<string, AMPSInterstitialAd>()
 
   public static getInstance(): AMPSInterstitialManager {
     if (!AMPSInterstitialManager.instance) {
@@ -43,33 +36,143 @@ export class AMPSInterstitialManager {
     }
     return AMPSInterstitialManager.instance;
   }
-  getInterstitialAd(){
-    return this.interstitialAd
-  }
-  private cleanUp(){
 
-    this.interstitialAd = undefined
+  getInterstitialAd(instanceId?: string): AMPSInterstitialAd | undefined {
+    if (instanceId) {
+      return this.interstitialAds.get(instanceId)
+    }
+    let latestInterstitialAd: AMPSInterstitialAd | undefined = undefined
+    this.interstitialAds.forEach((value: AMPSInterstitialAd) => {
+      latestInterstitialAd = value
+    })
+    return latestInterstitialAd
   }
+
+  private argsAsMap(args: Object | undefined): Map<string, Object> | undefined {
+    return args as Map<string, Object> | undefined
+  }
+
+  private extractInstanceId(args: Map<string, Object> | undefined): string | undefined {
+    return args?.get(AD_INSTANCE_ID) as string | undefined
+  }
+
+  private requireInstanceId(instanceId: string | undefined, result: MethodResult): string | undefined {
+    if (!instanceId) {
+      result.error('INVALID_ARGS', 'adInstanceId is required', undefined)
+      return undefined
+    }
+    return instanceId
+  }
+
+  private cleanUp(instanceId: string) {
+    this.interstitialAds.delete(instanceId)
+  }
+
+  private releaseInterstitialAd(instanceId: string) {
+    this.cleanUp(instanceId)
+  }
+
+  private createPayload(instanceId: string): InterstitialCallbackPayload {
+    const payload = new InterstitialCallbackPayload()
+    payload.adInstanceId = instanceId
+    return payload
+  }
+
+  private createErrorPayload(instanceId: string, code: number, message: string): InterstitialCallbackPayload {
+    const payload = this.createPayload(instanceId)
+    payload.code = code
+    payload.message = message
+    return payload
+  }
+
+  private createVideoSkipPayload(instanceId: string, playDurationMs?: number): InterstitialCallbackPayload {
+    const payload = this.createPayload(instanceId)
+    payload.playDurationMs = playDurationMs
+    return payload
+  }
+
+  private createCallBack(instanceId: string): ampsAd.CallBack {
+    return {
+      onLoadSuccess: () => this.sendMessage(instanceId, AMPSInterstitialAdCallBackChannelMethod.onLoadSuccess),
+      onLoadFailure: (code: number, message: string) =>
+        this.sendPayload(AMPSInterstitialAdCallBackChannelMethod.onLoadFailure, this.createErrorPayload(instanceId, code, message)),
+      onRenderOk: () => this.sendMessage(instanceId, AMPSInterstitialAdCallBackChannelMethod.onRenderOk),
+      onAdShow: () => this.sendMessage(instanceId, AMPSInterstitialAdCallBackChannelMethod.onAdShow),
+      onAdExposure: () => this.sendMessage(instanceId, AMPSInterstitialAdCallBackChannelMethod.onAdExposure),
+      onAdClicked: () => this.sendMessage(instanceId, AMPSInterstitialAdCallBackChannelMethod.onAdClicked),
+      onAdClosed: () => {
+        this.sendMessage(instanceId, AMPSInterstitialAdCallBackChannelMethod.onAdClosed)
+        this.cleanUp(instanceId)
+      },
+      onRenderFailure: () => this.sendMessage(instanceId, AMPSInterstitialAdCallBackChannelMethod.onRenderFailure),
+      onAdShowError: (code: number, message: string) =>
+        this.sendPayload(AMPSInterstitialAdCallBackChannelMethod.onAdShowError, this.createErrorPayload(instanceId, code, message)),
+      onVideoPlayStart: () => this.sendMessage(instanceId, AMPSInterstitialAdCallBackChannelMethod.onVideoPlayStart),
+      onVideoPlayEnd: () => this.sendMessage(instanceId, AMPSInterstitialAdCallBackChannelMethod.onVideoPlayEnd),
+      onVideoPlayError: (code: number, message: string) =>
+        this.sendPayload(AMPSInterstitialAdCallBackChannelMethod.onVideoPlayError, this.createErrorPayload(instanceId, code, message)),
+      onVideoSkipToEnd: (playDurationMs?: number) =>
+        this.sendPayload(AMPSInterstitialAdCallBackChannelMethod.onVideoSkipToEnd, this.createVideoSkipPayload(instanceId, playDurationMs)),
+      onAdReward: () => this.sendMessage(instanceId, AMPSInterstitialAdCallBackChannelMethod.onAdReward)
+    }
+  }
+
   handleMethodCall(call: MethodCall, result: MethodResult) {
+    const args = this.argsAsMap(call.args as Object | undefined)
+    const instanceId = this.extractInstanceId(args)
     switch (call.method) {
       case AMPSAdSdkMethodNames.interstitialCreate:
         this.handleCreate(call, result)
         break;
       case AMPSAdSdkMethodNames.interstitialPreLoad:
-        this.handlePreLoadAd(result);
+        {
+          const requiredInstanceId = this.requireInstanceId(instanceId, result)
+          if (!requiredInstanceId) {
+            return
+          }
+          this.handlePreLoadAd(requiredInstanceId, result);
+        }
         break;
       case AMPSAdSdkMethodNames.interstitialLoad:
-        this.handleLoadAd(result);
+        {
+          const requiredInstanceId = this.requireInstanceId(instanceId, result)
+          if (!requiredInstanceId) {
+            return
+          }
+          this.handleLoadAd(requiredInstanceId, result);
+        }
         break;
       case AMPSAdSdkMethodNames.interstitialShowAd:
-        this.handleShowAd(result, call.args);
+        {
+          const requiredInstanceId = this.requireInstanceId(instanceId, result)
+          if (!requiredInstanceId) {
+            return
+          }
+          this.handleShowAd(requiredInstanceId, result);
+        }
         break;
       case AMPSAdSdkMethodNames.interstitialGetECPM:
-        const mEcpm = this.interstitialAd?.getECPM() ?? 0
+        const mEcpm = instanceId ? (this.interstitialAds.get(instanceId)?.getECPM() ?? 0) : 0
         result.success(mEcpm);
         break;
+      case AMPSAdSdkMethodNames.interstitialAddPreLoadAdInfo:
+        result.success(null)
+        break;
+      case AMPSAdSdkMethodNames.interstitialGetMediaExtraInfo:
+        result.success(null)
+        break;
       case AMPSAdSdkMethodNames.interstitialIsReadyAd:
-        result.success(this.interstitialAd?.isReadyAd() ?? false);
+        result.success(instanceId ? (this.interstitialAds.get(instanceId)?.isReadyAd() ?? false) : false);
+        break;
+      case AMPSAdSdkMethodNames.interstitialDestroy:
+        {
+          const requiredInstanceId = this.requireInstanceId(instanceId, result)
+          if (!requiredInstanceId) {
+            return
+          }
+          this.releaseInterstitialAd(requiredInstanceId)
+        }
+        result.success(null)
         break;
       default:
         result.success(null);
@@ -77,25 +180,43 @@ export class AMPSInterstitialManager {
   }
   private handleCreate(call: MethodCall, result: MethodResult): void {
     try {
-      const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(call.args);
-      this.interstitialAd = new AMPSInterstitialAd(adOption, this.callback);
+      const args = this.argsAsMap(call.args as Object | undefined)
+      const instanceId = this.extractInstanceId(args)
+      if (!args || !instanceId) {
+        result.error('INVALID_ARGS', 'adInstanceId is required', undefined);
+        return
+      }
+      const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(args);
+      this.releaseInterstitialAd(instanceId)
+      this.interstitialAds.set(instanceId, new AMPSInterstitialAd(adOption, this.createCallBack(instanceId)));
     } catch (error) {
       result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`,undefined);
+      return
     }
     result.success(true)
   }
   // 处理开屏广告加载
-  private handleLoadAd( result: MethodResult): void {
+  private handleLoadAd(instanceId: string, result: MethodResult): void {
     try {
-      this.interstitialAd?.load();
+      const interstitialAd = this.interstitialAds.get(instanceId)
+      if (!interstitialAd) {
+        result.error('LOAD_FAILED', `Interstitial ad instance not found: ${instanceId}`, undefined);
+        return
+      }
+      interstitialAd.load();
     } catch (error) {
       result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`,undefined);
     }
     result.success(true)
   }
-  private handlePreLoadAd( result: MethodResult): void {
+  private handlePreLoadAd(instanceId: string, result: MethodResult): void {
     try {
-      this.interstitialAd?.preloadAd();
+      const interstitialAd = this.interstitialAds.get(instanceId)
+      if (!interstitialAd) {
+        result.error('LOAD_FAILED', `Interstitial ad instance not found: ${instanceId}`, undefined);
+        return
+      }
+      interstitialAd.preloadAd();
     } catch (error) {
       result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`,undefined);
     }
@@ -103,21 +224,29 @@ export class AMPSInterstitialManager {
   }
 
   // 处理开屏广告显示
-  private handleShowAd(result: MethodResult, args: Any): void {
+  private handleShowAd(instanceId: string, result: MethodResult): void {
     try {
       let context = AMPSEventManager.getInstance().getContext()
-      if (this.interstitialAd && context) {
-        this.interstitialAd?.showAd({windowStage:context.windowStage,uiContext:context.windowStage.getMainWindowSync().getUIContext()})
+      const interstitialAd = this.interstitialAds.get(instanceId)
+      if (interstitialAd && context) {
+        const showOptions = new InterstitialShowAdOptions(context.windowStage, context.windowStage.getMainWindowSync().getUIContext())
+        interstitialAd.showAd(showOptions)
       } else {
         result.error('SHOW_FAILED', '广告未加载或WindowStage不存在',undefined);
+        return
       }
     } catch (error) {
       result.error('SHOW_EXCEPTION', `显示广告异常: ${error instanceof Error ? error.message : error}`,undefined);
+      return
     }
     result.success(true);
   }
 
-  public sendMessage = (method: string, args?: Any) => {
-    AMPSEventManager.getInstance().sendMessageToFlutter(method, args)
+  private sendPayload(method: string, payload: InterstitialCallbackPayload): void {
+    AMPSEventManager.getInstance().sendMessageToFlutter(method, payload as ESObject)
+  }
+
+  private sendMessage(instanceId: string, method: string): void {
+    this.sendPayload(method, this.createPayload(instanceId))
   }
 }

@@ -14,6 +14,6 @@ export class UnifiedFactory extends PlatformViewFactory {
   }
 
   public create(context: common.Context, viewId: number, args: Object): PlatformView {
-    return new OhosPlatformUnifiedView(context, viewId, args, this.message);
+    return new OhosPlatformUnifiedView(context, viewId, args as ESObject, this.message);
   }
 }
