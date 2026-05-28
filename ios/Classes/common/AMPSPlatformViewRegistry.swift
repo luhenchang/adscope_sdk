@@ -15,7 +15,10 @@ class AMPSPlatformViewRegistry {
     private init() {}
     
     
-    func regist(_ binding: FlutterPluginRegistrar){
+    func regist(_ binding: FlutterPluginRegistrar?){
+        guard let binding = binding else {
+            return
+        }
         
         binding.register(AMPSNAtiveViewFactory(), withId: AMPSPlatformViewIds.nativeViewId)
         

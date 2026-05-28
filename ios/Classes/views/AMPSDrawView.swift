@@ -8,7 +8,6 @@
 import Foundation
 import Flutter
 
-
 class AMPSDrawViewFactory: NSObject, FlutterPlatformViewFactory {
     func create(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?) -> any FlutterPlatformView {
         return AMPSDrawView(frame: frame, viewId: viewId, args: args)
@@ -17,79 +16,66 @@ class AMPSDrawViewFactory: NSObject, FlutterPlatformViewFactory {
     func createArgsCodec() -> any FlutterMessageCodec & NSObjectProtocol {
         return FlutterStandardMessageCodec.sharedInstance()
     }
-    
-    
 }
 
-class AMPSDrawView : NSObject, FlutterPlatformView {
+class AMPSDrawView: NSObject, FlutterPlatformView {
     
-    private var iosView: IOSDrawView
-    var args: Any?
-    init(frame: CGRect,viewId: Int64,args:Any?) {
+    private let iosView: IOSDrawView
+    
+    init(frame: CGRect, viewId: Int64, args: Any?) {
         self.iosView = IOSDrawView(frame: frame)
-//        self.iosView.backgroundColor = UIColor.orange
-        self.args = args
+        super.init()
         
+        guard let param = args as? [String: Any?],
+              let adId = param["adId"] as? String,
+              let adView = AMPSDrawManager.shared.getAdView(adId: adId) else { return }
         
-    }
-    func view() -> UIView {
-        if let param = args as? [String: Any?]{
-           if let adId = param["adId"] as? String {
-               if let adView = AMPSDrawManager.shared.getAdView(adId: adId) {
-                   iosView.adId = adId
-                   self.iosView.clipsToBounds = true
-                   self.iosView.addSubview(adView)
-                   adView.tag = 10013
-                   
-                   
-               }
-           }
+        iosView.adId = adId
+        iosView.adInstanceId = param[ArgumentKeys.adInstanceId] as? String
+        iosView.clipsToBounds = true
+        if adView.superview !== iosView {
+            adView.removeFromSuperview()
+            iosView.adView = adView   // 直接持有引用，不再依赖 tag
+            iosView.addSubview(adView)
         }
+    }
+    
+    func view() -> UIView {
         return iosView
     }
 }
 
-
-
-
 class IOSDrawView: UIView {
-    // 1. 记录上次的广告视图布局参数（位置+尺寸），初始值设为无效值
-    private var lastAdFrame: CGRect = .zero
-    var adId: String?
     
+    weak var adView: UIView?   // 弱引用，避免循环持有（adView 已被外部管理器持有）
+    var adId: String?
+    var adInstanceId: String?
     
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        guard let adView = self.viewWithTag(10013) else { return }
+        guard let adView = adView,
+              !adView.bounds.isEmpty else { return }
         
-        // 2. 计算目标布局（居中）
-        let targetX = (self.bounds.width - adView.bounds.width) / 2
-        let targetY = (self.bounds.height - adView.bounds.height) / 2
         let targetFrame = CGRect(
-            x: targetX,
-            y: targetY,
-            width: adView.bounds.width,
+            x: (bounds.width  - adView.bounds.width)  / 2,
+            y: (bounds.height - adView.bounds.height) / 2,
+            width:  adView.bounds.width,
             height: adView.bounds.height
         )
         
-        // 3. 仅当目标布局与当前布局/上次记录的布局不一致时，才更新+发回调
-        if adView.frame != targetFrame || lastAdFrame != targetFrame {
-            // 更新广告视图布局
-            adView.frame = targetFrame
-            // 记录本次布局，用于下次对比
-            lastAdFrame = targetFrame
-            // 发送回调到Flutter
-            AMPSEventManager.shared.sendToFlutter(
-                AmpsDrawCallbackChannelMethod.drawSizeUpdate,
-                arg: [
-                    "adId": adId ?? "",
-                    "width": adView.frame.size.width,
-                    "height": adView.frame.size.height
-                ]
-            )
-            
-        }
+        guard adView.frame != targetFrame else { return }
+        
+        adView.frame = targetFrame
+        
+        AMPSEventManager.shared.sendToFlutter(
+            AmpsDrawCallbackChannelMethod.drawSizeUpdate,
+            arg: [
+                "adId":   adId ?? "",
+                ArgumentKeys.adInstanceId: adInstanceId ?? "",
+                "width":  targetFrame.width,
+                "height": targetFrame.height
+            ]
+        )
     }
 }
-

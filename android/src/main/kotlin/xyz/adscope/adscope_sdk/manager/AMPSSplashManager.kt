@@ -10,6 +10,8 @@ import xyz.adscope.adscope_sdk.data.AMPSAdCallBackChannelMethod
 import xyz.adscope.adscope_sdk.data.AMPSAdSdkMethodNames
 import xyz.adscope.adscope_sdk.data.AdOptionsModule
 import xyz.adscope.adscope_sdk.data.ErrorModel
+import xyz.adscope.adscope_sdk.data.SPLASH_BOTTOM
+import xyz.adscope.adscope_sdk.data.SPLASH_INSTANCE_ID
 import xyz.adscope.adscope_sdk.data.SplashBottomModule
 import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import xyz.adscope.adscope_sdk.utils.dpToPx
@@ -18,9 +20,11 @@ import xyz.adscope.amps.ad.splash.AMPSSplashAd
 import xyz.adscope.amps.ad.splash.AMPSSplashLoadEventListener
 import xyz.adscope.amps.common.AMPSError
 import xyz.adscope.common.v2.gsonlite.Gson
+import java.util.concurrent.ConcurrentHashMap
 
 class AMPSSplashManager private constructor() {
-    private var mSplashAd: AMPSSplashAd? = null
+    private val splashAds = ConcurrentHashMap<String, AMPSSplashAd>()
+
     companion object {
         @Volatile
         private var instance: AMPSSplashManager? = null
@@ -32,29 +36,32 @@ class AMPSSplashManager private constructor() {
         }
     }
 
-    private val adCallback = object : AMPSSplashLoadEventListener {
+    private fun containerTag(instanceId: String) = "splash_main_container_tag_$instanceId"
+
+    private fun createAdCallback(instanceId: String) = object : AMPSSplashLoadEventListener {
         override fun onAmpsAdLoaded() {
-            sendMessage(AMPSAdCallBackChannelMethod.ON_LOAD_SUCCESS)
-            sendMessage(AMPSAdCallBackChannelMethod.ON_RENDER_OK)
+            sendMessage(instanceId, AMPSAdCallBackChannelMethod.ON_LOAD_SUCCESS)
+            sendMessage(instanceId, AMPSAdCallBackChannelMethod.ON_RENDER_OK)
         }
 
         override fun onAmpsAdShow() {
-            sendMessage(AMPSAdCallBackChannelMethod.ON_AD_SHOW)
+            sendMessage(instanceId, AMPSAdCallBackChannelMethod.ON_AD_SHOW)
         }
 
         override fun onAmpsAdClicked() {
-            cleanupViewsAfterAdClosed()
-            sendMessage(AMPSAdCallBackChannelMethod.ON_AD_CLICKED)
+            cleanupViewsAfterAdClosed(instanceId)
+            sendMessage(instanceId, AMPSAdCallBackChannelMethod.ON_AD_CLICKED)
         }
 
         override fun onAmpsAdDismiss() {
-            cleanupViewsAfterAdClosed()
-            sendMessage(AMPSAdCallBackChannelMethod.ON_AD_CLOSED)
+            cleanupViewsAfterAdClosed(instanceId)
+            sendMessage(instanceId, AMPSAdCallBackChannelMethod.ON_AD_CLOSED)
         }
 
         override fun onAmpsAdFailed(error: AMPSError?) {
-            cleanupViewsAfterAdClosed()
+            cleanupViewsAfterAdClosed(instanceId)
             sendMessage(
+                instanceId,
                 AMPSAdCallBackChannelMethod.ON_LOAD_FAILURE,
                 mapOf(
                     ErrorModel.CODE to (error?.code?.toInt() ?: -1),
@@ -62,65 +69,99 @@ class AMPSSplashManager private constructor() {
                 )
             )
         }
-
     }
 
-
-    fun getSplashAd(): AMPSSplashAd? {
-        return this.mSplashAd
+    fun getSplashAd(instanceId: String? = null): AMPSSplashAd? {
+        if (instanceId != null) {
+            return splashAds[instanceId]
+        }
+        return splashAds.values.lastOrNull()
     }
 
-    /**
-     * 清理广告关闭后相关的视图和资源。
-     * @param
-     */
-    private fun cleanupViewsAfterAdClosed() {
+    private fun extractInstanceId(args: Map<String, Any>?): String? {
+        return args?.get(SPLASH_INSTANCE_ID) as? String
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun argsAsMap(call: MethodCall): Map<String, Any>? {
+        return call.arguments as? Map<String, Any>
+    }
+
+    private fun resolveBottomMap(args: Map<String, Any>?): Map<String, Any>? {
+        if (args == null) return null
+        val nested = args[SPLASH_BOTTOM] as? Map<String, Any>
+        if (nested != null) return nested
+        return if (args["type"] == "parent") args else null
+    }
+
+    private fun cleanupViewsAfterAdClosed(instanceId: String) {
         val activity = FlutterPluginUtil.getActivity()
         val contentView = activity?.findViewById<ViewGroup>(android.R.id.content)
-        contentView?.findViewWithTag<View>("splash_main_container_tag")?.let { viewToRemove ->
+        contentView?.findViewWithTag<View>(containerTag(instanceId))?.let { viewToRemove ->
             contentView.removeView(viewToRemove)
         }
-        SplashBottomModule.current = null
     }
 
     @Suppress("UNCHECKED_CAST")
     fun handleMethodCall(call: MethodCall, result: Result) {
+        val args = argsAsMap(call)
+        val instanceId = extractInstanceId(args)
         when (call.method) {
             AMPSAdSdkMethodNames.SPLASH_CREATE -> {
                 splashAdCreate(call, result)
             }
 
-            AMPSAdSdkMethodNames.SPLASH_LOAD -> handleSplashLoad(result)
-            AMPSAdSdkMethodNames.SPLASH_SHOW_AD -> handleSplashShowAd(call, result) // 更改了参数传递
+            AMPSAdSdkMethodNames.SPLASH_LOAD -> {
+                if (instanceId == null) {
+                    result.error("INVALID_ARGS", "splashInstanceId is required", null)
+                    return
+                }
+                handleSplashLoad(instanceId, result)
+            }
+
+            AMPSAdSdkMethodNames.SPLASH_SHOW_AD -> {
+                if (instanceId == null) {
+                    result.error("INVALID_ARGS", "splashInstanceId is required", null)
+                    return
+                }
+                handleSplashShowAd(instanceId, call, result)
+            }
+
             AMPSAdSdkMethodNames.SPLASH_GET_ECPM -> {
-                result.success(mSplashAd?.ecpm ?: 0)
+                result.success(splashAds[instanceId]?.ecpm ?: 0)
             }
 
             AMPSAdSdkMethodNames.SPLASH_PRE_LOAD -> {
-                mSplashAd?.preLoad()
+                splashAds[instanceId]?.preLoad()
                 result.success(null)
             }
 
             AMPSAdSdkMethodNames.SPLASH_ADD_PRE_LOAD_AD_INFO -> {
-                mSplashAd?.addPreLoadAdInfo()
+                splashAds[instanceId]?.addPreLoadAdInfo()
                 result.success(null)
             }
 
             AMPSAdSdkMethodNames.SPLASH_GET_MEDIA_EXTRA_INFO -> {
                 var mediaExtraInfo: String? = null
-                if (mSplashAd?.mediaExtraInfo != null) {
-                    mediaExtraInfo = Gson().toJson(mSplashAd?.mediaExtraInfo)
+                val ad = splashAds[instanceId]
+                if (ad?.mediaExtraInfo != null) {
+                    mediaExtraInfo = Gson().toJson(ad.mediaExtraInfo)
                 }
                 result.success(mediaExtraInfo)
             }
 
             AMPSAdSdkMethodNames.SPLASH_IS_READY_AD -> {
-                result.success(mSplashAd?.isReady ?: false)
+                result.success(splashAds[instanceId]?.isReady ?: false)
             }
+
             AMPSAdSdkMethodNames.SPLASH_DESTROY -> {
-                mSplashAd?.destroy()
+                if (instanceId != null) {
+                    splashAds.remove(instanceId)?.destroy()
+                    cleanupViewsAfterAdClosed(instanceId)
+                }
                 result.success(null)
             }
+
             else -> result.notImplemented()
         }
     }
@@ -131,22 +172,33 @@ class AMPSSplashManager private constructor() {
             result.error("LOAD_FAILED", "Activity not available for loading splash ad.", null)
             return
         }
-        val adOptionsMap = call.arguments<Map<String, Any>?>()
+        val adOptionsMap = argsAsMap(call)
+        val instanceId = extractInstanceId(adOptionsMap)
+        if (instanceId.isNullOrEmpty()) {
+            result.error("INVALID_ARGS", "splashInstanceId is required", null)
+            return
+        }
         val adOption = AdOptionsModule.getAdOptionFromMap(adOptionsMap, activity)
         try {
-            mSplashAd = AMPSSplashAd(activity, adOption, adCallback)
+            splashAds[instanceId] = AMPSSplashAd(activity, adOption, createAdCallback(instanceId))
             result.success(true)
         } catch (e: Exception) {
             result.error("LOAD_EXCEPTION", "Error loading splash ad: ${e.message}", e.toString())
         }
     }
 
-    private fun handleSplashLoad(result: Result) {
-        mSplashAd?.loadAd()
+    private fun handleSplashLoad(instanceId: String, result: Result) {
+        val ad = splashAds[instanceId]
+        if (ad == null) {
+            result.error("LOAD_FAILED", "Splash ad instance not found: $instanceId", null)
+            return
+        }
+        ad.loadAd()
         result.success(true)
     }
 
-    private fun handleSplashShowAd(call: MethodCall, result: Result) {
+    private fun handleSplashShowAd(instanceId: String, call: MethodCall, result: Result) {
+        val mSplashAd = splashAds[instanceId]
         val activity = FlutterPluginUtil.getActivity()
         if (mSplashAd == null) {
             result.error("SHOW_FAILED", "Splash ad not loaded.", null)
@@ -163,23 +215,22 @@ class AMPSSplashManager private constructor() {
             return
         }
 
+        val tag = containerTag(instanceId)
         try {
-            contentView.findViewWithTag<View>("splash_main_container_tag")?.let {
+            contentView.findViewWithTag<View>(tag)?.let {
                 contentView.removeView(it)
             }
             val mainContainerLocal = RelativeLayout(activity)
-            mainContainerLocal.tag = "splash_main_container_tag"
+            mainContainerLocal.tag = tag
             mainContainerLocal.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
 
-            val args = call.arguments<Map<String, Any>?>()
-            val splashBottomData = SplashBottomModule.fromMap(args)
-            SplashBottomModule.current = splashBottomData // 保持更新静态引用，如果其他地方需要
+            val args = argsAsMap(call)
+            val splashBottomData = SplashBottomModule.fromMap(resolveBottomMap(args))
 
-            // ---- 修改开始 ----
-            var customBottomLayoutLocal: View? = null // 初始化为 null
+            var customBottomLayoutLocal: View? = null
             var customBottomLayoutId: Int = View.NO_ID
 
             // 条件：仅当 splashBottomData 初始化成功并且高度大于0时，才创建和添加底部视图
@@ -212,24 +263,31 @@ class AMPSSplashManager private constructor() {
             adContainerLocal.layoutParams = adContainerParams
             mainContainerLocal.addView(adContainerLocal)
             contentView.addView(mainContainerLocal)
-            // --- 视图创建和添加结束 ---
-            if (mSplashAd?.isReady == true) {
-                mSplashAd?.show(adContainerLocal)
+            if (mSplashAd.isReady) {
+                mSplashAd.show(adContainerLocal)
                 result.success(true)
             } else {
                 contentView.removeView(mainContainerLocal)
                 result.error("SHOW_FAILED", "Splash ad not ready to be shown.", null)
             }
         } catch (e: Exception) {
-            // 捕获创建或显示视图过程中的异常，并尝试清理
-            contentView.findViewWithTag<View>("splash_main_container_tag")?.let {
+            contentView.findViewWithTag<View>(tag)?.let {
                 contentView.removeView(it)
             }
             result.error("SHOW_EXCEPTION", "Error showing splash ad: ${e.message}", e.toString())
         }
     }
 
-    private fun sendMessage(method: String, args: Any? = null) {
-        AMPSEventManager.getInstance().sendMessageToFlutter(method, args)
+    private fun sendMessage(instanceId: String, method: String, args: Any? = null) {
+        val payload: MutableMap<String, Any?> = mutableMapOf(SPLASH_INSTANCE_ID to instanceId)
+        when (args) {
+            null -> Unit
+            is Map<*, *> -> {
+                @Suppress("UNCHECKED_CAST")
+                payload.putAll(args as Map<String, Any?>)
+            }
+            else -> payload["data"] = args
+        }
+        AMPSEventManager.getInstance().sendMessageToFlutter(method, payload)
     }
 }

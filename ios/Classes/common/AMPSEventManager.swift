@@ -16,7 +16,10 @@ class AMPSEventManager : NSObject{
     
     var channel: FlutterMethodChannel?
     var registrar: FlutterPluginRegistrar?
-    func regist(_ registrar: FlutterPluginRegistrar) {
+    func regist(_ registrar: FlutterPluginRegistrar?) {
+        guard let registrar = registrar else {
+            return
+        }
         self.registrar = registrar
         channel = FlutterMethodChannel(name: "adscope_sdk", binaryMessenger:  registrar.messenger())
         channel?.setMethodCallHandler { methodCall, result in

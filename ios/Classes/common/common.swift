@@ -98,6 +98,7 @@ class AMPSRewardedVideoCallBackChannelMethod {
   static let onVideoPlayError = "RewardedVideo_onVideoPlayError";
   static let onVideoSkipToEnd = "RewardedVideo_onVideoSkipToEnd";
   static let onAdCached = "RewardedVideo_onAdCached";
+  static let onServerRewardDidFail = "RewardedVideo_ServerRewardDidFail"
 }
 //2. banner相关原生端回调
 class AMPSBannerCallBackChannelMethod {
@@ -185,6 +186,7 @@ enum AMPSAdSdkMethodNames {
 //    static let interstitialNotifyRtbWin = "AMPSInterstitial_notifyRTBWin"
 //    static let interstitialNotifyRtbLoss = "AMPSInterstitial_notifyRTBLoss"
     static let interstitialIsReadyAd = "AMPSInterstitial_isReadyAd"
+    static let interstitialPreLoad = "AMPSInterstitial_preLoad"
     
     // 原生广告相关方法
     static let nativeCreate = "AMPSNative_create"
@@ -199,6 +201,10 @@ enum AMPSAdSdkMethodNames {
     static let nativeSetVideoPlayConfig = "AMPSNative_setVideoPlayConfig"
     static let nativeGetUnifiedPattern = "AMPSNative_getUnifiedPattern"
     static let nativeGetDownLoad  = "AMPSNative_getDownLoad"
+    static let nativeDestroy = "AMPSNative_destroy"
+    static let nativeResume = "AMPSNative_resume"
+    static let nativePause = "AMPSNative_pause"
+    static let nativeGetMediaExtraInfo = "AMPSNative_getMediaExtraInfo"
     
     //激励视频
     static let rewardVideoCreate = "AMPSRewardVideo_create"
@@ -256,6 +262,8 @@ enum ArgumentKeys {
     static let adOption = "AdOption"
     static let config = "config"
     static let splashBottom = "SplashBottomView"
+    static let splashInstanceId = "splashInstanceId"
+    static let adInstanceId = "adInstanceId"
     static let videoSound = "videoSoundEnable"
     static let videoPlayType = "videoAutoPlayType"
     static let videoLoopReplay = "videoLoopReplay"
@@ -307,7 +315,11 @@ let nativeMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.nativeGetVideoDuration,
     AMPSAdSdkMethodNames.nativeSetVideoPlayConfig,
     AMPSAdSdkMethodNames.nativeGetUnifiedPattern,
-    AMPSAdSdkMethodNames.nativeGetDownLoad
+    AMPSAdSdkMethodNames.nativeGetDownLoad,
+    AMPSAdSdkMethodNames.nativeDestroy,
+    AMPSAdSdkMethodNames.nativeResume,
+    AMPSAdSdkMethodNames.nativePause,
+    AMPSAdSdkMethodNames.nativeGetMediaExtraInfo
 ]
 let rewardVideoMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.rewardVideoCreate,

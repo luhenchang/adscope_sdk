@@ -9,6 +9,7 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.platform.PlatformView
 import xyz.adscope.adscope_sdk.data.AMPSAdCallBackChannelMethod
 import xyz.adscope.adscope_sdk.data.SPLASH_BOTTOM
+import xyz.adscope.adscope_sdk.data.SPLASH_INSTANCE_ID
 import xyz.adscope.adscope_sdk.data.SplashBottomModule
 import xyz.adscope.adscope_sdk.manager.AMPSEventManager
 import xyz.adscope.adscope_sdk.manager.AMPSSplashManager
@@ -33,8 +34,9 @@ class AMPSSplashView(
 
     init {
         val creationArgsMap = args as? Map<*, *>?
+        val instanceId = creationArgsMap?.get(SPLASH_INSTANCE_ID) as? String
         //1. 首先，从 Manager 获取已经加载好的广告实例
-        mSplashAd = AMPSSplashManager.getInstance().getSplashAd()
+        mSplashAd = AMPSSplashManager.getInstance().getSplashAd(instanceId)
         if (mSplashAd?.isReady == true) {
             // 2. 解析底部视图数据
             val splashBottomData =

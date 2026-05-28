@@ -14,7 +14,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
-import androidx.core.graphics.toColorInt
 import xyz.adscope.adscope_sdk.data.AD_ID
 import xyz.adscope.adscope_sdk.data.AMPSNativeCallBackChannelMethod
 import xyz.adscope.adscope_sdk.data.ErrorModel
@@ -203,6 +202,7 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
         }
     }
 
+    fun String.toColorInt(): Int = Color.parseColor(this)
 
     private fun createVideoChild(
         child: NativeUnifiedChild.Video,

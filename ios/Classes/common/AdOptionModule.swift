@@ -25,6 +25,15 @@ struct AdOptionModule{
             config.s2sIp = s2s
         }
         
+        if let userId = para[AdOptionKeys.keyUserId] as? String {
+            config.userID = userId
+        }
+        if let extra = para[AdOptionKeys.keyExtra] as? String {
+            config.extra = extra
+        }
+//        if let ip = para[AdOptionKeys.keyIpAddress] as? String {
+//
+//        }
         if let timeout = para[AdOptionKeys.keyTimeoutInterval] as? TimeInterval {
             config.timeoutInterval = timeout
         }

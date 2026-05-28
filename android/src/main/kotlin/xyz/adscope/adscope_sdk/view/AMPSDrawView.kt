@@ -11,6 +11,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
 import xyz.adscope.adscope_sdk.data.AD_ID
+import xyz.adscope.adscope_sdk.data.AD_INSTANCE_ID
 import xyz.adscope.adscope_sdk.data.AMPSAdSdkMethodNames.DRAW_SIZE_UPDATE
 import xyz.adscope.adscope_sdk.data.NATIVE_HEIGHT
 import xyz.adscope.adscope_sdk.data.NATIVE_WIDTH
@@ -29,10 +30,12 @@ class AMPSDrawView(
 ) : PlatformView, MethodChannel.MethodCallHandler {
     private var rootView: FrameLayout
     private val adId: String?
+    private val adInstanceId: String?
 
     init {
         val creationArgs = parseCreationArgs(args)
         adId = creationArgs[AD_ID] as? String
+        adInstanceId = creationArgs[AD_INSTANCE_ID] as? String
         rootView = createRootView(creationArgs)
         addAdViewToRoot()
     }
@@ -110,7 +113,8 @@ class AMPSDrawView(
                     AMPSEventManager.getInstance().sendMessageToFlutter(DRAW_SIZE_UPDATE,mapOf(
                         NATIVE_WIDTH to width.pxToDp(context),
                         NATIVE_HEIGHT to height.pxToDp(context),
-                        AD_ID to adId
+                        AD_ID to adId,
+                        AD_INSTANCE_ID to adInstanceId
                     ))
                     // 3. 移除监听（避免重复回调）- 注意 API 版本兼容
                     drawView.viewTreeObserver.removeOnGlobalLayoutListener(this)

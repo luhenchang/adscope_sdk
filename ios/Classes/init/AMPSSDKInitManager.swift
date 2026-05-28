@@ -57,7 +57,7 @@ class AMPSSDKInitManager {
         if let idfa = initParam?.adController?.OAID{
             config.customIDFA = idfa
         }
-        if let sensor = initParam?.adController?.isCanUseSensor,sensor == false{
+        if let sensor = initParam?.adController?.isCanUseShakeAd,sensor == false{
             config.closeShakeAd = true
         }
         if let jsonOption = initParam?.optionInfo {

@@ -7,12 +7,11 @@ import android.util.TypedValue
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.core.graphics.toColorInt
 import xyz.adscope.adscope_sdk.data.SplashBottomModule
 
 
 object SplashBottomViewFactory {
-
+    fun String.toColorInt(): Int = Color.parseColor(this)
     /**
      * 根据 SplashBottomModule 数据动态创建一个 RelativeLayout 作为自定义底部视图。
      *

@@ -176,7 +176,7 @@ class AMPSInitConfigConverter {
         }
 
         (flutterParams[AMPSInitConfigKey.IS_USE_SPLASH_PUNCH_LINE] as? Boolean)?.let {
-            ampsInitConfigBuilder.setIsUseSplashPunchLine(it)
+            //ampsInitConfigBuilder.setIsUseSplashPunchLine(it)
         }
 
         (flutterParams[AMPSInitConfigKey.EXTENSION_PARAM] as? Map<String, Map<String, Any?>>)?.let {

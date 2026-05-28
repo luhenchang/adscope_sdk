@@ -64,7 +64,7 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
         let ad = adView.nativeAd
         
         if ad.nativeMode == .unifiedVideo {
-            adView.mediaView?.delegate = AMPSNativeManager.shared.unifiedManager
+            adView.mediaView?.delegate = AMPSNativeManager.shared.unifiedSlot(owning: adView)
             if let videoModel = model.unifiedWidget?.children?.first(where: { child in
                 child.type == .video
             }){
