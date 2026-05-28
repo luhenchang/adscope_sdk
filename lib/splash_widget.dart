@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:adscope_sdk/amps_sdk_export.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'common.dart';
 
 class SplashWidget extends StatefulWidget {
@@ -22,6 +21,10 @@ class _SplashWidgetState extends State<SplashWidget> {
     super.initState();
     splashParam[splashConfig] = widget.adSplash?.config.toMap();
     splashParam[splashBottomView] = widget.splashBottomWidget?.toMap();
+    if (widget.adSplash != null) {
+      splashParam[AMPSSplashInstanceKey.splashInstanceId] =
+          widget.adSplash!.instanceId;
+    }
   }
 
   @override

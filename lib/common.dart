@@ -73,6 +73,7 @@ class AMPSRewardedVideoCallBackChannelMethod {
   static const String onVideoPlayError = "RewardedVideo_onVideoPlayError";
   static const String onVideoSkipToEnd = "RewardedVideo_onVideoSkipToEnd";
   static const String onAdCached = "RewardedVideo_onAdCached";
+  static const String onServerRewardDidFail = "RewardedVideo_ServerRewardDidFail";
 }
 
 //2. banner相关原生端回调
@@ -149,7 +150,6 @@ class AMPSAdSdkMethodNames {
   static const String setLogLevel = "AMPSAdSdk_setLogLevel";
   /// 初始化AMPS广告SDK的方法名
   static const String init = 'AMPSAdSdk_init';
-  static const String permissionTracking = 'AMPSAdSdk_permissionTracking';
   static const String getSdkVersion= "AMPSAdSdk_getSdkVersion";
   static const String getInitStatus= "AMPSAdSdk_getInitStatus";
   static const String setPersonalRecommend = "AMPSAdSdk_setPersonalRecommend";
@@ -222,6 +222,14 @@ class AMPSAdSdkMethodNames {
   static const String drawResumeAd = "AMPSDraw_resume";
   static const String drawGetMediaExtraInfo = "AMPSDraw_getMediaExtraInfo";
 }
+/// 开屏多实例标识（Flutter 与原生 MethodChannel 参数、回调共用）
+class AMPSSplashInstanceKey {
+  static const String splashInstanceId = "splashInstanceId";
+}
+class AMPSAdInstanceKey {
+  static const String adInstanceId = "adInstanceId";
+}
+
 ///Error对应的key
 class AMPSSdkCallBackErrorKey {
   static const String adId = "adId";

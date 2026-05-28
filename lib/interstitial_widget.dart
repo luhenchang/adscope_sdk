@@ -1,8 +1,5 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
-
-import 'common.dart';
 ///插屏组件
 class InterstitialWidget extends StatefulWidget {
   const InterstitialWidget({super.key});

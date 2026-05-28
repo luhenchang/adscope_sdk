@@ -55,7 +55,9 @@ class _DrawWidgetState extends State<DrawWidget>
       }
       creationParams = <String, dynamic>{
         "adId": widget.adId,
-        "width": width
+        "width": width,
+        if (widget.adDraw != null)
+          AMPSAdInstanceKey.adInstanceId: widget.adDraw!.instanceId,
       };
     }
 

@@ -31,7 +31,7 @@ class NativeWidget extends StatefulWidget {
 }
 
 class _NativeWidgetState extends State<NativeWidget>
-    with AutomaticKeepAliveClientMixin, RouteAware{
+    with AutomaticKeepAliveClientMixin {
   /// 创建参数
   late Map<String, dynamic> creationParams;
 
@@ -73,7 +73,12 @@ class _NativeWidgetState extends State<NativeWidget>
         width = expressSizeList[0]?.toDouble() ?? width;
         height = expressSizeList[1]?.toDouble() ?? height;
       }
-      creationParams = <String, dynamic>{"adId": widget.adId, "width": width};
+      creationParams = <String, dynamic>{
+        "adId": widget.adId,
+        "width": width,
+        if (widget.adNative != null)
+          AMPSAdInstanceKey.adInstanceId: widget.adNative!.instanceId,
+      };
     }
 
     if (width <= 0 || height <= 0 || widgetNeedClose) {
@@ -115,32 +120,9 @@ class _NativeWidgetState extends State<NativeWidget>
     /// 有宽高信息了（渲染成功了）设置对应宽高
     return SizedBox.fromSize(
       size: Size(width, height),
-      child: Visibility(visible: showAd,child: view),
+      child: view,
     );
   }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // 订阅观察器
-    AMPSAdSDK.routeObserver.subscribe(this, ModalRoute.of(context)!);
-  }
-
-  @override
-  void dispose() {
-    AMPSAdSDK.routeObserver.unsubscribe(this); // 记得取消订阅
-    super.dispose();
-  }
-
-  @override
-  void didPushNext() => setState(() {
-    showAd = false;
-  });
-
-  @override
-  void didPopNext() => setState(() {
-    showAd = true;
-  });
 
   @override
   bool get wantKeepAlive => true;

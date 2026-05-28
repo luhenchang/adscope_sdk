@@ -102,6 +102,7 @@ class RewardVideoCallBack {
   final VoidCallback? onVideoPlayEnd;
   final VideoSkipToEndCallback? onVideoSkipToEnd;
   final VoidCallback? onAdReward;
+  final AdFailureCallback? onServerRewardFailed;
 
   const RewardVideoCallBack({
     this.onLoadSuccess,
@@ -114,7 +115,8 @@ class RewardVideoCallBack {
     this.onVideoPlayEnd,
     this.onVideoPlayError,
     this.onVideoSkipToEnd,
-    this.onAdReward
+    this.onAdReward,
+    this.onServerRewardFailed
   });
 }
 

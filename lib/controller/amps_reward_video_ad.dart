@@ -2,112 +2,81 @@ import 'package:adscope_sdk/adscope_sdk.dart';
 import 'package:adscope_sdk/amps_sdk_export.dart';
 
 import '../common.dart';
+import 'reward_video_callback_router.dart';
 
 class AMPSRewardVideoAd {
-  static const String _rewardAdHandlerKey = "reward_ad_handler";
+  static int _instanceCounter = 0;
+  final String instanceId;
   AdOptions config;
   RewardVideoCallBack? adCallBack;
 
-  AMPSRewardVideoAd({required this.config, this.adCallBack}) {
+  AMPSRewardVideoAd({required this.config, this.adCallBack, String? instanceId})
+      : instanceId = instanceId ?? _generateInstanceId() {
+    RewardVideoCallbackRouter.instance.register(this.instanceId, adCallBack);
     AdscopeSdk
-        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoCreate, config.toMap());
-
-    setMethodCallHandler();
+        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoCreate, _wrapArgs(config.toMap()));
   }
 
-  void setMethodCallHandler() {
-    AdscopeSdk.removeMethodCallHandler(_rewardAdHandlerKey);
-    AdscopeSdk.addMethodCallHandler(_rewardAdHandlerKey,
-      (call) async {
-        switch (call.method) {
-          case AMPSRewardedVideoCallBackChannelMethod.onLoadSuccess:
-            adCallBack?.onLoadSuccess?.call();
-            break;
-          case AMPSRewardedVideoCallBackChannelMethod.onLoadFailure:
-            var map = call.arguments as Map<dynamic, dynamic>;
-            adCallBack?.onLoadFailure?.call(map[AMPSSdkCallBackErrorKey.code],
-                map[AMPSSdkCallBackErrorKey.message]);
-            break;
-          case AMPSRewardedVideoCallBackChannelMethod.onAdShow:
-            adCallBack?.onAdShow?.call();
-            break;
-          case AMPSRewardedVideoCallBackChannelMethod.onAdClicked:
-            adCallBack?.onAdClicked?.call();
-            break;
-          case AMPSRewardedVideoCallBackChannelMethod.onAdClosed:
-            adCallBack?.onAdClosed?.call();
-            break;
-          case AMPSRewardedVideoCallBackChannelMethod.onVideoPlayStart:
-            adCallBack?.onVideoPlayStart?.call();
-            break;
-          case AMPSRewardedVideoCallBackChannelMethod.onVideoPlayEnd:
-            adCallBack?.onVideoPlayEnd?.call();
-            break;
-          case AMPSRewardedVideoCallBackChannelMethod.onVideoPlayError:
-            var map = call.arguments as Map<dynamic, dynamic>;
-            adCallBack?.onVideoPlayError?.call(
-                map[AMPSSdkCallBackErrorKey.code],
-                map[AMPSSdkCallBackErrorKey.message]);
-            break;
-          case AMPSRewardedVideoCallBackChannelMethod.onVideoSkipToEnd:
-            var map = call.arguments as Map<dynamic, dynamic>;
-            adCallBack?.onVideoSkipToEnd
-                ?.call(map[AMPSSdkCallBackParamsKey.playDurationMs]);
-            break;
-          case AMPSRewardedVideoCallBackChannelMethod.onAdReward:
-            adCallBack?.onAdReward?.call();
-            break;
-          case AMPSRewardedVideoCallBackChannelMethod.onAdCached:
-            adCallBack?.onAdCached?.call();
-            break;
-        }
-      },
-    );
+  static String _generateInstanceId() {
+    _instanceCounter += 1;
+    return 'reward_${_instanceCounter}_${DateTime.now().microsecondsSinceEpoch}';
+  }
+
+  Map<String, dynamic> _wrapArgs(Map<dynamic, dynamic> args) {
+    return {
+      AMPSAdInstanceKey.adInstanceId: instanceId,
+      ...args,
+    };
+  }
+
+  Map<String, dynamic> _instanceOnlyArgs() {
+    return {AMPSAdInstanceKey.adInstanceId: instanceId};
   }
 
   ///激励视频广告加载调用
   void load() async {
-    await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.rewardVideoLoad);
+    await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.rewardVideoLoad, _instanceOnlyArgs());
   }
 
   ///激励视频广预加载
   void preLoad() async {
     await AdscopeSdk
-        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoPreLoad);
+        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoPreLoad, _instanceOnlyArgs());
   }
 
   ///激励视频广告显示调用
   void showAd() async {
     await AdscopeSdk
-        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoShowAd);
+        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoShowAd, _instanceOnlyArgs());
   }
 
   ///激励视频广告是否有预加载
   Future<bool> isReadyAd() async {
     return await AdscopeSdk
-        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoIsReadyAd);
+        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoIsReadyAd, _instanceOnlyArgs());
   }
 
   ///销毁视频广告
   destroy() async {
-    AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.rewardVideoDestroyAd);
+    RewardVideoCallbackRouter.instance.unregister(instanceId);
+    AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.rewardVideoDestroyAd, _instanceOnlyArgs());
   }
 
   ///获取ecpm
   Future<num> getECPM() async {
     return await AdscopeSdk
-        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoGetECPM);
+        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoGetECPM, _instanceOnlyArgs());
   }
 
   ///添加预加载广告
   addPreLoadAdInfo() async {
     AdscopeSdk
-        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoAddPreLoadAdInfo);
+        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoAddPreLoadAdInfo, _instanceOnlyArgs());
   }
 
   ///获取MediaExtraInfo
   Future<dynamic> addPreGetMediaExtraInfo() async {
     return await AdscopeSdk
-        .invokeMapMethod(AMPSAdSdkMethodNames.rewardVideoGetMediaExtraInfo);
+        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoGetMediaExtraInfo, _instanceOnlyArgs());
   }
 }

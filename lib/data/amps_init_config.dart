@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-
 import 'amps_sdk_api_keys.dart';
 
 ///UI模式【自动、黑色、浅色】
@@ -332,7 +330,7 @@ class AMPSInitConfig {
   /// androidID
   final String? androidID;
 
-  ///optionInfo 三端统一
+  ///optionInfo Android特有
   final String? optionInfo;
 
   /// 聚合模式下，提前初始化的第三方广告渠道平台
@@ -381,7 +379,6 @@ class AMPSInitConfig {
 
   /// 转为 Map（用于JSON序列化）
   Map<String, dynamic> toMap(bool testModel) {
-    debugPrint("-----optionInfo-----: $optionInfo" );
     return {
       /// 基础类型直接传递
       AMPSInitConfigKey.testModel: testModel,
@@ -566,10 +563,10 @@ class AMPSBuilder {
   }
 
   /// 设置是否使用开屏广告标语
-  AMPSBuilder setIsUseSplashPunchLine(bool isUseSplashPunchLine) {
-    this.isUseSplashPunchLine = isUseSplashPunchLine;
-    return this;
-  }
+  // AMPSBuilder setIsUseSplashPunchLine(bool isUseSplashPunchLine) {
+  //   this.isUseSplashPunchLine = isUseSplashPunchLine;
+  //   return this;
+  // }
 
   /// 构建AMPSInitConfig对象的方法
   AMPSInitConfig build() {

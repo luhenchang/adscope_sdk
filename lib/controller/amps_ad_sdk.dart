@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:adscope_sdk/adscope_sdk.dart';
-import 'package:flutter/material.dart';
+
 import '../common.dart';
 import '../data/amps_init_config.dart';
 import '../data/amps_sdk_init_status.dart';
@@ -9,7 +9,6 @@ import '../data/amps_sdk_init_status.dart';
 class AMPSAdSDK {
   static const String _initHandlerKey = "sdk_init_handler";
   static bool testModel = false;
-  static RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
   AMPSAdSDK._();
   /// 发送数据给native
   static Future<void> init(AMPSInitConfig sdkConfig,AMPSIInitCallBack callBack) async {
@@ -48,12 +47,7 @@ class AMPSAdSDK {
       flag,
     );
   }
-  static Future<int> getPermissionTracking() async {
-    final res = await AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.permissionTracking
-    );
-    return res;
-  }
+
   ///获取SDK版本
   static Future<String> getSdkVersion() async {
     final sdkVersion = await AdscopeSdk.invokeMethod(
