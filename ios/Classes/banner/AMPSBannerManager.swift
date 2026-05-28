@@ -57,7 +57,7 @@ class AMPSBannerManager: NSObject {
         if let instanceId = instanceId {
             return bannerAds[instanceId]?.bannerView
         }
-        return bannerAds.values.last?.bannerView
+        return nil
     }
     
     private func handlebannerCreate(arguments: [String: Any]?, result: @escaping FlutterResult) {

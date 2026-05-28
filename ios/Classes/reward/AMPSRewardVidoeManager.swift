@@ -35,7 +35,7 @@ class AMPSRewardVideoManager: NSObject {
             result(rewardVideoAds[instanceId ?? ""]?.eCPM() ?? 0)
         case AMPSAdSdkMethodNames.rewardVideoPreLoad:
             if let instanceId = instanceId {
-                rewardVideoAds[instanceId]?.preLoad()
+                rewardVideoAds[instanceId]?.preloadAd()
             }
             result(nil)
         case AMPSAdSdkMethodNames.rewardVideoDestroyAd:

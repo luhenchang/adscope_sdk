@@ -186,6 +186,7 @@ enum AMPSAdSdkMethodNames {
 //    static let interstitialNotifyRtbWin = "AMPSInterstitial_notifyRTBWin"
 //    static let interstitialNotifyRtbLoss = "AMPSInterstitial_notifyRTBLoss"
     static let interstitialIsReadyAd = "AMPSInterstitial_isReadyAd"
+    static let interstitialPreLoad = "AMPSInterstitial_preLoad"
     
     // 原生广告相关方法
     static let nativeCreate = "AMPSNative_create"

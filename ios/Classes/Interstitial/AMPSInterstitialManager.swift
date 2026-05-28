@@ -46,7 +46,7 @@ class AMPSInterstitialManager: NSObject {
             }
         case AMPSAdSdkMethodNames.interstitialPreLoad:
             if let instanceId = instanceId {
-                interstitialAds[instanceId]?.preLoad()
+                interstitialAds[instanceId]?.preloadAd()
             }
             result(nil)
         default:
