@@ -194,7 +194,7 @@ export class AMPSSplashManager {
         result.success(mEcpm);
         break;
       case AMPSAdSdkMethodNames.splashGetSeatId:
-        const mSeatId = instanceId ? (this.splashAds.get(instanceId)?.getSeatId() ?? '') : ''
+        const mSeatId = instanceId ? (this.splashAds.get(instanceId)?.getSeatID() ?? '') : ''
         result.success(mSeatId);
         break;
       case AMPSAdSdkMethodNames.splashIsReadyAd:

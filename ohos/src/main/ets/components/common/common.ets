@@ -299,7 +299,8 @@ export let NativeMethodNames: string[] = [
   AMPSAdSdkMethodNames.nativeGetVideoDuration,
   AMPSAdSdkMethodNames.nativeDestroy,
   AMPSAdSdkMethodNames.nativeResume,
-  AMPSAdSdkMethodNames.nativePause
+  AMPSAdSdkMethodNames.nativePause,
+  AMPSAdSdkMethodNames.nativeGetSeatId,
 ];
 
 export let RewardVideoMethodNames: string[] = [
@@ -311,7 +312,8 @@ export let RewardVideoMethodNames: string[] = [
   AMPSAdSdkMethodNames.rewardVideoIsReadyAd,
   AMPSAdSdkMethodNames.rewardVideoDestroyAd,
   AMPSAdSdkMethodNames.rewardVideoAddPreLoadAdInfo,
-  AMPSAdSdkMethodNames.rewardVideoGetMediaExtraInfo
+  AMPSAdSdkMethodNames.rewardVideoGetMediaExtraInfo,
+  AMPSAdSdkMethodNames.rewardVideoGetSeatId
 ];
 
 export let BannerMethodNames: string[] = [
@@ -323,7 +325,8 @@ export let BannerMethodNames: string[] = [
   AMPSAdSdkMethodNames.bannerIsReadyAd,
   AMPSAdSdkMethodNames.bannerDestroyAd,
   AMPSAdSdkMethodNames.bannerAddPreLoadAdInfo,
-  AMPSAdSdkMethodNames.bannerGetMediaExtraInfo
+  AMPSAdSdkMethodNames.bannerGetMediaExtraInfo,
+  AMPSAdSdkMethodNames.splashGetSeatId
 ];
 
 export let DrawMethodNames: string[] = [
@@ -334,6 +337,7 @@ export let DrawMethodNames: string[] = [
   AMPSAdSdkMethodNames.drawDestroyAd,
   AMPSAdSdkMethodNames.drawPauseAd,
   AMPSAdSdkMethodNames.drawResumeAd,
-  AMPSAdSdkMethodNames.drawGetMediaExtraInfo
+  AMPSAdSdkMethodNames.drawGetMediaExtraInfo,
+  AMPSAdSdkMethodNames.splashGetSeatId
 ];
 

@@ -67,7 +67,7 @@ export class AMPSRewardVideoManager {
         result.success(instanceId ? (this.rewardVideoAds.get(instanceId)?.getECPM() ?? 0) : 0)
         break;
       case AMPSAdSdkMethodNames.rewardVideoGetSeatId:
-        result.success(instanceId ? (this.rewardVideoAds.get(instanceId)?.getSeatId() ?? '') : '')
+        result.success(instanceId ? (this.rewardVideoAds.get(instanceId)?.getSeatID() ?? '') : '')
         break;
       case AMPSAdSdkMethodNames.rewardVideoIsReadyAd:
         result.success(instanceId ? (this.rewardVideoAds.get(instanceId)?.isReadyAd() ?? false) : false)
