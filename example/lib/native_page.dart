@@ -54,7 +54,7 @@ class _NativePageState extends State<NativePage> {
 
   AMPSNativeRenderListener _renderListenerFor(String label) {
     return AMPSNativeRenderListener(
-      renderSuccess: (adId) {
+      renderSuccess: (adId) async {
         if (_sequentialMode) {
           _adIdsByLabel[label]?.add(adId);
           _adIdToLabel[adId] = label;
@@ -74,6 +74,9 @@ class _NativePageState extends State<NativePage> {
           _adIdToLabel[adId] = label;
           setState(() => feedAdList.add(adId));
         }
+        // 获取 seatId
+        final seatId = await _nativeAds[label]?.getSeatId();
+        debugPrint('[$label] native render seatId=$seatId');
       },
       renderFailed: (adId, code, message) {
         debugPrint('[$label] native renderFailed adId=$adId code=$code msg=$message');

@@ -166,6 +166,12 @@ class AMPSNativeManager: NSObject {
                 return
             }
             result(0)
+        case AMPSAdSdkMethodNames.nativeGetSeatId:
+            if let instanceId = instanceId(from: arguments), let ad = expressSlots[instanceId]?.nativeAd {
+                result(ad.successAdInfo.adapterSeatId)
+                return
+            }
+            result(nil)
         case AMPSAdSdkMethodNames.nativeIsNativeExpress:
             result(true)
         case AMPSAdSdkMethodNames.nativeIsReadyAd:

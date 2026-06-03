@@ -60,6 +60,9 @@ export class AMPSNativeManager {
       case AMPSAdSdkMethodNames.nativeGetECPM:
         result.success(this.getAdWrapper(args)?.getECPM() ?? 0)
         break;
+      case AMPSAdSdkMethodNames.nativeGetSeatId:
+        result.success(instanceId ? (this.nativeAds.get(instanceId)?.getSeatID() ?? '') : '')
+        break;
       case AMPSAdSdkMethodNames.nativePattern:
       case AMPSAdSdkMethodNames.nativeUnifiedMaterialType:
         result.success(this.getUnifiedPattern(this.getAdWrapper(args)))

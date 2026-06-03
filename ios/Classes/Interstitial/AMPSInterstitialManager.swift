@@ -33,6 +33,8 @@ class AMPSInterstitialManager: NSObject {
             handleInterstitialShowAd(instanceId: instanceId, result: result)
         case AMPSAdSdkMethodNames.interstitialGetEcpm:
             result(interstitialAds[instanceId ?? ""]?.eCPM() ?? 0)
+        case AMPSAdSdkMethodNames.interstitialGetSeatId:
+            result(interstitialAds[instanceId ?? ""]?.successAdInfo.adapterSeatId)
         case AMPSAdSdkMethodNames.interstitialDestroy:
             if let instanceId = instanceId {
                 cleanupViewsAfterAdClosed(instanceId: instanceId)

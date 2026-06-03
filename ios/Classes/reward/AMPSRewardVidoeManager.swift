@@ -33,6 +33,8 @@ class AMPSRewardVideoManager: NSObject {
             handleRewardVideoShowAd(instanceId: instanceId, result: result)
         case AMPSAdSdkMethodNames.rewardVideoGetECPM:
             result(rewardVideoAds[instanceId ?? ""]?.eCPM() ?? 0)
+        case AMPSAdSdkMethodNames.rewardVideoGetSeatId:
+            result(rewardVideoAds[instanceId ?? ""]?.successAdInfo.adapterSeatId)
         case AMPSAdSdkMethodNames.rewardVideoPreLoad:
             if let instanceId = instanceId {
                 rewardVideoAds[instanceId]?.preloadAd()

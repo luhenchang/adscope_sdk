@@ -68,6 +68,9 @@ export class AMPSBannerManager {
       case AMPSAdSdkMethodNames.bannerGetECPM:
         result.success(instanceId ? (this.bannerAdItems.get(instanceId)?.getECPM() ?? 0) : 0)
         break;
+      case AMPSAdSdkMethodNames.bannerGetSeatId:
+        result.success(instanceId ? (this.bannerAds.get(instanceId)?.getSeatID() ?? '') : '')
+        break;
       case AMPSAdSdkMethodNames.bannerDestroyAd:
         {
           const requiredInstanceId = this.requireInstanceId(instanceId, result)

@@ -84,7 +84,9 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
         }
 
         module.videoChild?.let { child ->
-            addView(createVideoChild(child, unifiedItem, adId))
+            unifiedItem.videoUrl?.let { _ ->
+                addView(createVideoChild(child, unifiedItem, adId))
+            }
         }
 
         module.titleChild?.let { child ->
@@ -183,7 +185,7 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
             unifiedItem.mainImageUrl?.let { imageUrl ->
                 AppCompatImageView(context).apply {
                     layoutParams = createLayoutParams(child.width, child.height, child.x, child.y)
-                    scaleType = ImageView.ScaleType.FIT_XY//目前用户设置多大就多大。
+                    scaleType = ImageView.ScaleType.CENTER_CROP//目前用户设置多大就多大。
                     ImageLoader().loadImage(this, imageUrl)
                     // 为我们自己创建的视图设置点击监听
                     setupClickListener(this, child.clickType, child.clickIdType)

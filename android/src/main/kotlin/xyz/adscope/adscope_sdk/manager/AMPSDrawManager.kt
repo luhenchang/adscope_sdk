@@ -209,6 +209,11 @@ class AMPSDrawManager private constructor() {
                 result.success(drawAds[instanceId]?.ecpm ?: 0)
             }
 
+            AMPSAdSdkMethodNames.DRAW_GET_SEAT_ID -> {
+                val instanceId = instanceIdFrom(call)
+                result.success(drawAds[instanceId]?.seatId)
+            }
+
             AMPSAdSdkMethodNames.DRAW_GET_MEDIA_EXTRA_INFO -> {
                 val instanceId = instanceIdFrom(call)
                 val ad = drawAds[instanceId]

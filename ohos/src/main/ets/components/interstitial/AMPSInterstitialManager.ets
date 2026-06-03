@@ -155,6 +155,10 @@ export class AMPSInterstitialManager {
         const mEcpm = instanceId ? (this.interstitialAds.get(instanceId)?.getECPM() ?? 0) : 0
         result.success(mEcpm);
         break;
+      case AMPSAdSdkMethodNames.interstitialGetSeatId:
+        const mSeatId = instanceId ? (this.interstitialAds.get(instanceId)?.getSeatID() ?? '') : ''
+        result.success(mSeatId);
+        break;
       case AMPSAdSdkMethodNames.interstitialAddPreLoadAdInfo:
         result.success(null)
         break;

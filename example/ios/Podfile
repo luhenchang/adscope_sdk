@@ -1,5 +1,5 @@
 # Uncomment this line to define a global platform for your project
- platform :ios, '11.0'
+ platform :ios, '13.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -31,16 +31,16 @@ target 'Runner' do
   use_frameworks! :linkage => :static
   use_modular_headers!
   
-#按需导入以下渠道
-  pod 'AMPSAdSDK', '~> 5.1.1.11'
-  pod 'AMPSASNPAdapter', '~> 5.1.5400.1' #asnp
-  pod 'AMPSBZAdapter', '~> 5.1.500200.0'  #倍孜
-  pod 'AMPSGDTAdapter', '~> 5.1.41575.1' # 优量汇
-  pod 'AMPSKSAdapter', '~> 5.1.41220.0'  #快手
-  pod 'AMPSGMAdapter', '~> 5.1.7403.1' #gromore
-  pod 'AMPSBDAdapter', '~> 5.1.10030.1'  #百度
-  pod 'AMPSSGAdapter', '~> 5.1.4203.0'  #sigmob
-  pod 'AMPSCSJAdapter', '~> 5.1.7403.1' #穿山甲
+pod 'AMPSAdSDK', '~> 5.1.2.3'
+ #按需导入以下渠道
+  pod 'AMPSASNPAdapter', '~> 5.1.5400.2' #asnp
+  pod 'AMPSBZAdapter', '~> 5.1.522200.0'  #倍孜
+  pod 'AMPSGDTAdapter', '~> 5.1.41590.1' # 优量汇
+  pod 'AMPSKSAdapter', '~> 5.1.53201.0'  #快手
+  pod 'AMPSGMAdapter', '~> 5.1.7604.0' #gromore
+  pod 'AMPSBDAdapter', '~> 5.1.10050.0'  #百度
+  pod 'AMPSSGAdapter', '~> 5.1.42012.0'  #sigmob
+  pod 'AMPSCSJAdapter', '~> 5.1.7604.0' #穿山甲
 #  pod 'AMPSJDAdapter', '~> 5.1.268.0'   #京东
 #  pod 'AMPSQMAdapter', '~> 5.1.137.0'   #趣盟
 #  pod 'AMPSOCTAdapter', '~> 5.1.2510.0'  #章鱼

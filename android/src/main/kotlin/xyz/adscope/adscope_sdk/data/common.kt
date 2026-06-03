@@ -171,6 +171,7 @@ object AMPSAdSdkMethodNames {
     const val SPLASH_LOAD = "AMPSSplashAd_load"
     const val SPLASH_SHOW_AD = "AMPSSplashAd_showAd"
     const val SPLASH_GET_ECPM = "AMPSSplashAd_getECPM"
+    const val SPLASH_GET_SEAT_ID = "AMPSSplashAd_getSeatId"
     const val SPLASH_PRE_LOAD = "AMPSSplashAd_preLoad"
     const val SPLASH_ADD_PRE_LOAD_AD_INFO = "AMPSSplashAd_addPreLoadAdInfo"
     const val SPLASH_GET_MEDIA_EXTRA_INFO = "AMPSSplashAd_getMediaExtraInfo"
@@ -183,6 +184,7 @@ object AMPSAdSdkMethodNames {
     const val INTERSTITIAL_PRE_LOAD = "AMPSInterstitial_preLoad"
     const val INTERSTITIAL_SHOW_AD = "AMPSInterstitial_showAd"
     const val INTERSTITIAL_GET_ECPM = "AMPSInterstitial_getECPM"
+    const val INTERSTITIAL_GET_SEAT_ID = "AMPSInterstitial_getSeatId"
     const val INTERSTITIAL_IS_READY_AD = "AMPSInterstitial_isReadyAd"
     const val INTERSTITIAL_DESTROY = "AMPSInterstitial_destroy"
     const val INTERSTITIAL_ADD_PRE_LOAD_AD_INFO = "AMPSInterstitial_addPreLoadAdInfo"
@@ -195,6 +197,7 @@ object AMPSAdSdkMethodNames {
     const val NATIVE_SIZE_UPDATE = "AMPSNative_SizeUpdate"
     const val NATIVE_PATTERN = "AMPSNative_getUnifiedPattern";
     const val NATIVE_GET_ECPM = "AMPSNative_getECPM"
+const val NATIVE_GET_SEAT_ID = "AMPSNative_getSeatId"
     const val NATIVE_IS_READY_AD = "AMPSNative_isReadyAd"
     const val NATIVE_IS_NATIVE_EXPRESS = "AMPSNative_isNativeExpress"
     const val NATIVE_UNIFIED_MATERIAL_TYPE = "AMPSNative_materialType"
@@ -211,6 +214,7 @@ object AMPSAdSdkMethodNames {
     const val REWARDED_VIDEO_SHOW_AD = "AMPSRewardVideo_showAd"
     const val REWARDED_VIDEO_DESTROY_AD = "AMPSRewardVideo_destroy"
     const val REWARDED_VIDEO_GET_ECPM = "AMPSRewardVideo_getECPM"
+const val REWARDED_VIDEO_GET_SEAT_ID = "AMPSRewardVideo_getSeatId"
     const val REWARDED_VIDEO_IS_READY_AD = "AMPSRewardVideo_isReadyAd"
     const val REWARDED_VIDEO_ADD_PRE_LOAD_AD_INFO = "AMPSRewardVideo_addPreLoadAdInfo"
     const val REWARDED_VIDEO_GET_MEDIA_EXTRA_INFO = "AMPSRewardVideo_getMediaExtraInfo"
@@ -221,6 +225,7 @@ object AMPSAdSdkMethodNames {
     const val BANNER_PRE_LOAD = "AMPSBanner_preLoad"
     const val BANNER_SHOW_AD = "AMPSBanner_showAd"
     const val BANNER_GET_ECPM = "AMPSBanner_getECPM"
+const val BANNER_GET_SEAT_ID = "AMPSBanner_getSeatId"
     const val BANNER_IS_READY_AD = "AMPSBanner_isReadyAd"
     const val BANNER_DESTROY_AD = "AMPSBanner_destroy"
     const val BANNER_ADD_PRE_LOAD_AD_INFO = "AMPSBanner_addPreLoadAdInfo"
@@ -230,6 +235,7 @@ object AMPSAdSdkMethodNames {
     const val DRAW_CREATE = "AMPSDraw_create"
     const val DRAW_LOAD = "AMPSDraw_load"
     const val DRAW_GET_ECPM = "AMPSDraw_getECPM"
+const val DRAW_GET_SEAT_ID = "AMPSDraw_getSeatId"
     const val DRAW_IS_READY_AD = "AMPSDraw_isReadyAd"
     const val DRAW_DESTROY_AD = "AMPSDraw_destroy"
     const val DRAW_PAUSE_AD = "AMPSDraw_pause"
@@ -275,6 +281,7 @@ val SplashMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.SPLASH_LOAD,
     AMPSAdSdkMethodNames.SPLASH_SHOW_AD,
     AMPSAdSdkMethodNames.SPLASH_GET_ECPM,
+    AMPSAdSdkMethodNames.SPLASH_GET_SEAT_ID,
     AMPSAdSdkMethodNames.SPLASH_PRE_LOAD,
     AMPSAdSdkMethodNames.SPLASH_ADD_PRE_LOAD_AD_INFO,
     AMPSAdSdkMethodNames.SPLASH_GET_MEDIA_EXTRA_INFO,
@@ -288,6 +295,7 @@ val InterstitialMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.INTERSTITIAL_PRE_LOAD,
     AMPSAdSdkMethodNames.INTERSTITIAL_SHOW_AD,
     AMPSAdSdkMethodNames.INTERSTITIAL_GET_ECPM,
+    AMPSAdSdkMethodNames.INTERSTITIAL_GET_SEAT_ID,
     AMPSAdSdkMethodNames.INTERSTITIAL_IS_READY_AD,
     AMPSAdSdkMethodNames.INTERSTITIAL_DESTROY,
     AMPSAdSdkMethodNames.INTERSTITIAL_ADD_PRE_LOAD_AD_INFO,
@@ -299,6 +307,7 @@ val NativeMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.NATIVE_LOAD,
     AMPSAdSdkMethodNames.NATIVE_SHOW_AD,
     AMPSAdSdkMethodNames.NATIVE_GET_ECPM,
+    AMPSAdSdkMethodNames.NATIVE_GET_SEAT_ID,
     AMPSAdSdkMethodNames.NATIVE_PATTERN,
     AMPSAdSdkMethodNames.NATIVE_IS_READY_AD,
     AMPSAdSdkMethodNames.NATIVE_IS_NATIVE_EXPRESS,
@@ -319,6 +328,7 @@ val RewardedVideoMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.REWARDED_VIDEO_SHOW_AD,
     AMPSAdSdkMethodNames.REWARDED_VIDEO_DESTROY_AD,
     AMPSAdSdkMethodNames.REWARDED_VIDEO_GET_ECPM,
+    AMPSAdSdkMethodNames.REWARDED_VIDEO_GET_SEAT_ID,
     AMPSAdSdkMethodNames.REWARDED_VIDEO_IS_READY_AD,
     AMPSAdSdkMethodNames.REWARDED_VIDEO_ADD_PRE_LOAD_AD_INFO,
     AMPSAdSdkMethodNames.REWARDED_VIDEO_GET_MEDIA_EXTRA_INFO
@@ -330,6 +340,7 @@ val BannerMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.BANNER_PRE_LOAD,
     AMPSAdSdkMethodNames.BANNER_SHOW_AD,
     AMPSAdSdkMethodNames.BANNER_GET_ECPM,
+    AMPSAdSdkMethodNames.BANNER_GET_SEAT_ID,
     AMPSAdSdkMethodNames.BANNER_IS_READY_AD,
     AMPSAdSdkMethodNames.BANNER_DESTROY_AD,
     AMPSAdSdkMethodNames.BANNER_ADD_PRE_LOAD_AD_INFO,
@@ -340,6 +351,7 @@ val DrawMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.DRAW_CREATE,
     AMPSAdSdkMethodNames.DRAW_LOAD,
     AMPSAdSdkMethodNames.DRAW_GET_ECPM,
+    AMPSAdSdkMethodNames.DRAW_GET_SEAT_ID,
     AMPSAdSdkMethodNames.DRAW_IS_READY_AD,
     AMPSAdSdkMethodNames.DRAW_DESTROY_AD,
     AMPSAdSdkMethodNames.DRAW_PAUSE_AD,

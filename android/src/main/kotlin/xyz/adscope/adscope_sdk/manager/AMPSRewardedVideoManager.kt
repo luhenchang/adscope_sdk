@@ -123,6 +123,10 @@ class AMPSRewardedVideoManager private constructor() {
                 result.success(rewardedVideoAds[instanceIdFrom(call)]?.ecpm ?: 0)
             }
 
+            AMPSAdSdkMethodNames.REWARDED_VIDEO_GET_SEAT_ID -> {
+                result.success(rewardedVideoAds[instanceIdFrom(call)]?.seatId)
+            }
+
             AMPSAdSdkMethodNames.REWARDED_VIDEO_IS_READY_AD -> {
                 result.success(rewardedVideoAds[instanceIdFrom(call)]?.isReady)
             }

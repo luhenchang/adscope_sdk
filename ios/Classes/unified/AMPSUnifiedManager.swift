@@ -63,6 +63,9 @@ class AmpsIosUnifiedNativeManager: NSObject, AMPSUnifiedNativeManagerDelegate {
             } else {
                 result(false)
             }
+        case AMPSAdSdkMethodNames.nativeGetSeatId:
+            result(unifiedNative?.successAdInfo.adapterSeatId)
+            return
         case AMPSAdSdkMethodNames.nativeIsReadyAd:
             result(unifiedNative?.adArray.count ?? 0 > 0)
         case AMPSAdSdkMethodNames.nativeDestroy:

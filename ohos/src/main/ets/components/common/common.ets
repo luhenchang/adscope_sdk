@@ -162,6 +162,7 @@ export class AMPSAdSdkMethodNames {
   static readonly splashLoad = 'AMPSSplashAd_load';
   static readonly splashShowAd = 'AMPSSplashAd_showAd';
   static readonly splashGetECPM = 'AMPSSplashAd_getECPM';
+  static readonly splashGetSeatId = 'AMPSSplashAd_getSeatId';
   static readonly splashPreLoad = "AMPSSplashAd_preLoad";
   static readonly splashAddPreLoadAdInfo = "AMPSSplashAd_addPreLoadAdInfo";
   static readonly splashAddPreGetMediaExtraInfo = "AMPSSplashAd_getMediaExtraInfo";
@@ -173,6 +174,7 @@ export class AMPSAdSdkMethodNames {
   static readonly interstitialLoad = 'AMPSInterstitial_load';
   static readonly interstitialShowAd = 'AMPSInterstitial_showAd';
   static readonly interstitialGetECPM = 'AMPSInterstitial_getECPM';
+  static readonly interstitialGetSeatId = 'AMPSInterstitial_getSeatId';
   static readonly interstitialPreLoad = "AMPSInterstitial_preLoad";
   static readonly interstitialAddPreLoadAdInfo = "AMPSInterstitial_addPreLoadAdInfo";
   static readonly interstitialGetMediaExtraInfo = "AMPSInterstitial_getMediaExtraInfo";
@@ -183,6 +185,7 @@ export class AMPSAdSdkMethodNames {
   static readonly nativeLoad = 'AMPSNative_load';
   static readonly nativeCreate = 'AMPSNative_create';
   static readonly nativeGetECPM = 'AMPSNative_getECPM';
+  static readonly nativeGetSeatId = 'AMPSNative_getSeatId';
   static readonly nativeIsReadyAd = 'AMPSNative_isReadyAd';
   static readonly nativeIsNativeExpress = 'AMPSNative_isNativeExpress';
   static readonly nativePattern = 'AMPSNative_getUnifiedPattern';
@@ -201,6 +204,7 @@ export class AMPSAdSdkMethodNames {
   static readonly rewardVideoPreLoad = 'AMPSRewardVideo_preLoad';
   static readonly rewardVideoShowAd = 'AMPSRewardVideo_showAd';
   static readonly rewardVideoGetECPM = 'AMPSRewardVideo_getECPM';
+  static readonly rewardVideoGetSeatId = 'AMPSRewardVideo_getSeatId';
   static readonly rewardVideoIsReadyAd = 'AMPSRewardVideo_isReadyAd';
   static readonly rewardVideoDestroyAd = "AMPSRewardVideo_destroy";
   static readonly rewardVideoAddPreLoadAdInfo = "AMPSRewardVideo_addPreLoadAdInfo";
@@ -212,6 +216,7 @@ export class AMPSAdSdkMethodNames {
   static readonly bannerPreLoad = 'AMPSBanner_preLoad';
   static readonly bannerSetSlideTime = 'AMPSBanner_setSlideTime';
   static readonly bannerGetECPM = 'AMPSBanner_getECPM';
+  static readonly bannerGetSeatId = 'AMPSBanner_getSeatId';
   static readonly bannerIsReadyAd = 'AMPSBanner_isReadyAd';
   static readonly bannerDestroyAd = "AMPSBanner_destroy";
   static readonly bannerAddPreLoadAdInfo = "AMPSBanner_addPreLoadAdInfo";
@@ -221,6 +226,7 @@ export class AMPSAdSdkMethodNames {
   static readonly drawCreate = "AMPSDraw_create";
   static readonly drawLoad = "AMPSDraw_load";
   static readonly drawGetEcpm = "AMPSDraw_getEcpm";
+  static readonly drawGetSeatId = "AMPSDraw_getSeatId";
   static readonly drawIsReadyAd = "AMPSDraw_isReadyAd";
   static readonly drawDestroyAd = "AMPSDraw_destroy";
   static readonly drawPauseAd = "AMPSDraw_pause";
@@ -259,6 +265,7 @@ export let SplashMethodNames: string[] =
     AMPSAdSdkMethodNames.splashLoad,
     AMPSAdSdkMethodNames.splashShowAd,
     AMPSAdSdkMethodNames.splashGetECPM,
+    AMPSAdSdkMethodNames.splashGetSeatId,
     AMPSAdSdkMethodNames.splashPreLoad,
     AMPSAdSdkMethodNames.splashAddPreLoadAdInfo,
     AMPSAdSdkMethodNames.splashAddPreGetMediaExtraInfo,
@@ -272,6 +279,7 @@ export let InterstitialMethodNames: string[] =
     AMPSAdSdkMethodNames.interstitialLoad,
     AMPSAdSdkMethodNames.interstitialShowAd,
     AMPSAdSdkMethodNames.interstitialGetECPM,
+    AMPSAdSdkMethodNames.interstitialGetSeatId,
     AMPSAdSdkMethodNames.interstitialAddPreLoadAdInfo,
     AMPSAdSdkMethodNames.interstitialGetMediaExtraInfo,
     AMPSAdSdkMethodNames.interstitialPreLoad,
@@ -291,7 +299,8 @@ export let NativeMethodNames: string[] = [
   AMPSAdSdkMethodNames.nativeGetVideoDuration,
   AMPSAdSdkMethodNames.nativeDestroy,
   AMPSAdSdkMethodNames.nativeResume,
-  AMPSAdSdkMethodNames.nativePause
+  AMPSAdSdkMethodNames.nativePause,
+  AMPSAdSdkMethodNames.nativeGetSeatId,
 ];
 
 export let RewardVideoMethodNames: string[] = [
@@ -303,7 +312,8 @@ export let RewardVideoMethodNames: string[] = [
   AMPSAdSdkMethodNames.rewardVideoIsReadyAd,
   AMPSAdSdkMethodNames.rewardVideoDestroyAd,
   AMPSAdSdkMethodNames.rewardVideoAddPreLoadAdInfo,
-  AMPSAdSdkMethodNames.rewardVideoGetMediaExtraInfo
+  AMPSAdSdkMethodNames.rewardVideoGetMediaExtraInfo,
+  AMPSAdSdkMethodNames.rewardVideoGetSeatId
 ];
 
 export let BannerMethodNames: string[] = [
@@ -315,7 +325,8 @@ export let BannerMethodNames: string[] = [
   AMPSAdSdkMethodNames.bannerIsReadyAd,
   AMPSAdSdkMethodNames.bannerDestroyAd,
   AMPSAdSdkMethodNames.bannerAddPreLoadAdInfo,
-  AMPSAdSdkMethodNames.bannerGetMediaExtraInfo
+  AMPSAdSdkMethodNames.bannerGetMediaExtraInfo,
+  AMPSAdSdkMethodNames.splashGetSeatId
 ];
 
 export let DrawMethodNames: string[] = [
@@ -326,6 +337,7 @@ export let DrawMethodNames: string[] = [
   AMPSAdSdkMethodNames.drawDestroyAd,
   AMPSAdSdkMethodNames.drawPauseAd,
   AMPSAdSdkMethodNames.drawResumeAd,
-  AMPSAdSdkMethodNames.drawGetMediaExtraInfo
+  AMPSAdSdkMethodNames.drawGetMediaExtraInfo,
+  AMPSAdSdkMethodNames.splashGetSeatId
 ];
 

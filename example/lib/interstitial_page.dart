@@ -21,9 +21,11 @@ class _InterstitialPageState extends State<InterstitialPage> {
 
   AdCallBack _callbackFor(String label) {
     return AdCallBack(
-      onRenderOk: () {
+      onRenderOk: () async {
         final ad = _interAds[label];
         debugPrint('[$label] interstitial onRenderOk id=${ad?.instanceId}');
+        final seatId = await ad?.getSeatId();
+        debugPrint('[$label] interstitial seatId=$seatId');
         if (label == 'A') {
           ad?.showAd();
         } else if (label == 'B') {

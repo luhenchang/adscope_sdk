@@ -172,6 +172,7 @@ enum AMPSAdSdkMethodNames {
     static let splashLoad = "AMPSSplashAd_load"
     static let splashShowAd = "AMPSSplashAd_showAd"
     static let splashGetEcpm = "AMPSSplashAd_getECPM"
+    static let splashGetSeatId = "AMPSSplashAd_getSeatId"
     static let splashDestroy = "AMPSSplashAd_destroy"
 //    static let splashNotifyRtbWin = "AMPSSplashAd_notifyRTBWin"
 //    static let splashNotifyRtbLoss = "AMPSSplashAd_notifyRTBLoss"
@@ -182,6 +183,7 @@ enum AMPSAdSdkMethodNames {
     static let interstitialLoad = "AMPSInterstitial_load"
     static let interstitialShowAd = "AMPSInterstitial_showAd"
     static let interstitialGetEcpm = "AMPSInterstitial_getECPM"
+    static let interstitialGetSeatId = "AMPSInterstitial_getSeatId"
     static let interstitialDestroy = "AMPSInterstitial_destroy"
 //    static let interstitialNotifyRtbWin = "AMPSInterstitial_notifyRTBWin"
 //    static let interstitialNotifyRtbLoss = "AMPSInterstitial_notifyRTBLoss"
@@ -193,6 +195,7 @@ enum AMPSAdSdkMethodNames {
     static let nativeLoad = "AMPSNative_load"
     static let nativeShowAd = "AMPSNative_showAd"
     static let nativeGetEcpm = "AMPSNative_getECPM"
+    static let nativeGetSeatId = "AMPSNative_getSeatId"
 //    static let nativeNotifyRtbWin = "AMPSNative_notifyRTBWin"
 //    static let nativeNotifyRtbLoss = "AMPSNative_notifyRTBLoss"
     static let nativeIsReadyAd = "AMPSNative_isReadyAd"
@@ -212,6 +215,7 @@ enum AMPSAdSdkMethodNames {
     static let rewardVideoPreLoad = "AMPSRewardVideo_preLoad"
     static let rewardVideoShowAd = "AMPSRewardVideo_showAd"
     static let rewardVideoGetECPM = "AMPSRewardVideo_getECPM"
+    static let rewardVideoGetSeatId = "AMPSRewardVideo_getSeatId"
     static let rewardVideoIsReadyAd = "AMPSRewardVideo_isReadyAd"
     static let rewardVideoDestroyAd = "AMPSRewardVideo_destroy"
     static let rewardVideoAddPreLoadAdInfo = "AMPSRewardVideo_addPreLoadAdInfo"
@@ -223,6 +227,7 @@ enum AMPSAdSdkMethodNames {
     static let bannerPreLoad = "AMPSBanner_preLoad";
     static let bannerShowAd = "AMPSBanner_showAd"
     static let bannerGetECPM = "AMPSBanner_getECPM"
+    static let bannerGetSeatId = "AMPSBanner_getSeatId"
     static let bannerIsReadyAd = "AMPSBanner_isReadyAd"
     static let bannerDestroyAd = "AMPSBanner_destroy";
     static let bannerAddPreLoadAdInfo = "AMPSBanner_addPreLoadAdInfo";
@@ -232,6 +237,7 @@ enum AMPSAdSdkMethodNames {
     static let drawCreate = "AMPSDraw_create";
     static let drawLoad = "AMPSDraw_load";
     static let drawGetEcpm = "AMPSDraw_getEcpm";
+    static let drawGetSeatId = "AMPSDraw_getSeatId";
     static let drawIsReadyAd = "AMPSDraw_isReadyAd";
     static let drawDestroyAd = "AMPSDraw_destroy";
     static let drawPauseAd = "AMPSDraw_pause";
@@ -292,6 +298,7 @@ let splashMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.splashLoad,
     AMPSAdSdkMethodNames.splashShowAd,
     AMPSAdSdkMethodNames.splashGetEcpm,
+    AMPSAdSdkMethodNames.splashGetSeatId,
     AMPSAdSdkMethodNames.splashIsReadyAd,
     AMPSAdSdkMethodNames.splashDestroy
 ]
@@ -301,6 +308,7 @@ let interstitialMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.interstitialLoad,
     AMPSAdSdkMethodNames.interstitialShowAd,
     AMPSAdSdkMethodNames.interstitialGetEcpm,
+    AMPSAdSdkMethodNames.interstitialGetSeatId,
     AMPSAdSdkMethodNames.interstitialIsReadyAd,
     AMPSAdSdkMethodNames.interstitialDestroy
 ]
@@ -310,6 +318,7 @@ let nativeMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.nativeLoad,
     AMPSAdSdkMethodNames.nativeShowAd,
     AMPSAdSdkMethodNames.nativeGetEcpm,
+    AMPSAdSdkMethodNames.nativeGetSeatId,
     AMPSAdSdkMethodNames.nativeIsReadyAd,
     AMPSAdSdkMethodNames.nativeIsNativeExpress,
     AMPSAdSdkMethodNames.nativeGetVideoDuration,
@@ -326,6 +335,7 @@ let rewardVideoMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.rewardVideoLoad,
     AMPSAdSdkMethodNames.rewardVideoShowAd,
     AMPSAdSdkMethodNames.rewardVideoGetECPM,
+    AMPSAdSdkMethodNames.rewardVideoGetSeatId,
     AMPSAdSdkMethodNames.rewardVideoDestroyAd,
     AMPSAdSdkMethodNames.rewardVideoIsReadyAd,
     AMPSAdSdkMethodNames.rewardVideoGetMediaExtraInfo,
@@ -336,6 +346,7 @@ let bannerMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.bannerLoad,
     AMPSAdSdkMethodNames.bannerShowAd,
     AMPSAdSdkMethodNames.bannerGetECPM,
+    AMPSAdSdkMethodNames.bannerGetSeatId,
     AMPSAdSdkMethodNames.bannerDestroyAd,
     AMPSAdSdkMethodNames.bannerIsReadyAd,
     AMPSAdSdkMethodNames.bannerGetMediaExtraInfo,
@@ -345,6 +356,7 @@ let drawMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.drawCreate,
     AMPSAdSdkMethodNames.drawLoad,
     AMPSAdSdkMethodNames.drawGetEcpm,
+    AMPSAdSdkMethodNames.drawGetSeatId,
     AMPSAdSdkMethodNames.drawPauseAd,
     AMPSAdSdkMethodNames.drawResumeAd,
     AMPSAdSdkMethodNames.drawDestroyAd,

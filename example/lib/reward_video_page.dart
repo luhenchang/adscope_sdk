@@ -22,9 +22,11 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
 
   RewardVideoCallBack _callbackFor(String label) {
     return RewardVideoCallBack(
-      onLoadSuccess: () {
+      onLoadSuccess: () async {
         final ad = _rewardAds[label];
         debugPrint('[$label] reward onLoadSuccess id=${ad?.instanceId}');
+        final seatId = await ad?.getSeatId();
+        debugPrint('[$label] reward seatId=$seatId');
         if (label == 'A') {
           ad?.showAd();
           setState(() => couldBack = false);
