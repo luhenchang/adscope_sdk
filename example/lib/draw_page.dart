@@ -146,7 +146,7 @@ class _DrawPageState extends State<DrawPage> with WidgetsBindingObserver {
       renderFailed: (adId, code, message) {
         debugPrint('[$label] draw renderFailed adId=$adId code=$code msg=$message');
       },
-      renderSuccess: (adId) {
+      renderSuccess: (adId) async {
         debugPrint('[$label] draw renderSuccess=$adId');
         _adIdsByLabel[label]?.add(adId);
         _adIdToLabel[adId] = label;
@@ -171,6 +171,9 @@ class _DrawPageState extends State<DrawPage> with WidgetsBindingObserver {
             }
           }
         });
+        // 获取 seatId
+        final seatId = await _drawAds[label]?.getSeatId();
+        debugPrint('[$label] draw render seatId=$seatId');
       },
     );
   }

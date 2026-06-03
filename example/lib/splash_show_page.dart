@@ -21,9 +21,11 @@ class _SplashShowPageState extends State<SplashShowPage> {
 
   AdCallBack _callbackFor(String label) {
     return AdCallBack(
-      onRenderOk: () {
+      onRenderOk: () async {
         final ad = _splashAds[label];
         debugPrint('[$label] splash onRenderOk id=${ad?.instanceId}');
+        final seatId = await ad?.getSeatId();
+        debugPrint('[$label] splash seatId=$seatId');
         if (label == 'A') {
           ad?.showAd();
         } else if (label == 'B') {
@@ -36,6 +38,9 @@ class _SplashShowPageState extends State<SplashShowPage> {
       },
       onLoadFailure: (code, msg) {
         debugPrint('[$label] splash failure=$code;$msg');
+      },
+      onLoadSuccess: () {
+        debugPrint('[$label] splash onLoadSuccess');
       },
       onAdClicked: () {
         setState(() => couldBack = true);
@@ -70,6 +75,7 @@ class _SplashShowPageState extends State<SplashShowPage> {
     final size = MediaQuery.of(context).size;
     final options = AdOptions(
       spaceId: splashSpaceId,
+      timeoutInterval: timeOut,
       expressSize: [size.width, size.height],
     );
     final ad = AMPSSplashAd(config: options, mCallBack: _callbackFor(label));
