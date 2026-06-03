@@ -158,6 +158,7 @@ class AMPSAdSdkMethodNames {
   static const String splashLoad = 'AMPSSplashAd_load';
   static const String splashShowAd = 'AMPSSplashAd_showAd';
   static const String splashGetECPM = 'AMPSSplashAd_getECPM';
+  static const String splashGetSeatId = 'AMPSSplashAd_getSeatId';
   static const String splashIsReadyAd = 'AMPSSplashAd_isReadyAd';
   static const String splashPreLoad = "AMPSSplashAd_preLoad";
   static const String splashAddPreLoadAdInfo = "AMPSSplashAd_addPreLoadAdInfo";
@@ -169,8 +170,9 @@ class AMPSAdSdkMethodNames {
   static const String interstitialLoad = "AMPSInterstitial_load";
   static const String interstitialPreLoad = "AMPSInterstitial_preLoad";
   static const String interstitialShowAd = "AMPSInterstitial_showAd";
-  static const String interstitialGetEcpm = "AMPSInterstitial_getECPM";
-  static const String interstitialIsReadyAd = "AMPSInterstitial_isReadyAd";
+  static const String interstitialGetEcpm = 'AMPSInterstitial_getECPM';
+  static const String interstitialGetSeatId = 'AMPSInterstitial_getSeatId';
+  static const String interstitialIsReadyAd = 'AMPSInterstitial_isReadyAd';
   static const String interstitialAddPreLoadAdInfo = "AMPSInterstitial_addPreLoadAdInfo";
   static const String interstitialGetMediaExtraInfo = "AMPSInterstitial_getMediaExtraInfo";
   static const String interstitialDestroy = "AMPSInterstitial_destroy";
@@ -181,6 +183,7 @@ class AMPSAdSdkMethodNames {
   // static const String nativeShowAd = 'AMPSNative_showAd';
   static const String nativePattern = 'AMPSNative_getUnifiedPattern';
   static const String nativeGetECPM = 'AMPSNative_getECPM';
+  static const String nativeGetSeatId = 'AMPSNative_getSeatId';
   static const String nativeDestroy = "AMPSNative_destroy";
   static const String nativeIsReadyAd = 'AMPSNative_isReadyAd';
   static const String nativeIsNativeExpress = 'AMPSNative_isNativeExpress';
@@ -196,6 +199,7 @@ class AMPSAdSdkMethodNames {
   static const String rewardVideoPreLoad = "AMPSRewardVideo_preLoad";
   static const String rewardVideoShowAd = 'AMPSRewardVideo_showAd';
   static const String rewardVideoGetECPM = 'AMPSRewardVideo_getECPM';
+  static const String rewardVideoGetSeatId = 'AMPSRewardVideo_getSeatId';
   static const String rewardVideoIsReadyAd = 'AMPSRewardVideo_isReadyAd';
   static const String rewardVideoDestroyAd = "AMPSRewardVideo_destroy";
   static const String rewardVideoAddPreLoadAdInfo = "AMPSRewardVideo_addPreLoadAdInfo";
@@ -207,6 +211,7 @@ class AMPSAdSdkMethodNames {
   static const String bannerPreLoad = "AMPSBanner_preLoad";
   static const String bannerSetSlideTime = 'AMPSBanner_setSlideTime';
   static const String bannerGetECPM = 'AMPSBanner_getECPM';
+  static const String bannerGetSeatId = 'AMPSBanner_getSeatId';
   static const String bannerIsReadyAd = 'AMPSBanner_isReadyAd';
   static const String bannerDestroyAd = "AMPSBanner_destroy";
   static const String bannerAddPreLoadAdInfo = "AMPSBanner_addPreLoadAdInfo";
@@ -216,6 +221,7 @@ class AMPSAdSdkMethodNames {
   static const String drawCreate = "AMPSDraw_create";
   static const String drawLoad = "AMPSDraw_load";
   static const String drawGetEcpm = "AMPSDraw_getEcpm";
+  static const String drawGetSeatId = "AMPSDraw_getSeatId";
   static const String drawIsReadyAd = "AMPSDraw_isReadyAd";
   static const String drawDestroyAd = "AMPSDraw_destroy";
   static const String drawPauseAd = "AMPSDraw_pause";

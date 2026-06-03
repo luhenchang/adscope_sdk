@@ -67,6 +67,11 @@ class AMPSInterstitialAd {
   Future<num> getECPM() async {
     return await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.interstitialGetEcpm, _instanceOnlyArgs());
   }
+
+  ///获取胜出渠道的seatId
+  Future<String?> getSeatId() async {
+    return await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.interstitialGetSeatId, _instanceOnlyArgs());
+  }
   
   ///调用addPreLoadAdInfo
   void addPreLoadAdInfo() async {

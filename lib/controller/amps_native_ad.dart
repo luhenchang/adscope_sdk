@@ -349,6 +349,14 @@ class AMPSNativeAd {
     );
   }
 
+  ///获取胜出渠道的seatId
+  Future<String?> getSeatId() async {
+    return await AdscopeSdk.invokeMethod(
+      AMPSAdSdkMethodNames.nativeGetSeatId,
+      _typedArgs(),
+    );
+  }
+
   ///获取是否是自渲染
   Future<bool> isNativeExpress(String adId) async {
     return await AdscopeSdk.invokeMethod(

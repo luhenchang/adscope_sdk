@@ -205,6 +205,14 @@ class AMPSDrawAd {
     );
   }
 
+  ///获取胜出渠道的seatId
+  Future<String?> getSeatId() async {
+    return await AdscopeSdk.invokeMethod(
+      AMPSAdSdkMethodNames.drawGetSeatId,
+      _instanceOnlyArgs(),
+    );
+  }
+
   ///页面销毁时调用
   void destroy() {
     DrawCallbackRouter.instance.unregister(instanceId);

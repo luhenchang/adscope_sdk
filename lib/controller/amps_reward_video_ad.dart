@@ -68,6 +68,12 @@ class AMPSRewardVideoAd {
         .invokeMethod(AMPSAdSdkMethodNames.rewardVideoGetECPM, _instanceOnlyArgs());
   }
 
+  ///获取胜出渠道的seatId
+  Future<String?> getSeatId() async {
+    return await AdscopeSdk
+        .invokeMethod(AMPSAdSdkMethodNames.rewardVideoGetSeatId, _instanceOnlyArgs());
+  }
+
   ///添加预加载广告
   addPreLoadAdInfo() async {
     AdscopeSdk

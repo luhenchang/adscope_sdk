@@ -89,6 +89,14 @@ class AMPSSplashAd {
         0;
   }
 
+  ///获取胜出渠道的seatId
+  Future<String?> getSeatId() async {
+    return await AdscopeSdk.invokeMethod(
+          AMPSAdSdkMethodNames.splashGetSeatId,
+          _instanceOnlyArgs(),
+        );
+  }
+
   ///调用addPreLoadAdInfo
   void addPreLoadAdInfo() async {
     await AdscopeSdk.invokeMethod(
