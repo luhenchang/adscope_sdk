@@ -332,6 +332,15 @@ class AMPSNativeManager {
                 }
             }
 
+            AMPSAdSdkMethodNames.NATIVE_GET_SEAT_ID -> {
+                val instanceId = instanceIdFrom(call)
+                if (nativeTypeFrom(call) == NativeType.NATIVE.value) {
+                    result.success(nativeAds[instanceId]?.seatId)
+                } else {
+                    result.success(null) // AMPSUnifiedNativeAd does not support seatId
+                }
+            }
+
             AMPSAdSdkMethodNames.NATIVE_IS_READY_AD -> {
                 val instanceId = instanceIdFrom(call)
                 if (nativeTypeFrom(call) == NativeType.NATIVE.value) {

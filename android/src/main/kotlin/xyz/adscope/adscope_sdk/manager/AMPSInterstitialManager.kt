@@ -90,6 +90,11 @@ class AMPSInterstitialManager private constructor() {
             AMPSAdSdkMethodNames.INTERSTITIAL_GET_ECPM -> {
                 result.success(interstitialAds[instanceIdFrom(call)]?.ecpm ?: 0)
             }
+
+            AMPSAdSdkMethodNames.INTERSTITIAL_GET_SEAT_ID -> {
+                result.success(interstitialAds[instanceIdFrom(call)]?.seatId)
+            }
+
             AMPSAdSdkMethodNames.INTERSTITIAL_IS_READY_AD -> {
                 result.success(interstitialAds[instanceIdFrom(call)]?.isReady ?: false)
             }

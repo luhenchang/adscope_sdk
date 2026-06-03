@@ -24,8 +24,11 @@ class _BannerWidgetPageState extends State<BannerWidgetPage> {
 
   BannerCallBack _callbackFor(String label) {
     return BannerCallBack(
-      onLoadSuccess: () {
+      onLoadSuccess: () async {
         debugPrint('[$label] banner onLoadSuccess id=${label == 'A' ? _bannerAdA?.instanceId : _bannerAdB?.instanceId}');
+        final banner = label == 'A' ? _bannerAdA : _bannerAdB;
+        final seatId = await banner?.getSeatId();
+        debugPrint('[$label] banner seatId=$seatId');
         if (label == 'A') {
           setState(() => showA = true);
         } else if (label == 'B') {

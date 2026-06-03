@@ -83,6 +83,10 @@ class AMPSBannerManager private constructor() {
                 result.success(bannerAds[instanceIdFrom(call)]?.ecpm ?: 0)
             }
 
+            AMPSAdSdkMethodNames.BANNER_GET_SEAT_ID -> {
+                result.success(bannerAds[instanceIdFrom(call)]?.seatId)
+            }
+
             AMPSAdSdkMethodNames.BANNER_GET_MEDIA_EXTRA_INFO -> {
                 var mediaExtraInfo: String? = null
                 val ad = bannerAds[instanceIdFrom(call)]

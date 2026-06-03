@@ -131,6 +131,10 @@ class AMPSSplashManager private constructor() {
                 result.success(splashAds[instanceId]?.ecpm ?: 0)
             }
 
+            AMPSAdSdkMethodNames.SPLASH_GET_SEAT_ID -> {
+                result.success(splashAds[instanceId]?.seatId)
+            }
+
             AMPSAdSdkMethodNames.SPLASH_PRE_LOAD -> {
                 splashAds[instanceId]?.preLoad()
                 result.success(null)

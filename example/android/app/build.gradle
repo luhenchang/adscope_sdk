@@ -5,20 +5,20 @@ plugins {
 }
 
 android {
-    signingConfigs {
-        debug {
-            storeFile file('C:\\Users\\12769\\Desktop\\key')
-            storePassword '123456'
-            keyAlias 'key'
-            keyPassword '123456'
-        }
-        release {
-            storeFile file('C:\\Users\\12769\\Desktop\\key')
-            storePassword '123456'
-            keyAlias 'key'
-            keyPassword '123456'
-        }
-    }
+//    signingConfigs {
+//        debug {
+//            storeFile file('C:\\Users\\12769\\Desktop\\key')
+//            storePassword '123456'
+//            keyAlias 'key'
+//            keyPassword '123456'
+//        }
+//        release {
+//            storeFile file('C:\\Users\\12769\\Desktop\\key')
+//            storePassword '123456'
+//            keyAlias 'key'
+//            keyPassword '123456'
+//        }
+//    }
     namespace = "xyz.adscope.adscope_sdk_example"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -54,7 +54,7 @@ android {
             // 移除无用的resource文件
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+//            signingConfig signingConfigs.release
         }
         debug {
             minifyEnabled false
