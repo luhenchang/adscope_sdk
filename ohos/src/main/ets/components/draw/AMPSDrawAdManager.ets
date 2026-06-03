@@ -65,6 +65,9 @@ export class AMPSDrawAdManager {
       case AMPSAdSdkMethodNames.drawGetEcpm:
         result.success(this.getAdWrapper(args)?.getECPM() ?? 0)
         break;
+      case AMPSAdSdkMethodNames.drawGetSeatId:
+        result.success(instanceId ? (this.drawAds.get(instanceId)?.getSeatID() ?? '') : '')
+        break;
       case AMPSAdSdkMethodNames.drawIsReadyAd:
         result.success(instanceId ? (this.drawAds.get(instanceId)?.isReadyAd() ?? false) : false)
         break;
