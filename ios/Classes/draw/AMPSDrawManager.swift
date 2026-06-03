@@ -130,6 +130,12 @@ class AMPSDrawManager: NSObject {
                 return
             }
             result(0)
+        case AMPSAdSdkMethodNames.drawGetSeatId:
+            if let instanceId = instanceId(from: arguments), let ad = drawSlots[instanceId]?.drawAd {
+                result(ad.successAdInfo.adapterSeatId)
+                return
+            }
+            result(nil)
         case AMPSAdSdkMethodNames.drawIsReadyAd:
             if let adId = arguments?["adId"] as? String, let view = getAdView(adId: adId) {
                 result(view.isReadyAd())

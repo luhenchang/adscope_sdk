@@ -27,6 +27,8 @@ class AMPSBannerManager: NSObject {
             handlebannerLoad(instanceId: instanceId, result: result)
         case AMPSAdSdkMethodNames.bannerGetECPM:
             result(bannerAds[instanceId ?? ""]?.eCPM() ?? 0)
+        case AMPSAdSdkMethodNames.bannerGetSeatId:
+            result(bannerAds[instanceId ?? ""]?.successAdInfo.adapterSeatId)
         case AMPSAdSdkMethodNames.bannerIsReadyAd:
             if let instanceId = instanceId {
                 result(bannerAds[instanceId] != nil)

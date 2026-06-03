@@ -37,6 +37,8 @@ class AMPSSplashManager: NSObject {
             handleSplashShowAd(instanceId: instanceId, arguments: arguments, result: result)
         case AMPSAdSdkMethodNames.splashGetEcpm:
             result(splashAds[instanceId ?? ""]?.eCPM() ?? 0)
+        case AMPSAdSdkMethodNames.splashGetSeatId:
+            result(splashAds[instanceId ?? ""]?.successAdInfo.adapterSeatId)
         case AMPSAdSdkMethodNames.splashDestroy:
             if let instanceId = instanceId {
                 cleanupViewsAfterAdClosed(instanceId: instanceId)
