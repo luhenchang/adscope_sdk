@@ -29,22 +29,23 @@ export class AMPSInitChannelMethod {
 }
 
 //开屏广告加载方法
-export class AMPSAdCallBackChannelMethod {
-  static readonly onLoadSuccess = "onLoadSuccess";
-  static readonly onLoadFailure = "onLoadFailure";
-  static readonly onRenderOk = "onRenderOk";
-  static readonly onAdShow = "onAdShow";
-  static readonly onAdExposure = "onAdExposure";
-  static readonly onAdClicked = "onAdClicked";
-  static readonly onAdClosed = "onAdClosed";
-  static readonly onRenderFailure = "onRenderFailure";
-  static readonly onAdShowError = "onAdShowError";
-  static readonly onVideoPlayStart = "onVideoPlayStart";
-  static readonly onVideoPlayEnd = "onVideoPlayEnd";
-  static readonly onVideoPlayError = "onVideoPlayError";
-  static readonly onVideoSkipToEnd = "onVideoSkipToEnd";
-  static readonly onAdReward = "onAdReward";
+export class AMPSSplashAdCallBackChannelMethod {
+  static readonly onLoadSuccess = "Splash_onLoadSuccess";
+  static readonly onLoadFailure = "Splash_onLoadFailure";
+  static readonly onRenderOk = "Splash_onRenderOk";
+  static readonly onAdShow = "Splash_onAdShow";
+  static readonly onAdExposure = "Splash_onAdExposure";
+  static readonly onAdClicked = "Splash_onAdClicked";
+  static readonly onAdClosed = "Splash_onAdClosed";
+  static readonly onRenderFailure = "Splash_onRenderFailure";
+  static readonly onAdShowError = "Splash_onAdShowError";
+  static readonly onVideoPlayStart = "Splash_onVideoPlayStart";
+  static readonly onVideoPlayEnd = "Splash_onVideoPlayEnd";
+  static readonly onVideoPlayError = "Splash_onVideoPlayError";
+  static readonly onVideoSkipToEnd = "Splash_onVideoSkipToEnd";
+  static readonly onAdReward = "Splash_onAdReward";
 }
+//插屏广告加载方法
 export class AMPSInterstitialAdCallBackChannelMethod {
   static readonly onLoadSuccess = "Interstitial_onLoadSuccess";
   static readonly onLoadFailure = "Interstitial_onLoadFailure";
@@ -61,7 +62,6 @@ export class AMPSInterstitialAdCallBackChannelMethod {
   static readonly onVideoSkipToEnd = "Interstitial_onVideoSkipToEnd";
   static readonly onAdReward = "Interstitial_onAdReward";
 }
-
 // 1. 激励视频回调方法常量（参考示例格式）
 export class AMPSRewardedVideoCallBackChannelMethod {
   static readonly onLoadSuccess = "RewardedVideo_onLoadSuccess";
@@ -75,6 +75,7 @@ export class AMPSRewardedVideoCallBackChannelMethod {
   static readonly onVideoPlayError = "RewardedVideo_onVideoPlayError";
   static readonly onVideoSkipToEnd = "RewardedVideo_onVideoSkipToEnd";
   static readonly onAdCached = "RewardedVideo_onAdCached";
+  static readonly onServerRewardDidFail = "RewardedVideo_ServerRewardDidFail";
 }
 //2. banner相关原生端回调
 export class AMPSBannerCallBackChannelMethod {
@@ -91,6 +92,7 @@ export class AMPSBannerCallBackChannelMethod {
   static readonly onVideoPause = "Banner_onVideoPause";
   static readonly onVideoResume = "Banner_onVideoResume";
 }
+
 export class AmpsDrawCallbackChannelMethod {
   static readonly onLoadSuccess = "Draw_onLoadSuccess";
   static readonly onLoadFailure = "Draw_onLoadFailure";
@@ -123,19 +125,35 @@ export class AMPSNativeCallBackChannelMethod {
   static readonly onAdExposure = "onAdExposure";
   static readonly onAdClicked = "onAdClicked";
   static readonly onAdClosed = "onAdClosed"; // 广告关闭
+  static readonly onComplainSuccess = "onComplainSuccess";
   //视频组件回调
+  static readonly onVideoInit = "onVideoInit";
+  static readonly onVideoLoading = "onVideoLoading";
   static readonly onVideoReady = "onVideoReady"; // 视频准备就绪
+  static readonly onVideoLoaded = "onVideoLoaded";
   static readonly onVideoPlayStart = "onVideoPlayStart"; // 视频开始播放
   static readonly onVideoPlayComplete = "onVideoPlayComplete"; // 视频播放完成
   static readonly onVideoPause = "onVideoPause"; // 视频暂停
   static readonly onVideoResume = "onVideoResume"; // 视频恢复播放
+  static readonly onVideoStop = "onVideoStop";
+  static readonly onVideoClicked = "onVideoClicked";
   static readonly onVideoPlayError = "onVideoPlayError"; // 视频播放错误
+}
+
+export class DownLoadCallBackChannelMethod {
+  static readonly onDownloadPaused = "onDownloadPaused";
+  static readonly onDownloadStarted = "onDownloadStarted";
+  static readonly onDownloadProgressUpdate = "onDownloadProgressUpdate";
+  static readonly onDownloadFinished = "onDownloadFinished";
+  static readonly onDownloadFailed = "onDownloadFailed";
+  static readonly onInstalled = "onInstalled";
 }
 
 export class AMPSAdSdkMethodNames {
   // 初始化AMPS广告SDK的方法名
   static readonly testMode = 'testMode'
   static readonly init = 'AMPSAdSdk_init';
+  static readonly permissionTracking = 'AMPSAdSdk_permissionTracking'
   static readonly getSdkVersion= "AMPSAdSdk_getSdkVersion";
   static readonly getInitStatus= "AMPSAdSdk_getInitStatus";
   static readonly setPersonalRecommend = "AMPSAdSdk_setPersonalRecommend";
@@ -148,6 +166,7 @@ export class AMPSAdSdkMethodNames {
   static readonly splashAddPreLoadAdInfo = "AMPSSplashAd_addPreLoadAdInfo";
   static readonly splashAddPreGetMediaExtraInfo = "AMPSSplashAd_getMediaExtraInfo";
   static readonly splashIsReadyAd = 'AMPSSplashAd_isReadyAd';
+  static readonly splashDestroy = "AMPSSplashAd_destroy";
 
   //插屏
   static readonly interstitialCreate = "AMPSInterstitial_create";
@@ -158,7 +177,7 @@ export class AMPSAdSdkMethodNames {
   static readonly interstitialAddPreLoadAdInfo = "AMPSInterstitial_addPreLoadAdInfo";
   static readonly interstitialGetMediaExtraInfo = "AMPSInterstitial_getMediaExtraInfo";
   static readonly interstitialIsReadyAd = 'AMPSInterstitial_isReadyAd';
-  static readonly interstitialDestroy = 'AMPSInterstitial_destroy';
+  static readonly interstitialDestroy = "AMPSInterstitial_destroy";
 
 
   static readonly nativeLoad = 'AMPSNative_load';
@@ -166,14 +185,15 @@ export class AMPSAdSdkMethodNames {
   static readonly nativeGetECPM = 'AMPSNative_getECPM';
   static readonly nativeIsReadyAd = 'AMPSNative_isReadyAd';
   static readonly nativeIsNativeExpress = 'AMPSNative_isNativeExpress';
+  static readonly nativePattern = 'AMPSNative_getUnifiedPattern';
   static readonly nativeUnifiedMaterialType = "AMPSNative_materialType";
   static readonly nativeUnifiedGetDownLoad = "AMPSNative_getDownLoad";
   static readonly nativeGetVideoDuration = 'AMPSNative_getVideoDuration';
   // static readonly nativeSetVideoPlayConfig = 'AMPSNative_setVideoPlayConfig';
   static readonly nativeGetMediaExtraInfo = "AMPSNative_getMediaExtraInfo";
-  static readonly nativeDestroy = 'AMPSNative_destroy';
-  static readonly nativeResume = 'AMPSNative_resume';
-  static readonly nativePause = 'AMPSNative_pause';
+  static readonly nativeDestroy = "AMPSNative_destroy";
+  static readonly nativeResume = "AMPSNative_resume";
+  static readonly nativePause = "AMPSNative_pause";
 
 
   static readonly rewardVideoCreate = 'AMPSRewardVideo_create';
@@ -212,12 +232,12 @@ export class AMPSAdSdkMethodNames {
 export const AD_WIN_PRICE = 'winPrice'
 export const AD_SEC_PRICE = 'secPrice'
 export const AD_ID = 'adId';
+export const AD_INSTANCE_ID = 'adInstanceId';
 export const AD_LOSS_REASON = 'lossReason'
 export const AD_OPTION = 'AdOption';
 export const CONFIG = "config";
 export const SPLASH_BOTTOM = "SplashBottomView";
 export const SPLASH_INSTANCE_ID = "splashInstanceId";
-export const AD_INSTANCE_ID = "adInstanceId";
 export const VIDEO_SOUND = "videoSoundEnable";
 export const VIDEO_PLAY_TYPE = "videoAutoPlayType";
 export const VIDEO_LOOP_REPLAY = "videoLoopReplay";
@@ -227,6 +247,7 @@ export const defaultAdOption: ampsAd.AdOptions = {
 
 export let InitMethodNames: string[] = [
   AMPSAdSdkMethodNames.init,
+  AMPSAdSdkMethodNames.permissionTracking,
   AMPSAdSdkMethodNames.getSdkVersion,
   AMPSAdSdkMethodNames.getInitStatus,
   AMPSAdSdkMethodNames.setPersonalRecommend
@@ -241,7 +262,8 @@ export let SplashMethodNames: string[] =
     AMPSAdSdkMethodNames.splashPreLoad,
     AMPSAdSdkMethodNames.splashAddPreLoadAdInfo,
     AMPSAdSdkMethodNames.splashAddPreGetMediaExtraInfo,
-    AMPSAdSdkMethodNames.splashIsReadyAd
+    AMPSAdSdkMethodNames.splashIsReadyAd,
+    AMPSAdSdkMethodNames.splashDestroy
   ];
 
 export let InterstitialMethodNames: string[] =
@@ -260,12 +282,16 @@ export let NativeMethodNames: string[] = [
   AMPSAdSdkMethodNames.nativeLoad,
   AMPSAdSdkMethodNames.nativeCreate,
   AMPSAdSdkMethodNames.nativeGetECPM,
+  AMPSAdSdkMethodNames.nativePattern,
   AMPSAdSdkMethodNames.nativeUnifiedMaterialType,
   AMPSAdSdkMethodNames.nativeUnifiedGetDownLoad,
   AMPSAdSdkMethodNames.nativeGetMediaExtraInfo,
   AMPSAdSdkMethodNames.nativeIsReadyAd,
   AMPSAdSdkMethodNames.nativeIsNativeExpress,
-  AMPSAdSdkMethodNames.nativeGetVideoDuration
+  AMPSAdSdkMethodNames.nativeGetVideoDuration,
+  AMPSAdSdkMethodNames.nativeDestroy,
+  AMPSAdSdkMethodNames.nativeResume,
+  AMPSAdSdkMethodNames.nativePause
 ];
 
 export let RewardVideoMethodNames: string[] = [

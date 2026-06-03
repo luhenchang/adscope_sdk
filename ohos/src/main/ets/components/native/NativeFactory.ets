@@ -14,6 +14,6 @@ export class NativeFactory extends PlatformViewFactory {
   }
 
   public create(context: common.Context, viewId: number, args: Object): PlatformView {
-    return new OhosPlatformNativeView(context, viewId, args, this.message);
+    return new OhosPlatformNativeView(context, viewId, args as ESObject, this.message);
   }
 }

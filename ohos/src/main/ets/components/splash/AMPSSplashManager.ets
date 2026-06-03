@@ -1,25 +1,42 @@
-import { Any, MethodCall, MethodResult } from '@ohos/flutter_ohos';
+import { MethodCall, MethodResult } from '@ohos/flutter_ohos';
 import {
-  AMPSAdCallBackChannelMethod,
   AMPSAdSdkMethodNames,
+  AMPSSplashAdCallBackChannelMethod,
   SPLASH_BOTTOM,
-  SPLASH_INSTANCE_ID,
+  SPLASH_INSTANCE_ID
 } from '../common/common';
 import { AMPSEventManager } from '../common/AMPSEventManager';
 import { ampsAd, AMPSSplashAd } from 'xyz.adscope.amps';
 import { AdOptionsModule } from '../common/AdOptionsModule';
-import { SplashBottomModule } from '../splash/SplashBottomModule';
+import { SplashBottomImageChild, SplashBottomModule, SplashBottomTextChild } from '../splash/SplashBottomModule';
 import { window } from '@kit.ArkUI';
 
-export let globalSplashBottomBuilder: WrappedBuilder<[]> | undefined = wrapBuilder(SplashBottomBuilder);
+export let globalSplashBottomBuilder: WrappedBuilder<[]> | undefined  = wrapBuilder(SplashBottomBuilder);
+
+class SplashCallbackPayload {
+  splashInstanceId: string = ''
+  code?: number = undefined
+  message?: string = undefined
+  playDurationMs?: number = undefined
+}
+
+class SplashShowAdOptions {
+  windowStage: window.WindowStage
+  bottomWrappedBuilder?: WrappedBuilder<[]> = undefined
+
+  constructor(windowStage: window.WindowStage, bottomWrappedBuilder?: WrappedBuilder<[]>) {
+    this.windowStage = windowStage
+    this.bottomWrappedBuilder = bottomWrappedBuilder
+  }
+}
 
 export class AMPSSplashManager {
   private static instance: AMPSSplashManager;
   private mWindowStage?: window.WindowStage;
   private mWindow?: window.Window;
-  private splashAds: Map<string, AMPSSplashAd> = new Map();
-  private splashBottomById: Map<string, SplashBottomModule> = new Map();
-  static currentShowInstanceId?: string;
+  private splashAds: Map<string, AMPSSplashAd> = new Map<string, AMPSSplashAd>();
+  private splashBottomModules: Map<string, SplashBottomModule> = new Map<string, SplashBottomModule>();
+  private currentShowingInstanceId?: string;
 
   public static getInstance(): AMPSSplashManager {
     if (!AMPSSplashManager.instance) {
@@ -30,118 +47,194 @@ export class AMPSSplashManager {
 
   getSplashAd(instanceId?: string): AMPSSplashAd | undefined {
     if (instanceId) {
-      return this.splashAds.get(instanceId);
+      return this.splashAds.get(instanceId)
     }
-    const keys = Array.from(this.splashAds.keys());
-    if (keys.length === 0) {
-      return undefined;
-    }
-    return this.splashAds.get(keys[keys.length - 1]);
+    let latestSplashAd: AMPSSplashAd | undefined = undefined
+    this.splashAds.forEach((value: AMPSSplashAd) => {
+      latestSplashAd = value
+    })
+    return latestSplashAd
   }
 
-  static getBottomModuleForCurrentShow(): SplashBottomModule | undefined {
-    if (!AMPSSplashManager.currentShowInstanceId) {
-      return undefined;
+  getCurrentSplashBottomModule(): SplashBottomModule | undefined {
+    if (!this.currentShowingInstanceId) {
+      return undefined
     }
-    return AMPSSplashManager.getInstance().splashBottomById.get(AMPSSplashManager.currentShowInstanceId);
+    return this.splashBottomModules.get(this.currentShowingInstanceId)
+  }
+
+  private argsAsMap(args: Object | undefined): Map<string, Object> | undefined {
+    return args as Map<string, Object> | undefined
+  }
+
+  private extractInstanceId(args: Map<string, Object> | undefined): string | undefined {
+    return args?.get(SPLASH_INSTANCE_ID) as string | undefined
+  }
+
+  private requireInstanceId(instanceId: string | undefined, result: MethodResult): string | undefined {
+    if (!instanceId) {
+      result.error('INVALID_ARGS', 'splashInstanceId is required', undefined)
+      return undefined
+    }
+    return instanceId
+  }
+
+  private resolveBottomModule(args: Map<string, Object> | undefined): SplashBottomModule | undefined {
+    if (!args) {
+      return undefined
+    }
+    let bottomMap = args.get(SPLASH_BOTTOM) as Map<string, Object> | undefined
+    if (!bottomMap && args.get('type') === 'parent') {
+      bottomMap = args
+    }
+    if (!bottomMap) {
+      return undefined
+    }
+    const module = new SplashBottomModule(bottomMap)
+    return module.initialized ? module : undefined
   }
 
   private cleanUp(instanceId: string) {
-    this.splashAds.delete(instanceId);
-    this.splashBottomById.delete(instanceId);
-    if (AMPSSplashManager.currentShowInstanceId === instanceId) {
-      AMPSSplashManager.currentShowInstanceId = undefined;
+    this.splashAds.delete(instanceId)
+    this.splashBottomModules.delete(instanceId)
+    if (this.currentShowingInstanceId === instanceId) {
+      this.currentShowingInstanceId = undefined
     }
   }
 
-  private extractInstanceId(args: ESObject): string | undefined {
-    if (args === null || args === undefined) {
-      return undefined;
-    }
-    const map = args as Record<string, Object>;
-    const id = map[SPLASH_INSTANCE_ID];
-    return typeof id === 'string' ? id : undefined;
+  private releaseSplashAd(instanceId: string) {
+    this.cleanUp(instanceId)
   }
 
-  private createCallback(instanceId: string): ampsAd.CallBack {
+  private createPayload(instanceId: string): SplashCallbackPayload {
+    const payload = new SplashCallbackPayload()
+    payload.splashInstanceId = instanceId
+    return payload
+  }
+
+  private createErrorPayload(instanceId: string, code: number, message: string): SplashCallbackPayload {
+    const payload = this.createPayload(instanceId)
+    payload.code = code
+    payload.message = message
+    return payload
+  }
+
+  private createVideoSkipPayload(instanceId: string, playDurationMs?: number): SplashCallbackPayload {
+    const payload = this.createPayload(instanceId)
+    payload.playDurationMs = playDurationMs
+    return payload
+  }
+
+  private createCallBack(instanceId: string): ampsAd.CallBack {
     return {
-      onLoadSuccess: (): void =>
-      this.sendMessage(instanceId, AMPSAdCallBackChannelMethod.onLoadSuccess),
-      onLoadFailure: (code: number, message: string): void =>
-      this.sendMessage(instanceId, AMPSAdCallBackChannelMethod.onLoadFailure, { code, message }),
-      onRenderOk: (): void =>
-      this.sendMessage(instanceId, AMPSAdCallBackChannelMethod.onRenderOk),
-      onAdShow: (): void =>
-      this.sendMessage(instanceId, AMPSAdCallBackChannelMethod.onAdShow),
-      onAdExposure: (): void =>
-      this.sendMessage(instanceId, AMPSAdCallBackChannelMethod.onAdExposure),
-      onAdClicked: (): void =>
-      this.sendMessage(instanceId, AMPSAdCallBackChannelMethod.onAdClicked),
-      onAdClosed: (): void => {
-        this.cleanUp(instanceId);
-        this.sendMessage(instanceId, AMPSAdCallBackChannelMethod.onAdClosed);
+      onLoadSuccess: () => {
+        this.sendMessage(instanceId, AMPSSplashAdCallBackChannelMethod.onLoadSuccess)
       },
-      onRenderFailure: (): void =>
-      this.sendMessage(instanceId, AMPSAdCallBackChannelMethod.onRenderFailure),
-      onAdShowError: (code: number, message: string): void =>
-      this.sendMessage(instanceId, AMPSAdCallBackChannelMethod.onAdShowError, { code, message }),
-      onVideoPlayStart: (): void =>
-      this.sendMessage(instanceId, AMPSAdCallBackChannelMethod.onVideoPlayStart),
-      onVideoPlayEnd: (): void =>
-      this.sendMessage(instanceId, AMPSAdCallBackChannelMethod.onVideoPlayEnd),
-      onVideoPlayError: (code: number, message: string): void =>
-      this.sendMessage(instanceId, AMPSAdCallBackChannelMethod.onVideoPlayError, { code, message }),
-      onVideoSkipToEnd: (playDurationMs?: number): void =>
-      this.sendMessage(instanceId, AMPSAdCallBackChannelMethod.onVideoSkipToEnd, { playDurationMs }),
-      onAdReward: (): void =>
-      this.sendMessage(instanceId, AMPSAdCallBackChannelMethod.onAdReward),
-    };
+      onLoadFailure: (code: number, message: string) =>
+        this.sendPayload(AMPSSplashAdCallBackChannelMethod.onLoadFailure, this.createErrorPayload(instanceId, code, message)),
+      onRenderOk: () => {
+        this.sendMessage(instanceId, AMPSSplashAdCallBackChannelMethod.onRenderOk)
+      },
+      onAdShow: () => this.sendMessage(instanceId, AMPSSplashAdCallBackChannelMethod.onAdShow),
+      onAdExposure: () => this.sendMessage(instanceId, AMPSSplashAdCallBackChannelMethod.onAdExposure),
+      onAdClicked: () => this.sendMessage(instanceId, AMPSSplashAdCallBackChannelMethod.onAdClicked),
+      onAdClosed: () => {
+        this.sendMessage(instanceId, AMPSSplashAdCallBackChannelMethod.onAdClosed)
+        this.cleanUp(instanceId)
+      },
+      onRenderFailure: () => this.sendMessage(instanceId, AMPSSplashAdCallBackChannelMethod.onRenderFailure),
+      onAdShowError: (code: number, message: string) =>
+        this.sendPayload(AMPSSplashAdCallBackChannelMethod.onAdShowError, this.createErrorPayload(instanceId, code, message)),
+      onVideoPlayStart: () => this.sendMessage(instanceId, AMPSSplashAdCallBackChannelMethod.onVideoPlayStart),
+      onVideoPlayEnd: () => this.sendMessage(instanceId, AMPSSplashAdCallBackChannelMethod.onVideoPlayEnd),
+      onVideoPlayError: (code: number, message: string) =>
+        this.sendPayload(AMPSSplashAdCallBackChannelMethod.onVideoPlayError, this.createErrorPayload(instanceId, code, message)),
+      onVideoSkipToEnd: (playDurationMs?: number) =>
+        this.sendPayload(AMPSSplashAdCallBackChannelMethod.onVideoSkipToEnd, this.createVideoSkipPayload(instanceId, playDurationMs)),
+      onAdReward: () => this.sendMessage(instanceId, AMPSSplashAdCallBackChannelMethod.onAdReward)
+    }
   }
 
   handleMethodCall(call: MethodCall, result: MethodResult) {
-    const instanceId = this.extractInstanceId(call.args);
+    const args = this.argsAsMap(call.args as Object | undefined)
+    const instanceId = this.extractInstanceId(args)
     switch (call.method) {
       case AMPSAdSdkMethodNames.splashCreate:
-        this.handleSplashCreate(call, result);
-        break;
+        this.handleSplashCreate(call, result)
+        break
       case AMPSAdSdkMethodNames.splashLoad:
-        if (!instanceId) {
-          result.error('INVALID_ARGS', 'splashInstanceId is required', undefined);
-          return;
+        {
+          const requiredInstanceId = this.requireInstanceId(instanceId, result)
+          if (!requiredInstanceId) {
+            return
+          }
+          this.handleSplashLoad(requiredInstanceId, result);
         }
-        this.handleSplashLoad(instanceId, call, result);
+        break;
+      case AMPSAdSdkMethodNames.splashPreLoad:
+        {
+          const requiredInstanceId = this.requireInstanceId(instanceId, result)
+          if (!requiredInstanceId) {
+            return
+          }
+          this.handleSplashPreLoad(requiredInstanceId, result)
+        }
         break;
       case AMPSAdSdkMethodNames.splashShowAd:
-        if (!instanceId) {
-          result.error('INVALID_ARGS', 'splashInstanceId is required', undefined);
-          return;
+        {
+          const requiredInstanceId = this.requireInstanceId(instanceId, result)
+          if (!requiredInstanceId) {
+            return
+          }
+          this.handleSplashShowAd(requiredInstanceId, args, result);
         }
-        this.handleSplashShowAd(instanceId, result, call.args);
         break;
       case AMPSAdSdkMethodNames.splashGetECPM:
-        result.success(this.splashAds.get(instanceId ?? '')?.getECPM() ?? 0);
+        const mEcpm = instanceId ? (this.splashAds.get(instanceId)?.getECPM() ?? 0) : 0
+        result.success(mEcpm);
         break;
       case AMPSAdSdkMethodNames.splashIsReadyAd:
-        result.success(this.splashAds.get(instanceId ?? '')?.isReadyAd() ?? false);
+        result.success(instanceId ? (this.splashAds.get(instanceId)?.isReadyAd() ?? false) : false);
         break;
       case AMPSAdSdkMethodNames.splashDestroy:
-        if (instanceId) {
-          this.cleanUp(instanceId);
+        {
+          const requiredInstanceId = this.requireInstanceId(instanceId, result)
+          if (!requiredInstanceId) {
+            return
+          }
+          this.releaseSplashAd(requiredInstanceId)
         }
-        result.success(null);
+        result.success(null)
         break;
       default:
         result.success(null);
     }
   }
 
-  private handleSplashLoad(instanceId: string, call: MethodCall, result: MethodResult): void {
+  // 处理开屏广告加载
+  private handleSplashPreLoad(instanceId: string, result: MethodResult): void {
     try {
-      const ad = this.splashAds.get(instanceId);
-      if (!ad) {
-        this.handleSplashCreate(call, result);
+      const splashAd = this.splashAds.get(instanceId)
+      if (!splashAd) {
+        result.error('LOAD_FAILED', `Splash ad instance not found: ${instanceId}`, undefined);
+        return
       }
-      this.splashAds.get(instanceId)?.load();
+      splashAd.preloadAd()
+      result.success(true);
+    } catch (error) {
+      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
+    }
+  }
+
+  // 处理开屏广告加载
+  private handleSplashLoad(instanceId: string, result: MethodResult): void {
+    try {
+      const splashAd = this.splashAds.get(instanceId)
+      if (!splashAd) {
+        result.error('LOAD_FAILED', `Splash ad instance not found: ${instanceId}`, undefined);
+        return
+      }
+      splashAd.load();
       result.success(true);
     } catch (error) {
       result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
@@ -150,55 +243,53 @@ export class AMPSSplashManager {
 
   private handleSplashCreate(call: MethodCall, result: MethodResult): void {
     try {
-      const instanceId = this.extractInstanceId(call.args);
-      if (!instanceId) {
+      const args = this.argsAsMap(call.args)
+      const instanceId = this.extractInstanceId(args)
+      if (!args || !instanceId) {
         result.error('INVALID_ARGS', 'splashInstanceId is required', undefined);
-        return;
+        return
       }
-      const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(call.args);
-      adOption.adCount = 1;
-      const context = AMPSEventManager.getInstance().getContext();
+
+      const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(args);
+      adOption.adCount = 1
+      let context = AMPSEventManager.getInstance().getContext()
       this.mWindowStage = context?.windowStage;
       if (this.mWindowStage) {
         this.mWindow = this.mWindowStage.getMainWindowSync();
         if (this.mWindow) {
-          this.splashAds.set(
-            instanceId,
-            new AMPSSplashAd(adOption, this.createCallback(instanceId), this.mWindow.getUIContext()),
-          );
+          this.releaseSplashAd(instanceId)
+          this.splashAds.set(instanceId, new AMPSSplashAd(adOption, this.createCallBack(instanceId), this.mWindow.getUIContext()));
+          result.success(true);
         } else {
           result.error('LOAD_FAILED', '获取窗口或UI上下文失败', undefined);
-          return;
+          return
         }
       } else {
         result.error('LOAD_FAILED', 'WindowStage未初始化', undefined);
-        return;
+        return
       }
-      result.success(true);
     } catch (error) {
       result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
+      return
     }
   }
 
-  private resolveBottomArgs(args: Any): Any {
-    if (args === null || args === undefined) {
-      return args;
-    }
-    const map = args as Record<string, Object>;
-    const nested = map[SPLASH_BOTTOM];
-    if (nested !== undefined) {
-      return nested;
-    }
-    return args;
-  }
-
-  private handleSplashShowAd(instanceId: string, result: MethodResult, args: Any): void {
+  // 处理开屏广告显示
+  private handleSplashShowAd(instanceId: string, args: Map<string, Object> | undefined, result: MethodResult): void {
     try {
-      const splashAd = this.splashAds.get(instanceId);
-      if (splashAd && this.mWindowStage) {
-        AMPSSplashManager.currentShowInstanceId = instanceId;
-        this.splashBottomById.set(instanceId, new SplashBottomModule(this.resolveBottomArgs(args)));
-        splashAd.showAd({ windowStage: this.mWindowStage, bottomWrappedBuilder: globalSplashBottomBuilder });
+      const splashAd = this.splashAds.get(instanceId)
+      const context = AMPSEventManager.getInstance().getContext()
+      const windowStage = context?.windowStage ?? this.mWindowStage
+      if (splashAd && windowStage) {
+        const splashBottomModule = this.resolveBottomModule(args)
+        this.currentShowingInstanceId = instanceId
+        if (splashBottomModule) {
+          this.splashBottomModules.set(instanceId, splashBottomModule)
+        } else {
+          this.splashBottomModules.delete(instanceId)
+        }
+        const showOptions = new SplashShowAdOptions(windowStage, globalSplashBottomBuilder)
+        splashAd.showAd(showOptions);
         result.success(true);
       } else {
         result.error('SHOW_FAILED', '广告未加载或WindowStage不存在', undefined);
@@ -208,41 +299,41 @@ export class AMPSSplashManager {
     }
   }
 
-  public sendMessage(instanceId: string, method: string, args?: Any) {
-    const payload: Record<string, Object> = {};
-    payload[SPLASH_INSTANCE_ID] = instanceId;
-    if (args !== null && args !== undefined) {
-      const extra = args as Record<string, Object>;
-      Object.keys(extra).forEach((key: string) => {
-        payload[key] = extra[key];
-      });
-    }
-    AMPSEventManager.getInstance().sendMessageToFlutter(method, payload);
+  private sendPayload(method: string, payload: SplashCallbackPayload): void {
+    AMPSEventManager.getInstance().sendMessageToFlutter(method, payload as ESObject)
+  }
+
+  private sendMessage(instanceId: string, method: string): void {
+    this.sendPayload(method, this.createPayload(instanceId))
   }
 }
 
 @Builder
 export function SplashBottomBuilder() {
-  const bottomModule = AMPSSplashManager.getBottomModuleForCurrentShow();
-  if (bottomModule?.initialized) {
+  if (AMPSSplashManager.getInstance().getCurrentSplashBottomModule()?.initialized) {
     Stack() {
-      Image($rawfile(`flutter_assets/${bottomModule?.imgChildren?.imagePath}`))
-        .width(bottomModule?.imgChildren?.width)
-        .height(bottomModule?.imgChildren?.height)
-        .offset({
-          x: bottomModule?.imgChildren?.x,
-          y: bottomModule?.imgChildren?.y,
-        });
-      Text(bottomModule?.textChildren?.text)
-        .fontColor(bottomModule?.textChildren?.color)
-        .offset({
-          x: bottomModule?.textChildren?.x,
-          y: bottomModule?.textChildren?.y,
-        });
+      ForEach(AMPSSplashManager.getInstance().getCurrentSplashBottomModule()?.textChildrens ?? [], (item: SplashBottomTextChild) => {
+        Text(item?.text)
+          .fontColor(item?.color)
+          .fontSize(item?.fontSize)
+          .offset({
+            x: item?.x,
+            y: item?.y
+          })
+      })
+      ForEach(AMPSSplashManager.getInstance().getCurrentSplashBottomModule()?.imgChildrens ?? [], (imgItem: SplashBottomImageChild) => {
+        Image($rawfile(`flutter_assets/${imgItem.imagePath}`))
+          .width(imgItem?.width)
+          .height(imgItem?.height)
+          .offset({
+            x: imgItem?.x,
+            y: imgItem?.y
+          })
+      })
     }
-    .backgroundColor(bottomModule?.backgroundColor)
-    .height(bottomModule?.height)
+    .backgroundColor(AMPSSplashManager.getInstance().getCurrentSplashBottomModule()?.backgroundColor)
+    .height(AMPSSplashManager.getInstance().getCurrentSplashBottomModule()?.height)
     .width('100%')
-    .alignContent(Alignment.TopStart);
+    .alignContent(Alignment.TopStart)
   }
 }

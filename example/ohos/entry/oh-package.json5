@@ -7,13 +7,13 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "amps_ks_adapter": "file:../libs/amps_ks_adapter_5.15.3010.har",
-    'amps_gm_adapter': "file:../libs/amps_gm_adapter_5.15.730.har",
-    "amps_csj_adapter": "file:../libs/amps_csj_adapter_5.15.730.har",
-    "amps_hw_adapter": "file:../libs/amps_hw_adapter_5.15.503.har",
-    "amps_gdt_adapter": "file:../libs/amps_gdt_adapter_5.15.120.har",
-    "amps_sigmob_adapter": "file:../libs/amps_sigmob_adapter_5.15.113.har",
-    "amps_jad_adapter": "file:../libs/amps_jad_adapter_5.15.1010.har"
+    "amps_ks_adapter": "file:../libs/amps_ks_adapter_5.25.3010.har",
+    'amps_gm_adapter': "file:../libs/amps_gm_adapter_5.25.754.har",
+    "amps_csj_adapter": "file:../libs/amps_csj_adapter_5.25.754.har",
+    "amps_hw_adapter": "file:../libs/amps_hw_adapter_5.25.500.har",
+    "amps_gdt_adapter": "file:../libs/amps_gdt_adapter_5.25.131.har",
+    "amps_sigmob_adapter": "file:../libs/amps_sigmob_adapter_5.25.116.har",
+//    "amps_jad_adapter": "file:../libs/amps_jad_adapter_5.18.1010.har"
   },
 }
 

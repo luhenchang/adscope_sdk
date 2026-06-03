@@ -1,218 +1,284 @@
-import { Any, MethodCall, MethodResult } from '@ohos/flutter_ohos';
-import { ampsAd, AMPSBannerAd, AMPSBannerAdWrapper } from 'xyz.adscope.amps';
+import { MethodCall, MethodResult } from '@ohos/flutter_ohos';
+import { ampsAd, AMPSBannerAd, AMPSBannerAdListener, AMPSBannerAdWrapper } from 'xyz.adscope.amps';
 import { AdOptionsModule } from '../common/AdOptionsModule';
 import { AMPSEventManager } from '../common/AMPSEventManager';
 import { AD_INSTANCE_ID, AMPSBannerCallBackChannelMethod, AMPSAdSdkMethodNames } from '../common/common';
 import { window } from '@kit.ArkUI';
 
-class BannerSlot {
-  bannerAd?: AMPSBannerAd;
-  bannerAdItem?: AMPSBannerAdWrapper;
+class BannerCallbackPayload {
+  adInstanceId: string = ''
+  code?: number = undefined
+  message?: string = undefined
 }
 
 export class AMPSBannerManager {
-  private static instance?: AMPSBannerManager;
-  private bannerSlots: Map<string, BannerSlot> = new Map();
-  static currentViewInstanceId?: string;
+  private static instance?: AMPSBannerManager
+  private bannerAds: Map<string, AMPSBannerAd> = new Map<string, AMPSBannerAd>()
+  private bannerAdItems: Map<string, AMPSBannerAdWrapper> = new Map<string, AMPSBannerAdWrapper>()
+  private mWindowStage?: window.WindowStage
 
-  private constructor() {}
+  private constructor() {
+  }
 
   static getInstance() {
     if (!AMPSBannerManager.instance) {
-      AMPSBannerManager.instance = new AMPSBannerManager();
+      AMPSBannerManager.instance = new AMPSBannerManager()
     }
-    return AMPSBannerManager.instance!;
+    return AMPSBannerManager.instance!
   }
 
-  private extractInstanceId(args: Any): string | undefined {
-    if (args === null || args === undefined) {
-      return undefined;
-    }
-    const map = args as Record<string, Object>;
-    const id = map[AD_INSTANCE_ID];
-    return typeof id === 'string' ? id : undefined;
-  }
-
-  getBannerAdItem(instanceId?: string): AMPSBannerAdWrapper | undefined {
-    const id = instanceId ?? AMPSBannerManager.currentViewInstanceId;
-    if (id) {
-      return this.bannerSlots.get(id)?.bannerAdItem;
-    }
-    const keys = Array.from(this.bannerSlots.keys());
-    if (keys.length === 0) {
-      return undefined;
-    }
-    return this.bannerSlots.get(keys[keys.length - 1])?.bannerAdItem;
-  }
-
-  private cleanUp(instanceId: string) {
-    this.bannerSlots.delete(instanceId);
-    if (AMPSBannerManager.currentViewInstanceId === instanceId) {
-      AMPSBannerManager.currentViewInstanceId = undefined;
-    }
-  }
-
-  private ensureSlot(instanceId: string): BannerSlot {
-    let slot = this.bannerSlots.get(instanceId);
-    if (!slot) {
-      slot = new BannerSlot();
-      this.bannerSlots.set(instanceId, slot);
-    }
-    return slot;
+  getBannerAdItem(instanceId: string): AMPSBannerAdWrapper | undefined {
+    return this.bannerAdItems.get(instanceId)
   }
 
   handleMethodCall(call: MethodCall, result: MethodResult) {
-    const instanceId = this.extractInstanceId(call.args);
+    const args = this.argsAsMap(call.args as Object | undefined)
+    const instanceId = this.extractInstanceId(args)
     switch (call.method) {
       case AMPSAdSdkMethodNames.bannerCreate:
-        this.handleCreate(call, result);
+        this.handleCreate(call, result)
         break;
       case AMPSAdSdkMethodNames.bannerLoad:
-        if (!instanceId) {
-          result.error('INVALID_ARGS', 'adInstanceId is required', undefined);
-          return;
+        {
+          const requiredInstanceId = this.requireInstanceId(instanceId, result)
+          if (!requiredInstanceId) {
+            return
+          }
+          this.handleLoadAd(requiredInstanceId, result)
         }
-        this.handleLoadAd(instanceId, result);
         break;
       case AMPSAdSdkMethodNames.bannerPreLoad:
-        if (instanceId) {
-          this.bannerSlots.get(instanceId)?.bannerAd?.load();
+        {
+          const requiredInstanceId = this.requireInstanceId(instanceId, result)
+          if (!requiredInstanceId) {
+            return
+          }
+          this.handlePreLoadAd(requiredInstanceId, result)
         }
-        result.success(true);
         break;
       case AMPSAdSdkMethodNames.bannerSetSlideTime:
-        this.setSlideIntervalTime(instanceId, result, call.args);
-        break;
+        {
+          const requiredInstanceId = this.requireInstanceId(instanceId, result)
+          if (!requiredInstanceId) {
+            return
+          }
+          this.setSlideIntervalTime(requiredInstanceId, args, result)
+        }
+        break
       case AMPSAdSdkMethodNames.bannerGetECPM:
-        result.success(this.getBannerAdItem(instanceId)?.getECPM() ?? 0);
+        result.success(instanceId ? (this.bannerAdItems.get(instanceId)?.getECPM() ?? 0) : 0)
         break;
       case AMPSAdSdkMethodNames.bannerDestroyAd:
-        if (instanceId) {
-          this.cleanUp(instanceId);
+        {
+          const requiredInstanceId = this.requireInstanceId(instanceId, result)
+          if (!requiredInstanceId) {
+            return
+          }
+          this.releaseBanner(requiredInstanceId)
         }
-        result.success(true);
+        result.success(null)
         break;
       case AMPSAdSdkMethodNames.bannerIsReadyAd:
-        result.success(this.bannerSlots.get(instanceId ?? '')?.bannerAd?.isReadyAd() ?? false);
+        result.success(instanceId ? (this.bannerAds.get(instanceId)?.isReadyAd() ?? false) : false)
+        break;
+      case AMPSAdSdkMethodNames.bannerAddPreLoadAdInfo:
+        result.success(null)
+        break;
+      case AMPSAdSdkMethodNames.bannerGetMediaExtraInfo:
+        result.success(null)
         break;
       default:
         result.success(undefined);
     }
   }
 
-  mWindowStage?: window.WindowStage;
+  private argsAsMap(args: Object | undefined): Map<string, Object> | undefined {
+    return args as Map<string, Object> | undefined
+  }
+
+  private extractInstanceId(args: Map<string, Object> | undefined): string | undefined {
+    return args?.get(AD_INSTANCE_ID) as string | undefined
+  }
+
+  private requireInstanceId(instanceId: string | undefined, result: MethodResult): string | undefined {
+    if (!instanceId) {
+      result.error('INVALID_ARGS', 'adInstanceId is required', undefined)
+      return undefined
+    }
+    return instanceId
+  }
+
+  private createPayload(instanceId: string): BannerCallbackPayload {
+    const payload = new BannerCallbackPayload()
+    payload.adInstanceId = instanceId
+    return payload
+  }
+
+  private createErrorPayload(instanceId: string, code: number, message: string): BannerCallbackPayload {
+    const payload = this.createPayload(instanceId)
+    payload.code = code
+    payload.message = message
+    return payload
+  }
+
+  private releaseBanner(instanceId: string): void {
+    this.bannerAdItems.get(instanceId)?.destroy()
+    this.bannerAdItems.delete(instanceId)
+    this.bannerAds.delete(instanceId)
+  }
 
   private handleCreate(call: MethodCall, result: MethodResult): void {
     try {
-      const instanceId = this.extractInstanceId(call.args);
-      if (!instanceId) {
-        result.error('INVALID_ARGS', 'adInstanceId is required', undefined);
-        return;
+      const args = this.argsAsMap(call.args as Object | undefined)
+      const instanceId = this.extractInstanceId(args)
+      if (!args || !instanceId) {
+        result.error('INVALID_ARGS', 'adInstanceId is required', undefined)
+        return
       }
-      const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(call.args);
-      const context = AMPSEventManager.getInstance().getContext();
-      this.mWindowStage = context?.windowStage;
+      const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(args)
+      const context = AMPSEventManager.getInstance().getContext()
+      this.mWindowStage = context?.windowStage
       if (!this.mWindowStage) {
-        result.error('LOAD_FAILED', 'WindowStage未初始化', undefined);
-        return;
+        result.error('LOAD_FAILED', 'WindowStage未初始化', undefined)
+        return
       }
-      const mWindow = this.mWindowStage.getMainWindowSync();
-      if (!mWindow) {
-        result.error('LOAD_FAILED', '获取窗口或UI上下文失败', undefined);
-        return;
-      }
-      const slot = this.ensureSlot(instanceId);
-      const that = this;
-      slot.bannerAd = new AMPSBannerAd(mWindow.getUIContext(), adOption, {
-        loadOk: (ads) => {
-          slot.bannerAdItem = ads[0];
-          AMPSBannerManager.currentViewInstanceId = instanceId;
-          slot.bannerAdItem.renderCallBack = {
-            renderSuccess() {
-              that.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onLoadSuccess);
-            },
-            renderFailed(code, message) {
-              that.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onLoadFailure, { code, message });
-            },
-          };
-          slot.bannerAdItem.interactCallBack = {
-            onAdShow() {
-              that.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onAdShow);
-            },
-            onAdExposure() {
-              that.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onAdShow);
-            },
-            onAdClicked() {
-              that.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onAdClicked);
-            },
-            toCloseAd() {
-              that.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onAdClosed);
-            },
-          };
-          slot.bannerAdItem.videoPlayCallBack = {
-            onVideoReady() {
-              that.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onVideoReady);
-            },
-            onVideoPlayStart() {
-              that.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onVideoPlayStart);
-            },
-            onVideoPause() {
-              that.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onVideoPause);
-            },
-            onVideoResume() {
-              that.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onVideoResume);
-            },
-            onVideoPlayComplete() {
-              that.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onVideoPlayEnd);
-            },
-            onVideoPlayError(code, message) {
-              that.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onLoadFailure, { code, message });
-            },
-          };
-          ads[0].renderAd();
-        },
-        loadFail: (code, message) => {
-          that.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onLoadFailure, { code, message });
-        },
-      });
-      result.success(true);
+      const mWindow = this.mWindowStage.getMainWindowSync()
+      this.releaseBanner(instanceId)
+      this.bannerAds.set(instanceId, new AMPSBannerAd(mWindow.getUIContext(), adOption, this.createCallBack(instanceId)))
     } catch (error) {
-      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
+      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined)
+      return
     }
+    result.success(true)
   }
 
   private handleLoadAd(instanceId: string, result: MethodResult): void {
     try {
-      this.bannerSlots.get(instanceId)?.bannerAd?.load();
-      result.success(true);
-    } catch (error) {
-      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
-    }
-  }
-
-  private setSlideIntervalTime(instanceId: string | undefined, result: MethodResult, args: Any): void {
-    try {
-      if (instanceId && args as number) {
-        const time = args as number;
-        this.bannerSlots.get(instanceId)?.bannerAdItem?.setSlideIntervalTime(time);
-        result.success(true);
-      } else {
-        result.error('SHOW_FAILED', 'adInstanceId or slide time missing', undefined);
+      const bannerAd = this.bannerAds.get(instanceId)
+      if (!bannerAd) {
+        result.error('LOAD_FAILED', `Banner ad instance not found: ${instanceId}`, undefined)
+        return
       }
+      bannerAd.load()
     } catch (error) {
-      result.error('SHOW_EXCEPTION', `设置轮播间隔异常: ${error instanceof Error ? error.message : error}`, undefined);
+      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined)
+      return
+    }
+    result.success(true)
+  }
+
+  private handlePreLoadAd(instanceId: string, result: MethodResult): void {
+    try {
+      const bannerAd = this.bannerAds.get(instanceId)
+      if (!bannerAd) {
+        result.error('LOAD_FAILED', `Banner ad instance not found: ${instanceId}`, undefined)
+        return
+      }
+      bannerAd.load()
+    } catch (error) {
+      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined)
+      return
+    }
+    result.success(true)
+  }
+
+  private setSlideIntervalTime(instanceId: string, args: Map<string, Object> | undefined, result: MethodResult): void {
+    try {
+      const time = args?.get('slideTime') as number | undefined
+      if (time === undefined) {
+        result.error('INVALID_ARGS', 'slideTime is required', undefined)
+        return
+      }
+      const bannerAdItem = this.bannerAdItems.get(instanceId)
+      if (!bannerAdItem) {
+        result.error('SHOW_FAILED', `Banner ad instance not found: ${instanceId}`, undefined)
+        return
+      }
+      bannerAdItem.setSlideIntervalTime(time)
+    } catch (error) {
+      result.error('SHOW_EXCEPTION', `显示广告异常: ${error instanceof Error ? error.message : error}`, undefined)
+      return
+    }
+    result.success(true)
+  }
+
+  private createCallBack(instanceId: string): AMPSBannerAdListener {
+    return {
+      loadOk: (ads: AMPSBannerAdWrapper[]) => {
+        if (ads.length === 0) {
+          this.sendPayload(
+            AMPSBannerCallBackChannelMethod.onLoadFailure,
+            this.createErrorPayload(instanceId, -1, 'banner wrapper is empty')
+          )
+          return
+        }
+        const bannerAdItem = ads[0]
+        this.bannerAdItems.set(instanceId, bannerAdItem)
+        bannerAdItem.renderCallBack = {
+          renderSuccess: () => {
+            this.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onLoadSuccess)
+          },
+          renderFailed: (adWrapper: AMPSBannerAdWrapper, code: number, message: string) => {
+            this.sendPayload(
+              AMPSBannerCallBackChannelMethod.onLoadFailure,
+              this.createErrorPayload(instanceId, code, message)
+            )
+          }
+        }
+        bannerAdItem.interactCallBack = {
+          onAdShow: () => {
+            this.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onAdShow)
+          },
+          onAdExposure: () => {
+            this.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onAdShow)
+          },
+          onAdClicked: () => {
+            this.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onAdClicked)
+          },
+          toCloseAd: () => {
+            this.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onAdClosed)
+            this.releaseBanner(instanceId)
+          }
+        }
+        bannerAdItem.videoPlayCallBack = {
+          onVideoReady: () => {
+            this.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onVideoReady)
+          },
+          onVideoPlayStart: () => {
+            this.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onVideoPlayStart)
+          },
+          onVideoPause: () => {
+            this.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onVideoPause)
+          },
+          onVideoResume: () => {
+            this.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onVideoResume)
+          },
+          onVideoPlayComplete: () => {
+            this.sendMessage(instanceId, AMPSBannerCallBackChannelMethod.onVideoPlayEnd)
+          },
+          onVideoPlayError: (code: number, message: string) => {
+            this.sendPayload(
+              AMPSBannerCallBackChannelMethod.onVideoPlayError,
+              this.createErrorPayload(instanceId, code, message)
+            )
+          }
+        }
+        bannerAdItem.renderAd()
+      },
+      loadFail: (code: number, message: string) => {
+        this.sendPayload(
+          AMPSBannerCallBackChannelMethod.onLoadFailure,
+          this.createErrorPayload(instanceId, code, message)
+        )
+      }
     }
   }
 
-  public sendMessage(instanceId: string, method: string, args?: Any) {
-    const payload: Record<string, Object> = {};
-    payload[AD_INSTANCE_ID] = instanceId;
-    if (args !== null && args !== undefined) {
-      const extra = args as Record<string, Object>;
-      Object.keys(extra).forEach((key: string) => {
-        payload[key] = extra[key];
-      });
-    }
-    AMPSEventManager.getInstance().sendMessageToFlutter(method, payload);
+  private sendPayload(method: string, payload: BannerCallbackPayload): void {
+    AMPSEventManager.getInstance().sendMessageToFlutter(method, payload as ESObject)
+  }
+
+  private sendMessage(instanceId: string, method: string): void {
+    this.sendPayload(method, this.createPayload(instanceId))
   }
 }

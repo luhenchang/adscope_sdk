@@ -1,22 +1,18 @@
 import PlatformView, { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformView';
 import common from '@ohos.app.ability.common';
 import { BinaryMessenger } from '@ohos/flutter_ohos/src/main/ets/plugin/common/BinaryMessenger';
-import { AMPSNativeAdWrapper } from 'xyz.adscope.amps';
-import { AdWrapperManager } from '../native/AdWrapperManager';
+import { AD_ID, AD_INSTANCE_ID } from '../common/common';
 import { AMPSNativeAdComponent } from './AMPSNativeAdComponent';
 
 @Observed
 export class OhosPlatformNativeView extends PlatformView {
-  static adId: string | undefined;
-  static adInstanceId: string | undefined;
-  static wrapper: AMPSNativeAdWrapper | undefined
+  adId: string = ''
+  instanceId: string = ''
+
   constructor(context: common.Context, viewId: number, args: ESObject, message: BinaryMessenger) {
     super();
-    OhosPlatformNativeView.adId = args.get("adId")
-    OhosPlatformNativeView.adInstanceId = args.get("adInstanceId")
-    if (OhosPlatformNativeView.adId) {
-      OhosPlatformNativeView.wrapper = AdWrapperManager.getInstance().getAd(OhosPlatformNativeView.adId)
-    }
+    this.adId = (args.get(AD_ID) as string | undefined) ?? ''
+    this.instanceId = (args.get(AD_INSTANCE_ID) as string | undefined) ?? ''
   }
 
   getView(): WrappedBuilder<[Params]> {
@@ -27,8 +23,11 @@ export class OhosPlatformNativeView extends PlatformView {
   }
 }
 
-
 @Builder
 export function AMPSNativeWrappedBuilder(params: Params) {
-  AMPSNativeAdComponent({ params: params, adId: OhosPlatformNativeView.adId, adInstanceId: OhosPlatformNativeView.adInstanceId })
+  AMPSNativeAdComponent({
+    params: params,
+    adId: (params.platformView as OhosPlatformNativeView).adId,
+    instanceId: (params.platformView as OhosPlatformNativeView).instanceId
+  })
 }

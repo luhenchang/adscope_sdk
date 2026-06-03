@@ -17,7 +17,7 @@ export default class EntryAbility extends FlutterAbility {
     })
   }
   configureFlutterEngine(flutterEngine: FlutterEngine) {
-    this.requestOAIDTrackingConsentPermissions(this.context)
+    //this.requestOAIDTrackingConsentPermissions(this.context)
     super.configureFlutterEngine(flutterEngine)
     GeneratedPluginRegistrant.registerWith(flutterEngine)
   }

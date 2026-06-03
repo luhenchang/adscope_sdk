@@ -3,6 +3,7 @@ import { AMPSInitConfigConverter } from "../init/AMPSInitConfigConverter";
 import { AMPSAdSdkMethodNames, AMPSInitChannelMethod } from "../common/common";
 import { AMPSAdSdk, AMPSIInitCallback, AMPSInitConfig } from "xyz.adscope.amps";
 import { AMPSEventManager } from "../common/AMPSEventManager";
+import { abilityAccessCtrl } from "@kit.AbilityKit";
 
 export class AMPSSDKInitManager {
   private static instance: AMPSSDKInitManager;
@@ -29,6 +30,22 @@ export class AMPSSDKInitManager {
             this.sendMessage(AMPSInitChannelMethod.initFailed, { code: -1, message: (error as Error).message })
           }
           result.success(true);
+        }
+        break;
+      case AMPSAdSdkMethodNames.permissionTracking:
+        let context1 = AMPSEventManager.getInstance().getContext()
+        if (context1) {
+          try {
+            const atManager: abilityAccessCtrl.AtManager = abilityAccessCtrl.createAtManager();
+             atManager.requestPermissionsFromUser(context1, ['ohos.permission.APP_TRACKING_CONSENT'])
+               .then((res)=>{
+                 result.success(res.authResults[0]);
+               }).catch((error:Error)=>{
+               result.error(error.name, `权限请求异常: ${error instanceof Error ? error.message : error}`, undefined);
+             })
+          } catch (error) {
+            result.error(error.code, `权限请求异常: ${error instanceof Error ? error.message : error}`, undefined);
+          }
         }
         break;
       case AMPSAdSdkMethodNames.getSdkVersion:
@@ -70,6 +87,7 @@ export class AMPSSDKInitManager {
     }
     if (ampsInitConfig) {
       AMPSAdSdk.testMode = false
+      AMPSSDKInitManager.initStatus = 1
       AMPSAdSdk.init(ampsInitConfig, callback)
     }
   }

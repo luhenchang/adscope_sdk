@@ -27,14 +27,18 @@ export class AdWrapperManager {
 
   /**
    * 将广告实例添加到 Map 中
+   * @param adId Flutter 侧回传并用于平台视图查找的广告 ID
    * @param ad 广告实例
    */
-  public addAd(ad: AMPSNativeAdWrapper): void {
-    if (ad && ad.adId) {
-      this.adMap.set(ad.adId, ad);
+  public addAd(adId: string, ad: AMPSNativeAdWrapper): void {
+    if (adId && ad) {
+      this.adMap.set(adId, ad);
     }
   }
 
+  public allItem():AMPSNativeAdWrapper[]{
+    return Array.from(this.adMap.values())
+  }
   /**
    * 根据 adId 获取广告实例
    * @param adId 广告的唯一 ID

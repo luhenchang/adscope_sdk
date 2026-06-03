@@ -1,5 +1,4 @@
 import { globalSplashBottomBuilder, OhosPlatformSplashView } from './OhosPlatformSplashView';
-import { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformView';
 import { AMPSBuildSplashView, AMPSSplashAd } from 'xyz.adscope.amps';
 import { common } from '@kit.AbilityKit';
 import { AMPSSplashManager } from './AMPSSplashManager';
@@ -10,11 +9,11 @@ struct AMPSSplashComponent {
   splashAd?: AMPSSplashAd
 
   aboutToAppear(): void {
-    this.splashAd = AMPSSplashManager.getInstance().getSplashAd(undefined)
+    this.splashAd = AMPSSplashManager.getInstance().getSplashAd(OhosPlatformSplashView.splashInstanceId)
   }
 
   build() {
-    if (this.splashAd?.isReadyAd()) {
+    if (this.splashAd?.isReadyAd() && this.splashAd.isSupportViewBuilder()) {
       Column() {
         AMPSBuildSplashView(
           this.splashAd, {

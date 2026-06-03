@@ -1,16 +1,23 @@
 import PlatformView, { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformView';
 import { AMPSSplashComponent } from './AMPSSplashComponent';
-import { SPLASH_BOTTOM } from '../common/common';
-import { SplashBottomModule } from '../splash/SplashBottomModule';
+import { SPLASH_BOTTOM, SPLASH_INSTANCE_ID } from '../common/common';
+import { SplashBottomImageChild, SplashBottomModule, SplashBottomTextChild } from '../splash/SplashBottomModule';
 
 //底部自定义组件全局WrappedBuilder
 export let globalSplashBottomBuilder: WrappedBuilder<[]> | undefined  = wrapBuilder(MyBuilder);
 @Observed
 export class OhosPlatformSplashView extends PlatformView {
+  static splashInstanceId?: string
   static splashBottomModule?: SplashBottomModule
   constructor(args: ESObject) {
     super();
-    OhosPlatformSplashView.splashBottomModule = new SplashBottomModule(args.get(SPLASH_BOTTOM))
+    OhosPlatformSplashView.splashInstanceId = args.get(SPLASH_INSTANCE_ID) as string | undefined
+    const bottomMap = args.get(SPLASH_BOTTOM) as Map<string, Object> | undefined
+    if (bottomMap) {
+      OhosPlatformSplashView.splashBottomModule = new SplashBottomModule(bottomMap)
+    } else {
+      OhosPlatformSplashView.splashBottomModule = undefined
+    }
   }
 
   getView(): WrappedBuilder<[Params]> {
@@ -18,6 +25,7 @@ export class OhosPlatformSplashView extends PlatformView {
   }
 
   dispose(): void {
+    OhosPlatformSplashView.splashInstanceId = undefined
     OhosPlatformSplashView.splashBottomModule = undefined
   }
 }
@@ -27,19 +35,24 @@ export class OhosPlatformSplashView extends PlatformView {
 export function MyBuilder() {
   if (OhosPlatformSplashView.splashBottomModule?.initialized) {
     Stack() {
-      Image($rawfile(`flutter_assets/${OhosPlatformSplashView.splashBottomModule?.imgChildren?.imagePath}`))
-        .width(OhosPlatformSplashView.splashBottomModule?.imgChildren?.width)
-        .height(OhosPlatformSplashView.splashBottomModule?.imgChildren?.height)
-        .offset({
-          x: OhosPlatformSplashView.splashBottomModule?.imgChildren?.x,
-          y: OhosPlatformSplashView.splashBottomModule?.imgChildren?.y
-        })
-      Text(OhosPlatformSplashView.splashBottomModule?.textChildren?.text)
-        .fontColor(OhosPlatformSplashView.splashBottomModule?.textChildren?.color)
-        .offset({
-          x: OhosPlatformSplashView.splashBottomModule?.textChildren?.x,
-          y: OhosPlatformSplashView.splashBottomModule?.textChildren?.y
-        })
+      ForEach(OhosPlatformSplashView.splashBottomModule?.textChildrens ?? [], (item: SplashBottomTextChild) => {
+        Text(item?.text)
+          .fontColor(item?.color)
+          .fontSize(item?.fontSize)
+          .offset({
+            x: item?.x,
+            y: item?.y
+          })
+      })
+      ForEach(OhosPlatformSplashView.splashBottomModule?.imgChildrens ?? [], (imgItem: SplashBottomImageChild) => {
+        Image($rawfile(`flutter_assets/${imgItem.imagePath}`))
+          .width(imgItem?.width)
+          .height(imgItem?.height)
+          .offset({
+            x: imgItem?.x,
+            y: imgItem?.y
+          })
+      })
     }
     .backgroundColor(OhosPlatformSplashView.splashBottomModule?.backgroundColor)
     .height(OhosPlatformSplashView.splashBottomModule?.height)

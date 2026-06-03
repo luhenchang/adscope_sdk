@@ -4,47 +4,55 @@ import { AMPSBuildNativeView, AMPSNativeAdWrapper } from 'xyz.adscope.amps';
 import { AMPSEventManager } from '../common/AMPSEventManager';
 import { AMPSNativeCallBackChannelMethod } from '../common/common';
 import { AdWrapperManager } from '../native/AdWrapperManager';
-import { OhosPlatformNativeView } from './OhosPlatformNativeView';
+
+class NativeSizeUpdatePayload {
+  adInstanceId: string = ''
+  adId: string = ''
+  width: number = 0
+  height: number = 0
+}
 
 @Component
 export struct AMPSNativeAdComponent {
   @Prop params: Params
   @Prop adId: string
-  @Prop adInstanceId: string
-  @State customView: OhosPlatformNativeView = this.params.platformView as OhosPlatformNativeView
+  @Prop instanceId: string
   @State wrapper: AMPSNativeAdWrapper | undefined = undefined
   @State closeAd: boolean = false
+
   aboutToAppear(): void {
     this.wrapper = AdWrapperManager.getInstance().getAd(this.adId)
   }
 
+  private sendSizeUpdate(width: number, height: number): void {
+    const payload = new NativeSizeUpdatePayload()
+    payload.adInstanceId = this.instanceId
+    payload.adId = this.adId
+    payload.width = width
+    payload.height = height
+    AMPSEventManager.getInstance().sendMessageToFlutter(
+      AMPSNativeCallBackChannelMethod.nativeSizeUpdate,
+      payload as ESObject
+    )
+  }
+
   build() {
     if (this.wrapper && !this.closeAd)
-    Column() {
       Column() {
-
-        AMPSBuildNativeView(this.wrapper)
-      }.onAreaChange((oldValue, size) => {
-
-        if (size.width && size.width > 10 && size.height && size.height > 10) {
-          if (oldValue.height as number == (size.height as number)) {
-            return
+        Column() {
+          AMPSBuildNativeView(this.wrapper)
+        }.onAreaChange((oldValue, size) => {
+          if (size.width && size.width > 10 && size.height && size.height > 10) {
+            if (Math.floor(oldValue.height as number) < Math.floor(size.height as number)) {
+              this.sendSizeUpdate(size.width as number, size.height as number)
+            }
           }
-          let map: Map<string, Any> = new Map()
-          map.set("adId", this.adId)
-          map.set("adInstanceId", this.adInstanceId)
-          map.set("width", size.width as number)
-          map.set("height", size.height as number)
-          console.log("nativeSizeUpdate-w:" + size.width + "h:" + size.height)
-          AMPSEventManager.getInstance().sendMessageToFlutter(AMPSNativeCallBackChannelMethod.nativeSizeUpdate, map)
-        }
-      })
-      .backgroundColor(Color.Green)
-    }
-    .alignItems(HorizontalAlign.Center)
-    .justifyContent(FlexAlign.Center)
-    .direction(Direction.Ltr)
-    .height("100%")
-    .width("100%")
+        })
+      }
+      .alignItems(HorizontalAlign.Center)
+      .justifyContent(FlexAlign.Center)
+      .direction(Direction.Ltr)
+      .height("100%")
+      .width("100%")
   }
 }

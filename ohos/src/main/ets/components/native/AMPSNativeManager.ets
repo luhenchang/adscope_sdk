@@ -1,16 +1,14 @@
-import {
-  Any, MethodCall, MethodResult
-} from '@ohos/flutter_ohos';
+import { MethodCall, MethodResult } from '@ohos/flutter_ohos';
 import {
   ampsAd,
   AMPSNativeAd,
   AMPSNativeAdListener,
-  AMPSAdVideoPlayConfig,
   AMPSNativeAdWrapper,
   AMPSNativeInteractiveListener,
   AMPSNativeRenderListener
 } from 'xyz.adscope.amps';
 import {
+  AD_ID,
   AD_INSTANCE_ID,
   AMPSAdSdkMethodNames,
   AMPSNativeCallBackChannelMethod
@@ -20,17 +18,21 @@ import { window } from '@kit.ArkUI';
 import { AdWrapperManager } from '../native/AdWrapperManager';
 import { AMPSEventManager } from '../common/AMPSEventManager';
 
-class NativeSlot {
-  instanceId: string = '';
-  ad?: AMPSNativeAd;
-  adIds: Set<string> = new Set<string>();
+class NativeCallbackPayload {
+  adInstanceId: string = ''
+  adId?: string = undefined
+  adIds?: Array<string> = undefined
+  code?: number = undefined
+  message?: string = undefined
+  extra?: string = undefined
 }
 
 export class AMPSNativeManager {
   private static instance: AMPSNativeManager;
+  private static adIdCounter: number = 0
   private mWindowStage?: window.WindowStage;
-  private slots: Map<string, NativeSlot> = new Map();
-  private mVideoConfig?: AMPSAdVideoPlayConfig;
+  private nativeAds: Map<string, AMPSNativeAd> = new Map<string, AMPSNativeAd>()
+  private adIdsByInstance: Map<string, Array<string>> = new Map<string, Array<string>>()
 
   public static getInstance(): AMPSNativeManager {
     if (!AMPSNativeManager.instance) {
@@ -39,204 +41,289 @@ export class AMPSNativeManager {
     return AMPSNativeManager.instance;
   }
 
-  private extractInstanceId(args: Any): string | undefined {
-    if (args === null || args === undefined) {
-      return undefined;
-    }
-    const map = args as Record<string, Object>;
-    const id = map[AD_INSTANCE_ID];
-    return typeof id === 'string' ? id : undefined;
-  }
-
-  private getSlot(instanceId: string): NativeSlot | undefined {
-    return this.slots.get(instanceId);
-  }
-
-  private ensureSlot(instanceId: string): NativeSlot {
-    let slot = this.slots.get(instanceId);
-    if (!slot) {
-      slot = new NativeSlot();
-      slot.instanceId = instanceId;
-      this.slots.set(instanceId, slot);
-    }
-    return slot;
-  }
-
-  private cleanUp(instanceId: string): void {
-    const slot = this.slots.get(instanceId);
-    if (!slot) {
-      return;
-    }
-    slot.adIds.forEach((adId) => {
-      AdWrapperManager.getInstance().removeAd(adId);
-    });
-    slot.adIds.clear();
-    this.slots.delete(instanceId);
-  }
-
-  private buildInteractiveCallback(instanceId: string, slot: NativeSlot): AMPSNativeInteractiveListener {
-    return {
-      onAdShow: (adId?: string): void => {
-        this.sendMessage(instanceId, AMPSNativeCallBackChannelMethod.onAdShow, { adId });
-      },
-      onAdExposure: (adId?: string): void => {
-        this.sendMessage(instanceId, AMPSNativeCallBackChannelMethod.onAdExposure, { adId });
-      },
-      onAdClicked: (adId?: string): void => {
-        this.sendMessage(instanceId, AMPSNativeCallBackChannelMethod.onAdClicked, { adId });
-      },
-      toCloseAd: (adId?: string): void => {
-        if (adId) {
-          AdWrapperManager.getInstance().removeAd(adId);
-          slot.adIds.delete(adId);
-          this.sendMessage(instanceId, AMPSNativeCallBackChannelMethod.onAdClosed, { adId });
-        }
-      }
-    };
-  }
-
-  private buildRenderCallback(instanceId: string, slot: NativeSlot): AMPSNativeRenderListener {
-    return {
-      renderSuccess: (adWrapper: AMPSNativeAdWrapper): void => {
-        this.sendMessage(instanceId, AMPSNativeCallBackChannelMethod.renderSuccess, { adId: adWrapper.adId });
-        adWrapper.interactCallBack = this.buildInteractiveCallback(instanceId, slot);
-        adWrapper.videoPlayCallBack = {
-          onVideoReady: () => {
-            this.sendMessage(instanceId, AMPSNativeCallBackChannelMethod.onVideoReady, { adId: adWrapper.adId });
-          },
-          onVideoPlayStart: () => {
-            this.sendMessage(instanceId, AMPSNativeCallBackChannelMethod.onVideoPlayStart, { adId: adWrapper.adId });
-          },
-          onVideoPause: () => {
-            this.sendMessage(instanceId, AMPSNativeCallBackChannelMethod.onVideoPause, { adId: adWrapper.adId });
-          },
-          onVideoResume: () => {
-            this.sendMessage(instanceId, AMPSNativeCallBackChannelMethod.onVideoResume, { adId: adWrapper.adId });
-          },
-          onVideoPlayComplete: () => {
-            this.sendMessage(instanceId, AMPSNativeCallBackChannelMethod.onVideoPlayComplete, { adId: adWrapper.adId });
-          },
-          onVideoPlayError: (code, extra) => {
-            this.sendMessage(instanceId, AMPSNativeCallBackChannelMethod.onVideoPlayError, { adId: adWrapper.adId, code, extra });
-          }
-        };
-        slot.adIds.add(adWrapper.adId);
-        AdWrapperManager.getInstance().addAd(adWrapper);
-      },
-      renderFailed: (adWrapper: AMPSNativeAdWrapper): void => {
-        this.sendMessage(instanceId, AMPSNativeCallBackChannelMethod.renderFailed, { adId: adWrapper.adId });
-      }
-    };
-  }
-
-  private buildLoadCallback(instanceId: string, slot: NativeSlot): AMPSNativeAdListener {
-    const renderCb = this.buildRenderCallback(instanceId, slot);
-    return {
-      loadOk: (adItems: AMPSNativeAdWrapper[]): void => {
-        const adIdList: string[] = adItems.map((ad) => ad.adId);
-        this.sendMessage(instanceId, AMPSNativeCallBackChannelMethod.loadOk, { adIds: adIdList });
-        adItems.forEach((item) => {
-          item.renderCallBack = renderCb;
-          item.renderAd();
-        });
-      },
-      loadFail: (code: number, message: string): void => {
-        this.sendMessage(instanceId, AMPSNativeCallBackChannelMethod.loadFail, { code, message });
-      }
-    };
-  }
-
   handleMethodCall(call: MethodCall, result: MethodResult) {
-    const instanceId = this.extractInstanceId(call.args);
+    const args = this.argsAsMap(call.args as Object | undefined)
+    const instanceId = this.extractInstanceId(args)
     switch (call.method) {
       case AMPSAdSdkMethodNames.nativeCreate:
-        this.handleCreate(call, result);
-        break;
+        this.handleCreate(call, result)
+        break
       case AMPSAdSdkMethodNames.nativeLoad:
-        if (!instanceId) {
-          result.error('INVALID_ARGS', 'adInstanceId is required', undefined);
-          return;
+        {
+          const requiredInstanceId = this.requireInstanceId(instanceId, result)
+          if (!requiredInstanceId) {
+            return
+          }
+          this.handleLoadAd(requiredInstanceId, result)
         }
-        this.handleLoadAd(instanceId, result);
         break;
       case AMPSAdSdkMethodNames.nativeGetECPM:
-        result.success(this.getAdWrapper(call.args)?.getECPM() ?? 0);
+        result.success(this.getAdWrapper(args)?.getECPM() ?? 0)
+        break;
+      case AMPSAdSdkMethodNames.nativePattern:
+      case AMPSAdSdkMethodNames.nativeUnifiedMaterialType:
+        result.success(this.getUnifiedPattern(this.getAdWrapper(args)))
         break;
       case AMPSAdSdkMethodNames.nativeIsReadyAd:
-        result.success(this.getSlot(instanceId ?? '')?.ad?.isReadyAd() ?? false);
+        result.success(instanceId ? (this.nativeAds.get(instanceId)?.isReadyAd() ?? false) : false)
         break;
       case AMPSAdSdkMethodNames.nativeIsNativeExpress:
-        result.success(this.getAdWrapper(call.args)?.isNativeExpress() ?? false);
+        result.success(this.getAdWrapper(args)?.isNativeExpress() ?? false)
         break;
       case AMPSAdSdkMethodNames.nativeGetVideoDuration:
-        result.success(this.getAdWrapper(call.args)?.getVideoDuration() ?? 0);
+        result.success(this.getAdWrapper(args)?.getVideoDuration() ?? 0)
+        break;
+      case AMPSAdSdkMethodNames.nativeUnifiedGetDownLoad:
+        result.success(null)
+        break;
+      case AMPSAdSdkMethodNames.nativeGetMediaExtraInfo:
+        result.success(null)
         break;
       case AMPSAdSdkMethodNames.nativeDestroy:
-        if (instanceId) {
-          this.cleanUp(instanceId);
+        {
+          const requiredInstanceId = this.requireInstanceId(instanceId, result)
+          if (!requiredInstanceId) {
+            return
+          }
+          this.releaseNativeAd(requiredInstanceId)
         }
-        result.success(null);
+        result.success(null)
         break;
       case AMPSAdSdkMethodNames.nativeResume:
+        result.success(null)
+        break;
       case AMPSAdSdkMethodNames.nativePause:
-        result.success(null);
+        result.success(null)
         break;
       default:
         result.success(null);
     }
   }
 
-  private getAdWrapper(arg: ESObject): AMPSNativeAdWrapper | undefined {
-    const map = arg as Record<string, Object>;
-    const targetAdId = map['adId'] as string;
-    return AdWrapperManager.getInstance().getAd(targetAdId);
+  private argsAsMap(args: Object | undefined): Map<string, Object> | undefined {
+    return args as Map<string, Object> | undefined
+  }
+
+  private extractInstanceId(args: Map<string, Object> | undefined): string | undefined {
+    return args?.get(AD_INSTANCE_ID) as string | undefined
+  }
+
+  private requireInstanceId(instanceId: string | undefined, result: MethodResult): string | undefined {
+    if (!instanceId) {
+      result.error('INVALID_ARGS', 'adInstanceId is required', undefined)
+      return undefined
+    }
+    return instanceId
+  }
+
+  private getAdWrapper(args: Map<string, Object> | undefined): AMPSNativeAdWrapper | undefined {
+    const targetAdId = args?.get(AD_ID) as string | undefined
+    if (!targetAdId) {
+      return undefined
+    }
+    return AdWrapperManager.getInstance().getAd(targetAdId)
+  }
+
+  private generateAdId(instanceId: string): string {
+    AMPSNativeManager.adIdCounter += 1
+    return `${instanceId}_${AMPSNativeManager.adIdCounter}_${Date.now()}`
+  }
+
+  private createPayload(instanceId: string): NativeCallbackPayload {
+    const payload = new NativeCallbackPayload()
+    payload.adInstanceId = instanceId
+    return payload
+  }
+
+  private createAdPayload(instanceId: string, adId: string): NativeCallbackPayload {
+    const payload = this.createPayload(instanceId)
+    payload.adId = adId
+    return payload
+  }
+
+  private createAdIdsPayload(instanceId: string, adIds: Array<string>): NativeCallbackPayload {
+    const payload = this.createPayload(instanceId)
+    payload.adIds = adIds
+    return payload
+  }
+
+  private createErrorPayload(instanceId: string, code: number, message: string): NativeCallbackPayload {
+    const payload = this.createPayload(instanceId)
+    payload.code = code
+    payload.message = message
+    return payload
+  }
+
+  private createAdErrorPayload(instanceId: string, adId: string, code?: number, message?: string, extra?: string): NativeCallbackPayload {
+    const payload = this.createAdPayload(instanceId, adId)
+    payload.code = code
+    payload.message = message
+    payload.extra = extra
+    return payload
+  }
+
+  private clearWrapperByAdId(adId: string): void {
+    AdWrapperManager.getInstance().getAd(adId)?.destroy()
+    AdWrapperManager.getInstance().removeAd(adId)
+  }
+
+  private clearInstanceWrappers(instanceId: string): void {
+    const adIds = this.adIdsByInstance.get(instanceId)
+    if (!adIds) {
+      return
+    }
+    adIds.forEach((adId: string) => {
+      this.clearWrapperByAdId(adId)
+    })
+    this.adIdsByInstance.delete(instanceId)
+  }
+
+  private removeInstanceAdId(instanceId: string, adId: string): void {
+    const adIds = this.adIdsByInstance.get(instanceId)
+    if (!adIds) {
+      return
+    }
+    const nextAdIds = adIds.filter((item: string) => item !== adId)
+    if (nextAdIds.length === 0) {
+      this.adIdsByInstance.delete(instanceId)
+    } else {
+      this.adIdsByInstance.set(instanceId, nextAdIds)
+    }
+  }
+
+  private releaseNativeAd(instanceId: string): void {
+    this.clearInstanceWrappers(instanceId)
+    this.nativeAds.delete(instanceId)
+  }
+
+  private getUnifiedPattern(wrapper?: AMPSNativeAdWrapper): number {
+    if (!wrapper) {
+      return 3
+    }
+    if (wrapper.getVideoUrl()) {
+      return 2
+    }
+    return 0
+  }
+
+  private createInteractiveCallback(instanceId: string, adId: string): AMPSNativeInteractiveListener {
+    return {
+      onAdShow: (): void => {
+        this.sendPayload(AMPSNativeCallBackChannelMethod.onAdShow, this.createAdPayload(instanceId, adId))
+      },
+      onAdExposure: (): void => {
+        this.sendPayload(AMPSNativeCallBackChannelMethod.onAdExposure, this.createAdPayload(instanceId, adId))
+      },
+      onAdClicked: (): void => {
+        this.sendPayload(AMPSNativeCallBackChannelMethod.onAdClicked, this.createAdPayload(instanceId, adId))
+      },
+      toCloseAd: (): void => {
+        this.clearWrapperByAdId(adId)
+        this.removeInstanceAdId(instanceId, adId)
+        this.sendPayload(AMPSNativeCallBackChannelMethod.onAdClosed, this.createAdPayload(instanceId, adId))
+      }
+    }
+  }
+
+  private createRenderCallback(instanceId: string, adId: string): AMPSNativeRenderListener {
+    return {
+      renderSuccess: (adWrapper: AMPSNativeAdWrapper): void => {
+        AdWrapperManager.getInstance().addAd(adId, adWrapper)
+        adWrapper.interactCallBack = this.createInteractiveCallback(instanceId, adId)
+        adWrapper.videoPlayCallBack = {
+          onVideoReady: () => {
+            this.sendPayload(AMPSNativeCallBackChannelMethod.onVideoReady, this.createAdPayload(instanceId, adId))
+          },
+          onVideoPlayStart: () => {
+            this.sendPayload(AMPSNativeCallBackChannelMethod.onVideoPlayStart, this.createAdPayload(instanceId, adId))
+          },
+          onVideoPlayComplete: () => {
+            this.sendPayload(AMPSNativeCallBackChannelMethod.onVideoPlayComplete, this.createAdPayload(instanceId, adId))
+          },
+          onVideoPause: () => {
+            this.sendPayload(AMPSNativeCallBackChannelMethod.onVideoPause, this.createAdPayload(instanceId, adId))
+          },
+          onVideoResume: () => {
+            this.sendPayload(AMPSNativeCallBackChannelMethod.onVideoResume, this.createAdPayload(instanceId, adId))
+          },
+          onVideoPlayError: (code: number, extra: string) => {
+            this.sendPayload(
+              AMPSNativeCallBackChannelMethod.onVideoPlayError,
+              this.createAdErrorPayload(instanceId, adId, code, undefined, extra)
+            )
+          }
+        }
+        this.sendPayload(AMPSNativeCallBackChannelMethod.renderSuccess, this.createAdPayload(instanceId, adId))
+      },
+      renderFailed: (): void => {
+        this.sendPayload(AMPSNativeCallBackChannelMethod.renderFailed, this.createAdPayload(instanceId, adId))
+      }
+    }
+  }
+
+  private createLoadCallback(instanceId: string): AMPSNativeAdListener {
+    return {
+      loadOk: (adItems: AMPSNativeAdWrapper[]): void => {
+        this.clearInstanceWrappers(instanceId)
+        const adIdList: Array<string> = []
+        adItems.forEach((item: AMPSNativeAdWrapper) => {
+          const adId = this.generateAdId(instanceId)
+          adIdList.push(adId)
+          AdWrapperManager.getInstance().addAd(adId, item)
+          item.renderCallBack = this.createRenderCallback(instanceId, adId)
+          item.renderAd()
+        })
+        this.adIdsByInstance.set(instanceId, adIdList)
+        this.sendPayload(AMPSNativeCallBackChannelMethod.loadOk, this.createAdIdsPayload(instanceId, adIdList))
+      },
+      loadFail: (code: number, message: string): void => {
+        this.sendPayload(AMPSNativeCallBackChannelMethod.loadFail, this.createErrorPayload(instanceId, code, message))
+      }
+    }
   }
 
   private handleCreate(call: MethodCall, result: MethodResult): void {
     try {
-      const instanceId = this.extractInstanceId(call.args);
-      if (!instanceId) {
-        result.error('INVALID_ARGS', 'adInstanceId is required', undefined);
-        return;
+      const args = this.argsAsMap(call.args as Object | undefined)
+      const instanceId = this.extractInstanceId(args)
+      if (!args || !instanceId) {
+        result.error('INVALID_ARGS', 'adInstanceId is required', undefined)
+        return
       }
-      const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(call.args);
-      const context = AMPSEventManager.getInstance().getContext();
-      this.mWindowStage = context?.windowStage;
+      const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(args)
+      const context = AMPSEventManager.getInstance().getContext()
+      this.mWindowStage = context?.windowStage
       if (!this.mWindowStage) {
-        result.error('LOAD_FAILED', 'WindowStage未初始化', undefined);
-        return;
+        result.error('LOAD_FAILED', 'WindowStage未初始化', undefined)
+        return
       }
-      const mWindow = this.mWindowStage.getMainWindowSync();
-      if (!mWindow) {
-        result.error('LOAD_FAILED', '获取窗口或UI上下文失败', undefined);
-        return;
-      }
-      const slot = this.ensureSlot(instanceId);
-      slot.ad = new AMPSNativeAd(mWindow.getUIContext(), adOption, this.buildLoadCallback(instanceId, slot));
-      result.success(true);
+      const mWindow = this.mWindowStage.getMainWindowSync()
+      this.releaseNativeAd(instanceId)
+      this.nativeAds.set(instanceId, new AMPSNativeAd(mWindow.getUIContext(), adOption, this.createLoadCallback(instanceId)))
     } catch (error) {
-      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
+      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined)
+      return
     }
+    result.success(true)
   }
 
   private handleLoadAd(instanceId: string, result: MethodResult): void {
     try {
-      this.getSlot(instanceId)?.ad?.load();
-      result.success(true);
+      const nativeAd = this.nativeAds.get(instanceId)
+      if (!nativeAd) {
+        result.error('LOAD_FAILED', `Native ad instance not found: ${instanceId}`, undefined)
+        return
+      }
+      nativeAd.load()
     } catch (error) {
-      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined);
+      result.error('LOAD_EXCEPTION', `加载广告异常: ${error instanceof Error ? error.message : error}`, undefined)
+      return
     }
+    result.success(true)
   }
 
-  public sendMessage(instanceId: string, method: string, args?: Any) {
-    const payload: Record<string, Object> = {};
-    payload[AD_INSTANCE_ID] = instanceId;
-    if (args !== null && args !== undefined) {
-      const extra = args as Record<string, Object>;
-      Object.keys(extra).forEach((key: string) => {
-        payload[key] = extra[key];
-      });
-    }
-    AMPSEventManager.getInstance().sendMessageToFlutter(method, payload);
+  private sendPayload(method: string, payload: NativeCallbackPayload): void {
+    AMPSEventManager.getInstance().sendMessageToFlutter(method, payload as ESObject)
   }
 }
+

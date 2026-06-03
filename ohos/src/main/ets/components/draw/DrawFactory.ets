@@ -1,4 +1,3 @@
-
 import common from '@ohos.app.ability.common';
 import MessageCodec from '@ohos/flutter_ohos/src/main/ets/plugin/common/MessageCodec';
 import PlatformViewFactory from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformViewFactory';
@@ -6,8 +5,7 @@ import { BinaryMessenger } from '@ohos/flutter_ohos/src/main/ets/plugin/common/B
 import PlatformView from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformView';
 import { OhosPlatformDrawView } from './OhosPlatformDrawView';
 
-export class DrawFactory extends  PlatformViewFactory {
-
+export class DrawFactory extends PlatformViewFactory {
   message: BinaryMessenger;
 
   constructor(message: BinaryMessenger, createArgsCodes: MessageCodec<Object>) {
@@ -16,10 +14,6 @@ export class DrawFactory extends  PlatformViewFactory {
   }
 
   public create(context: common.Context, viewId: number, args: Object): PlatformView {
-    let adID = (args as Map<string, string>).get("adId")
-    let instanceId = (args as Map<string, string>).get("adInstanceId")
-    OhosPlatformDrawView.adId = adID
-    OhosPlatformDrawView.adInstanceId = instanceId
-    return new OhosPlatformDrawView();
+    return new OhosPlatformDrawView(args as ESObject);
   }
 }

@@ -1,5 +1,3 @@
-
-
 import common from '@ohos.app.ability.common';
 import MessageCodec from '@ohos/flutter_ohos/src/main/ets/plugin/common/MessageCodec';
 import PlatformViewFactory from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformViewFactory';
@@ -16,6 +14,6 @@ export class BannerFactory extends PlatformViewFactory {
   }
 
   public create(context: common.Context, viewId: number, args: Object): PlatformView {
-    return new OhosPlatformBannerView();
+    return new OhosPlatformBannerView(args as ESObject);
   }
 }
