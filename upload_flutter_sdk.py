@@ -20,7 +20,7 @@ from pathlib import Path
 from urllib import error, request
 
 
-UPLOAD_URL = "http://m-new-test.adscope.com.cn/api/product/mediation/sdk/upload/flutter"
+UPLOAD_URL = "https://m-new.adscope.com.cn/api/product/mediation/sdk/upload/flutter"
 
 DEFAULT_FLUTTER_VERSIONS = [
     {

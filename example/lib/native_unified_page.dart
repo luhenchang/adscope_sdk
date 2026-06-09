@@ -307,6 +307,7 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
             x: 0,
             y: 28,
             backgroundColor: '#FFFFFF',
+            clickType: AMPSAdItemClickType.click
           ),
           UnifiedDescWidget(
             fontSize: 14,
