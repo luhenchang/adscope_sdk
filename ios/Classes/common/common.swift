@@ -203,6 +203,7 @@ enum AMPSAdSdkMethodNames {
     static let nativeGetVideoDuration = "AMPSNative_getVideoDuration"
     static let nativeSetVideoPlayConfig = "AMPSNative_setVideoPlayConfig"
     static let nativeGetUnifiedPattern = "AMPSNative_getUnifiedPattern"
+    static let nativeGetUnifiedImages = "AMPSNative_getUnifiedImages"
     static let nativeGetDownLoad  = "AMPSNative_getDownLoad"
     static let nativeDestroy = "AMPSNative_destroy"
     static let nativeResume = "AMPSNative_resume"
@@ -324,6 +325,7 @@ let nativeMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.nativeGetVideoDuration,
     AMPSAdSdkMethodNames.nativeSetVideoPlayConfig,
     AMPSAdSdkMethodNames.nativeGetUnifiedPattern,
+    AMPSAdSdkMethodNames.nativeGetUnifiedImages,
     AMPSAdSdkMethodNames.nativeGetDownLoad,
     AMPSAdSdkMethodNames.nativeDestroy,
     AMPSAdSdkMethodNames.nativeResume,

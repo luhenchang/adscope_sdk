@@ -37,6 +37,8 @@ struct FlutterUnifiedChild: Codable {
     var fontColor: String?
     var content: String?
     
+    var url: String?
+    var children: [FlutterUnifiedChild]?
     
     
     
@@ -44,6 +46,7 @@ struct FlutterUnifiedChild: Codable {
 
 enum FlutterUnifiedChildType:String,Codable {
     case mainImage //= "mainImage"
+    case imagesChild
     case mainTitle //= "mainTitle"
     case descText
     case actionButton
