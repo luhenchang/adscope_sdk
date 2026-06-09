@@ -83,6 +83,12 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
             }
         }
 
+        module.imagesChild?.let { images ->
+            createImagesViews(images, unifiedItem).forEach { view ->
+                addView(view)
+            }
+        }
+
         module.videoChild?.let { child ->
             unifiedItem.videoUrl?.let { _ ->
                 addView(createVideoChild(child, unifiedItem, adId))
@@ -201,6 +207,38 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
                 } catch (_: IllegalArgumentException) { /* 忽略错误 */
                 }
             }
+        }
+    }
+
+    private fun createImagesViews(
+        images: Array<NativeUnifiedChild.Image>,
+        unifiedItem: AMPSUnifiedNativeItem
+    ): List<View> {
+        val fallbackUrls = unifiedItem.imagesUrl?.filter { !it.isNullOrBlank() } ?: emptyList()
+        return images.mapIndexedNotNull { index, child ->
+            val imageUrl = child.url?.takeIf { !it.isBlank() }
+                ?: fallbackUrls.getOrNull(index)
+                ?: return@mapIndexedNotNull null
+            createConfiguredImageView(child, imageUrl)
+        }
+    }
+
+    private fun createConfiguredImageView(
+        child: NativeUnifiedChild.Image,
+        imageUrl: String
+    ): AppCompatImageView {
+        return AppCompatImageView(context).apply {
+            layoutParams = createLayoutParams(child.width, child.height, child.x, child.y)
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            child.backgroundColor?.let { bgColor ->
+                try {
+                    setBackgroundColor(bgColor.toColorInt())
+                } catch (_: IllegalArgumentException) {
+                }
+            }
+            setupClickListener(this, child.clickType, child.clickIdType)
+            ImageLoader().loadImage(this, imageUrl)
+            Log.d(TAG, "load imagesChild url=$imageUrl")
         }
     }
 

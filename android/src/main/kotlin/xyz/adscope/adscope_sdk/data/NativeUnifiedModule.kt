@@ -2,6 +2,7 @@ package xyz.adscope.adscope_sdk.data
 
 import android.util.Log
 import java.io.Serializable
+import kotlin.collections.emptyList
 import kotlin.collections.get
 
 //自渲染View结构类
@@ -14,6 +15,17 @@ sealed class NativeUnifiedChild : Serializable {
     data class MainImage(
         override val x: Double? = null,
         override val y: Double? = null,
+        val clickType: Int? = null,
+        val clickIdType: Int? = null,
+        val width: Double? = null,
+        val height: Double? = null,
+        val backgroundColor: String? = null
+    ) : NativeUnifiedChild()
+
+    data class Image (
+        override val x: Double? = null,
+        override val y: Double? = null,
+        val url: String? = null,
         val clickType: Int? = null,
         val clickIdType: Int? = null,
         val width: Double? = null,
@@ -143,6 +155,8 @@ sealed class NativeUnifiedChild : Serializable {
 class NativeUnifiedModule(map: Map<String, Any>?) : Serializable {
      var mainImageChild: NativeUnifiedChild.MainImage? = null
         private set
+     var imagesChild: Array<NativeUnifiedChild.Image>? = null
+         private set
      var titleChild: NativeUnifiedChild.Title? = null
         private set
      var descriptionChild: NativeUnifiedChild.Description? = null
@@ -194,6 +208,7 @@ class NativeUnifiedModule(map: Map<String, Any>?) : Serializable {
             // 使用 when 语句根据 type 创建对应的 data class 实例
             when (childMap["type"] as? String) {
                 "mainImage" -> mainImageChild = createMainImageChild(childMap)
+                "imagesChild" -> imagesChild = createImagesChild(childMap)
                 "mainTitle" -> titleChild = createTitleChild(childMap)
                 "descText" -> descriptionChild = createDescriptionChild(childMap)
                 "actionButton" -> actionButtonChild = createActionButtonChild(childMap)
@@ -227,6 +242,22 @@ class NativeUnifiedModule(map: Map<String, Any>?) : Serializable {
             height = map["height"].asDouble(),
             backgroundColor = map["backgroundColor"].asString()
         )
+    }
+
+    private fun createImagesChild(map: Map<*, *>): Array<NativeUnifiedChild.Image> {
+        val children = map["children"] as? List<Map<*, *>> ?: emptyList()
+        return children.map { child ->
+            NativeUnifiedChild.Image(
+                x = child["x"].asDouble(),
+                y = child["y"].asDouble(),
+                url = child["url"].asString(),
+                clickType = child["clickType"].asInt(),
+                clickIdType = child["clickIdType"].asInt(),
+                width = child["width"].asDouble(),
+                height = child["height"].asDouble(),
+                backgroundColor = child["backgroundColor"].asString()
+            )
+        }.toTypedArray()
     }
 
     private fun createTitleChild(map: Map<*, *>): NativeUnifiedChild.Title {

@@ -59,6 +59,62 @@ class UnifiedMainImgWidget extends LayoutWidget {
     };
   }
 }
+
+/// 自渲染多图中的单张图片（对应 Android [NativeUnifiedChild.Image]）。
+class UnifiedImageItemWidget extends LayoutWidget {
+  /// 图片地址；留空时由原生侧按广告数据 [imagesUrl] 顺序兜底。
+  final String url;
+  final double width;
+  final double height;
+  final double x;
+  final double y;
+  final String backgroundColor;
+  AMPSAdItemClickType clickType;
+  AMPSAdItemClickIdType clickIdType;
+
+  UnifiedImageItemWidget({
+    this.url = '',
+    required this.width,
+    required this.height,
+    required this.x,
+    required this.y,
+    this.backgroundColor = '#FFFFFF',
+    this.clickType = AMPSAdItemClickType.none,
+    this.clickIdType = AMPSAdItemClickIdType.click,
+  });
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'url': url,
+      'width': width,
+      'height': height,
+      'x': x,
+      'y': y,
+      'backgroundColor': backgroundColor,
+      'clickType': clickType.value,
+      'clickIdType': clickIdType.value,
+    };
+  }
+}
+
+/// 自渲染多图容器（对应 Android type: imagesChild + children 列表）。
+///
+/// 每张图的位置、尺寸由业务方通过 [UnifiedImageItemWidget] 自行指定后传入 [children]。
+class UnifiedImagesWidget extends LayoutWidget {
+  final List<UnifiedImageItemWidget> children;
+
+  UnifiedImagesWidget({required this.children});
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'type': 'imagesChild',
+      'children': children.map((child) => child.toMap()).toList(),
+    };
+  }
+}
+
 ///自渲染点击类型
 enum AMPSAdItemClickType {
   none(-1),
