@@ -360,6 +360,16 @@ class AMPSNativeManager {
                 }
             }
 
+            AMPSAdSdkMethodNames.NATIVE_UNIFIED_IMAGES -> {
+                val adId = argsMap(call)?.get(AD_ID) as? String ?: ""
+                if (nativeTypeFrom(call) == NativeType.NATIVE.value) {
+                    result.success(null)
+                } else {
+                    val foundWrapper = AdUnifiedWrapperManager.getInstance().getAdItem(adId)
+                    result.success(foundWrapper?.imagesUrl)
+                }
+            }
+
             AMPSAdSdkMethodNames.NATIVE_UNIFIED_GET_DOWNLOAD -> {
                 val adId = argsMap(call)?.get(AD_ID) as? String ?: ""
                 if (nativeTypeFrom(call) == NativeType.NATIVE.value) {

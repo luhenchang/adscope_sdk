@@ -57,6 +57,14 @@ class AmpsIosUnifiedNativeManager: NSObject, AMPSUnifiedNativeManagerDelegate {
                 return
             }
             result(0)
+        case AMPSAdSdkMethodNames.nativeGetUnifiedImages:
+            if let adId = arguments["adId"] as? String, let view = getUnifiedNativeAdView(adId) {
+                let test =  [view.nativeAd.imageUrl,view.nativeAd.imageUrl]
+                let urls = view.nativeAd.imageUrls.compactMap { $0 as? String }
+                result(test)
+                return
+            }
+            result([])
         case AMPSAdSdkMethodNames.nativeIsNativeExpress:
             if let adId = arguments["adId"] as? String {
                 result(getUnifiedNativeAdView(adId)?.nativeAd.nativeMode == .nativeExpress)

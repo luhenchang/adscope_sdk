@@ -70,26 +70,45 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
             }){
                 adView.mediaView?.resetLayout(with: CGRect(x: videoModel.x ?? 0, y: videoModel.y ?? 0, width:  videoModel.width ?? adView.frame.width, height: videoModel.height ?? 150))
             }
-        } else if ad.imageUrls.count > 1 {
-            for i in 0..<ad.imageUrls.count {
-                let width = (adView.frame.width - 10 * CGFloat(ad.imageUrls.count - 1)) / CGFloat(ad.imageUrls.count)
-                let imgView = UIImageView(frame: CGRect(
-                    x: 10 + CGFloat(i) * width,
-                    y: 10,
-                    width: width,
-                    height: 150
+        } else if let imagesChildModel = model.unifiedWidget?.children?.first(where: { child in
+            child.type == .imagesChild
+        }) {
+            // 自渲染多图：遍历 children，每张图用独立 ImageView 展示
+            let imageModels = imagesChildModel.children ?? []
+            let fallbackUrls = ad.imageUrls.compactMap { $0 as? String }
+            for (index, imgModel) in imageModels.enumerated() {
+                let contain = fallbackUrls.contains { item  in
+                    return item == imgModel.url
+                }
+                if (!contain){
+                    continue
+                }
+                // 优先使用 Flutter 传入的 url，否则用广告数据兜底
+                let urlString = (imgModel.url != nil && !imgModel.url!.isEmpty) ? imgModel.url : (index < fallbackUrls.count ? fallbackUrls[index] : nil)
+                
+                guard let finalUrl = urlString, !finalUrl.isEmpty else { continue }
+                let imageView = UIImageView(frame: CGRect(
+                    x: imgModel.x ?? 0,
+                    y: imgModel.y ?? 0,
+                    width: imgModel.width ?? 100,
+                    height: imgModel.height ?? 100
                 ))
-                imgView.contentMode = .scaleAspectFit
-                if let urlString = ad.imageUrls[i] as? String, let _ = URL(string: urlString) {
-                    Tools.fetchImageData(from: urlString) { [weak imgView] result in
+                imageView.contentMode = .scaleAspectFill
+                imageView.clipsToBounds = true
+                if let bgColor = imgModel.backgroundColor {
+                    imageView.backgroundColor = UIColor(hexString: bgColor)
+                }
+                if let _ = URL(string: finalUrl) {
+                    Tools.fetchImageData(from: finalUrl) { [weak imageView] result in
                         if case let .success(data) = result {
-                            imgView?.image = UIImage(data: data)
+                            imageView?.image = UIImage(data: data)
                         }
                     }
-                   
                 }
-                adView.addSubview(imgView)
-                clickViews.append(imgView)
+                adView.addSubview(imageView)
+                if imgModel.clickType == 0 {
+                    clickViews.append(imageView)
+                }
             }
         } else if !ad.imageUrl.isEmpty {
             let imageUrl = ad.imageUrl
@@ -101,7 +120,9 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
                 if let bgColor = imgModel.backgroundColor{
                     imageView.backgroundColor = UIColor(hexString: bgColor)
                 }
-                
+                if imgModel.clickType == 0 {
+                    clickViews.append(imageView)
+                }
             }
             imageView.contentMode = .scaleAspectFit
             if let _ = URL(string: imageUrl) {
@@ -113,7 +134,6 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
             }
             
             adView.addSubview(imageView)
-            clickViews.append(imageView)
                              
         }
 
@@ -133,6 +153,10 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
                 }
             }
             adView.addSubview(adLogoImageView)
+            if imgModel.clickType == 0 {
+                clickViews.append(adLogoImageView)
+            }
+            
         }
         
         let iconImageView = UIImageView()
@@ -159,6 +183,9 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
                 }
             }
             adView.addSubview(iconImageView)
+            if imgModel.clickType == 0 {
+                clickViews.append(iconImageView)
+            }
         }
 
         // 创建标题Label
@@ -179,6 +206,9 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
                 titleLabel.textColor = UIColor(hexString: color)
             }
             adView.addSubview(titleLabel)
+            if imgModel.clickType == 0 {
+                clickViews.append(titleLabel)
+            }
         }
         
         // 创建描述Label
@@ -208,9 +238,10 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
                 descLabel.textColor = UIColor(hexString: color)
             }
             adView.addSubview(descLabel)
+            if imgModel.clickType == 0 {
+                clickViews.append(descLabel)
+            }
         }
-        
-        clickViews.append(contentsOf: [iconImageView,titleLabel,descLabel])
         // 注册可点击视图
         adView.registerClickableViews(clickViews)
     }

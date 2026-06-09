@@ -189,6 +189,7 @@ export class AMPSAdSdkMethodNames {
   static readonly nativeIsReadyAd = 'AMPSNative_isReadyAd';
   static readonly nativeIsNativeExpress = 'AMPSNative_isNativeExpress';
   static readonly nativePattern = 'AMPSNative_getUnifiedPattern';
+  static readonly nativeImages = 'AMPSNative_getUnifiedImages';
   static readonly nativeUnifiedMaterialType = "AMPSNative_materialType";
   static readonly nativeUnifiedGetDownLoad = "AMPSNative_getDownLoad";
   static readonly nativeGetVideoDuration = 'AMPSNative_getVideoDuration';
@@ -291,6 +292,7 @@ export let NativeMethodNames: string[] = [
   AMPSAdSdkMethodNames.nativeCreate,
   AMPSAdSdkMethodNames.nativeGetECPM,
   AMPSAdSdkMethodNames.nativePattern,
+  AMPSAdSdkMethodNames.nativeImages,
   AMPSAdSdkMethodNames.nativeUnifiedMaterialType,
   AMPSAdSdkMethodNames.nativeUnifiedGetDownLoad,
   AMPSAdSdkMethodNames.nativeGetMediaExtraInfo,

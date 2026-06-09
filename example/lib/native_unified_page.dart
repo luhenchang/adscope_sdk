@@ -20,10 +20,10 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
   final Map<String, String> _adIdToLabel = {};
   final Map<String, UnifiedAdDownloadAppInfo?> _downloadInfoByAdId = {};
   final Map<String, AMPSUnifiedPattern> _patternByAdId = {};
+  final Map<String, List<String>> _imagesByAdId = {};
 
   List<String> feedList = [];
   List<String> feedAdList = [];
-
   bool _sequentialMode = false;
   List<String> _pendingBAdIds = [];
 
@@ -59,15 +59,14 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
 
   AMPSNativeRenderListener _renderListenerFor(String label) {
     return AMPSNativeRenderListener(
-      renderSuccess: (adId) {
+      renderSuccess: (adId) async {
         debugPrint('[$label] unified renderSuccess adId=$adId');
         final ad = _nativeAds[label];
-        ad?.getUnifiedPattern(adId).then((pattern) {
-          if (!mounted) return;
-          setState(() {
-            _patternByAdId[adId] = pattern;
-          });
-        });
+        final pattern =
+            await ad?.getUnifiedPattern(adId) ?? AMPSUnifiedPattern.adPatternUnknown;
+        final images = await ad?.getUnifiedImages(adId) ?? const <String>[];
+        if (!mounted) return;
+        debugPrint('[$label] unified pattern=$pattern images=$images');
         ad?.getDownLoadInfo(adId).then((info) {
           if (!mounted) return;
           setState(() {
@@ -80,11 +79,19 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
           final aAdIds = _adIdsByLabel['A'] ?? const <String>[];
           final aHasShown = aAdIds.any(feedAdList.contains);
           if (aHasShown) {
-            _pendingBAdIds.add(adId);
+            setState(() {
+              _patternByAdId[adId] = pattern;
+              _imagesByAdId[adId] = images;
+              _pendingBAdIds.add(adId);
+            });
             return;
           }
         }
-        setState(() => feedAdList.add(adId));
+        setState(() {
+          _patternByAdId[adId] = pattern;
+          _imagesByAdId[adId] = images;
+          feedAdList.add(adId);
+        });
       },
       renderFailed: (adId, code, message) {
         debugPrint('[$label] unified renderFailed=$code, $message');
@@ -113,6 +120,7 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
     _adIdToLabel.remove(adId);
     _downloadInfoByAdId.remove(adId);
     _patternByAdId.remove(adId);
+    _imagesByAdId.remove(adId);
     if (_sequentialMode && label == 'A') {
       final remaining = _adIdsByLabel['A'] ?? const <String>[];
       final aStillVisible = remaining.any(feedAdList.contains);
@@ -154,6 +162,7 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
     _adIdToLabel.clear();
     _downloadInfoByAdId.clear();
     _patternByAdId.clear();
+    _imagesByAdId.clear();
     _pendingBAdIds = [];
     setState(() => feedAdList.clear());
   }
@@ -209,6 +218,7 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
                   final label = _adIdToLabel[adId] ?? '?';
                   final nativeAd = _nativeAds[label];
                   final pattern = _patternByAdId[adId] ?? AMPSUnifiedPattern.adPatternUnknown;
+                  final images = _imagesByAdId[adId] ?? const <String>[];
                   final downloadInfo = _downloadInfoByAdId[adId];
                   return Column(
                     children: [
@@ -221,13 +231,17 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
                             UnifiedWidget(
                               nativeAd,
                               mInteractiveCallBack: _interactiveListenerFor(label),
-                              key: ValueKey(adId),
+                              key: ValueKey('$adId-${pattern.value}-${images.length}'),
                               adId: adId,
                               unifiedContent: NativeUnifiedWidget(
                                 width: expressWidth,
                                 height: expressHeight,
                                 backgroundColor: '#80F7FF',
-                                children: _getChildrenByType(pattern.value),
+                                children: _getChildrenByType(
+                                  pattern.value,
+                                  adId: adId,
+                                  imageUrls: images,
+                                ),
                               ),
                             ),
                             Positioned(
@@ -295,8 +309,36 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
     );
   }
 
-  List<LayoutWidget> _getChildrenByType(int type) {
-    debugPrint("type=$type");
+  /// 三图样式：由业务方按设计稿自行定义每张图的 url 与 x/y/width/height。
+  List<UnifiedImageItemWidget> _buildCustomImageItems(List<String> imageUrls) {
+    const layouts = <({double x, double y, double width, double height})>[
+      (x: 0, y: 28, width: 110, height: 120),
+      (x: 120, y: 28, width: 110, height: 120),
+      (x: 240, y: 28, width: 110, height: 120),
+    ];
+    final items = <UnifiedImageItemWidget>[];
+    for (var i = 0; i < imageUrls.length && i < layouts.length; i++) {
+      final slot = layouts[i];
+      items.add(
+        UnifiedImageItemWidget(
+          url: imageUrls[i],
+          x: slot.x,
+          y: slot.y,
+          width: slot.width,
+          height: slot.height,
+          backgroundColor: '#FFFFFF',
+        ),
+      );
+    }
+    return items;
+  }
+
+  List<LayoutWidget> _getChildrenByType(
+    int type, {
+    String? adId,
+    List<String> imageUrls = const [],
+  }) {
+    debugPrint('type=$type adId=$adId imageUrls=$imageUrls');
     switch (type) {
       case 0:
         return [
@@ -307,6 +349,7 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
             x: 0,
             y: 28,
             backgroundColor: '#FFFFFF',
+            clickType: AMPSAdItemClickType.click
           ),
           UnifiedDescWidget(
             fontSize: 14,
@@ -357,12 +400,8 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
       case 1:
         return [
           UnifiedTitleWidget(fontSize: 18, color: "#1D2129", x: 2, y: 3),
-          UnifiedMainImgWidget(
-            width: expressWidth,
-            height: expressHeight - 60,
-            x: 0,
-            y: 28,
-            backgroundColor: '#FFFFFF',
+          UnifiedImagesWidget(
+            children: _buildCustomImageItems(imageUrls),
           ),
           ShakeWidget(width: 100, height: 100, x: 100, y: 50),
           UnifiedDescWidget(

@@ -197,9 +197,10 @@ object AMPSAdSdkMethodNames {
     const val NATIVE_SIZE_UPDATE = "AMPSNative_SizeUpdate"
     const val NATIVE_PATTERN = "AMPSNative_getUnifiedPattern";
     const val NATIVE_GET_ECPM = "AMPSNative_getECPM"
-const val NATIVE_GET_SEAT_ID = "AMPSNative_getSeatId"
+    const val NATIVE_GET_SEAT_ID = "AMPSNative_getSeatId"
     const val NATIVE_IS_READY_AD = "AMPSNative_isReadyAd"
     const val NATIVE_IS_NATIVE_EXPRESS = "AMPSNative_isNativeExpress"
+    const val NATIVE_UNIFIED_IMAGES = "AMPSNative_getUnifiedImages"
     const val NATIVE_UNIFIED_MATERIAL_TYPE = "AMPSNative_materialType"
     const val NATIVE_UNIFIED_GET_DOWNLOAD = "AMPSNative_getDownLoad"
     const val NATIVE_RESUME = "AMPSNative_resume"
@@ -214,7 +215,7 @@ const val NATIVE_GET_SEAT_ID = "AMPSNative_getSeatId"
     const val REWARDED_VIDEO_SHOW_AD = "AMPSRewardVideo_showAd"
     const val REWARDED_VIDEO_DESTROY_AD = "AMPSRewardVideo_destroy"
     const val REWARDED_VIDEO_GET_ECPM = "AMPSRewardVideo_getECPM"
-const val REWARDED_VIDEO_GET_SEAT_ID = "AMPSRewardVideo_getSeatId"
+    const val REWARDED_VIDEO_GET_SEAT_ID = "AMPSRewardVideo_getSeatId"
     const val REWARDED_VIDEO_IS_READY_AD = "AMPSRewardVideo_isReadyAd"
     const val REWARDED_VIDEO_ADD_PRE_LOAD_AD_INFO = "AMPSRewardVideo_addPreLoadAdInfo"
     const val REWARDED_VIDEO_GET_MEDIA_EXTRA_INFO = "AMPSRewardVideo_getMediaExtraInfo"
@@ -225,7 +226,7 @@ const val REWARDED_VIDEO_GET_SEAT_ID = "AMPSRewardVideo_getSeatId"
     const val BANNER_PRE_LOAD = "AMPSBanner_preLoad"
     const val BANNER_SHOW_AD = "AMPSBanner_showAd"
     const val BANNER_GET_ECPM = "AMPSBanner_getECPM"
-const val BANNER_GET_SEAT_ID = "AMPSBanner_getSeatId"
+    const val BANNER_GET_SEAT_ID = "AMPSBanner_getSeatId"
     const val BANNER_IS_READY_AD = "AMPSBanner_isReadyAd"
     const val BANNER_DESTROY_AD = "AMPSBanner_destroy"
     const val BANNER_ADD_PRE_LOAD_AD_INFO = "AMPSBanner_addPreLoadAdInfo"
@@ -235,7 +236,7 @@ const val BANNER_GET_SEAT_ID = "AMPSBanner_getSeatId"
     const val DRAW_CREATE = "AMPSDraw_create"
     const val DRAW_LOAD = "AMPSDraw_load"
     const val DRAW_GET_ECPM = "AMPSDraw_getECPM"
-const val DRAW_GET_SEAT_ID = "AMPSDraw_getSeatId"
+    const val DRAW_GET_SEAT_ID = "AMPSDraw_getSeatId"
     const val DRAW_IS_READY_AD = "AMPSDraw_isReadyAd"
     const val DRAW_DESTROY_AD = "AMPSDraw_destroy"
     const val DRAW_PAUSE_AD = "AMPSDraw_pause"
@@ -315,6 +316,7 @@ val NativeMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.NATIVE_PAUSE,
     AMPSAdSdkMethodNames.NATIVE_DESTROY,
     AMPSAdSdkMethodNames.NATIVE_GET_MEDIA_EXTRA_INFO,
+    AMPSAdSdkMethodNames.NATIVE_UNIFIED_IMAGES,
     AMPSAdSdkMethodNames.NATIVE_UNIFIED_MATERIAL_TYPE,
     AMPSAdSdkMethodNames.NATIVE_UNIFIED_GET_DOWNLOAD
 

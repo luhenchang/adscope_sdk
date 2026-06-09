@@ -270,6 +270,18 @@ class AMPSNativeAd {
   }
 
   //自渲染类型
+  Future<List<String>> getUnifiedImages(String adId) async {
+    final images = await AdscopeSdk.invokeMethod(
+      AMPSAdSdkMethodNames.nativeImages,
+      _argsWithAdId(adId),
+    );
+    if (images is List) {
+      return images.map((item) => item?.toString() ?? '').where((url) => url.isNotEmpty).toList();
+    }
+    return const [];
+  }
+
+  //自渲染类型
   Future<AMPSUnifiedPattern> getUnifiedPattern(String adId) async {
     final pattern = await AdscopeSdk.invokeMethod(
       AMPSAdSdkMethodNames.nativePattern,

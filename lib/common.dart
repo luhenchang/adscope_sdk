@@ -182,6 +182,7 @@ class AMPSAdSdkMethodNames {
   static const String nativeLoad = 'AMPSNative_load';
   // static const String nativeShowAd = 'AMPSNative_showAd';
   static const String nativePattern = 'AMPSNative_getUnifiedPattern';
+  static const String nativeImages = 'AMPSNative_getUnifiedImages';
   static const String nativeGetECPM = 'AMPSNative_getECPM';
   static const String nativeGetSeatId = 'AMPSNative_getSeatId';
   static const String nativeDestroy = "AMPSNative_destroy";

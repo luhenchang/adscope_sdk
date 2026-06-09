@@ -1,0 +1,16 @@
+# 排除 example 的 build 产物和 SDK 库文件（这些体积巨大且用户不需要）
+example/build/
+example/.dart_tool/
+example/ios/Pods/
+example/ohos/node_modules/
+example/ohos/oh_modules/
+example/ohos/build/
+example/ohos/.hvigor/
+example/ohos/.idea/
+example/android/.gradle/
+example/android/build/
+example/android/app/build/
+example/android/app/.gradle/
+example/android/app/libs/
+example/ohos/libs/
+example/flutter_*.log
