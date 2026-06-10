@@ -79,6 +79,17 @@ export class AMPSNativeManager {
       case AMPSAdSdkMethodNames.nativeUnifiedGetDownLoad:
         result.success(null)
         break;
+      case AMPSAdSdkMethodNames.nativeImages:
+        {
+          const wrapper = this.getAdWrapper(args)
+          if (wrapper) {
+            const urls = wrapper.getImgList().map((it => it.imageUrl))
+            result.success(urls)
+          } else {
+            result.success([])
+          }
+        }
+        break;
       case AMPSAdSdkMethodNames.nativeGetMediaExtraInfo:
         result.success(null)
         break;

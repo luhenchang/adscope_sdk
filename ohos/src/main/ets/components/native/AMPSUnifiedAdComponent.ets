@@ -7,7 +7,7 @@ import {
   AMPSNativeContainer,
   AMPSBuildNativeView
 } from 'xyz.adscope.amps';
-import { AdClickIdType, AdClickType, NativeUnifiedBaseChild, NativeUnifiedModule } from '../native/UnifiedNativeModule';
+import { AdClickIdType, AdClickType, NativeUnifiedBaseChild, NativeUnifiedModule, UnifiedImageItemChild } from '../native/UnifiedNativeModule';
 import { OhosPlatformUnifiedView } from './OhosPlatformUnifiedView';
 import { AdWrapperManager } from '../native/AdWrapperManager';
 import util from '@ohos.util';
@@ -24,9 +24,11 @@ export struct AMPSUnifiedAdComponent {
   @Prop unifiedModule?: NativeUnifiedModule = undefined
   private rootComponentId: string = util.generateRandomUUID();
 
+  iamgeUrls:string[] =[]
   aboutToAppear(): void {
     this.creativeViewIds.clear();
     this.wrapper = AdWrapperManager.getInstance().getAd(this.adId)
+    this.iamgeUrls = this.wrapper?.getImgList().map((it => it.imageUrl)) ?? []
   }
 
   @Builder
@@ -51,6 +53,28 @@ export struct AMPSUnifiedAdComponent {
                     wrapper.getClickHandler()(this.getUIContext(), event, clickType)
                   }
                 })
+            }
+            if (this.unifiedModule?.imagesChildren && this.unifiedModule.imagesChildren.length > 0) {
+              ForEach(this.unifiedModule.imagesChildren, (imgChild: UnifiedImageItemChild) => {
+                if (imgChild.url && this.iamgeUrls.indexOf(imgChild.url) >= 0) {
+                  Image(imgChild.url)
+                    .width(imgChild.width)
+                    .height(imgChild.height)
+                    .offset({ x: imgChild.x, y: imgChild.y })
+                    .backgroundColor(imgChild.backgroundColor)
+                    .objectFit(ImageFit.Cover)
+                    .id(this.getClickIdTypeIsClick(imgChild) ?
+                      this.clickIds.addAdId(util.generateRandomUUID()) :
+                      this.creativeViewIds.addAdId(util.generateRandomUUID()))
+                    .onClick((event) => {
+                      let clickType: AMPSAdItemClickType =
+                        this.getAdItemClickType(imgChild.clickType);
+                      if (clickType != AMPSAdItemClickType.NONE) {
+                        wrapper.getClickHandler()(this.getUIContext(), event, clickType)
+                      }
+                    })
+                }
+              })
             }
             if (this.unifiedModule?.videoChildren && wrapper.getVideoUrl()) {
               Column() {

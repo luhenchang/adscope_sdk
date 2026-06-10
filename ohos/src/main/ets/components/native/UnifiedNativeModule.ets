@@ -4,6 +4,7 @@ import { Any } from '@ohos/flutter_ohos';
 // 定义所有子组件类型枚举，提高代码可读性
 enum ChildType {
   MAIN_IMAGE = 'mainImage',
+  IMAGES_CHILD = 'imagesChild',
   TITLE = 'mainTitle',
   DESC = 'descText',
   ACTION_BUTTON = 'actionButton',
@@ -44,6 +45,14 @@ export class NativeUnifiedBaseChild {
 
 // 1. 主图组件
 class UnifiedMainImgChild extends NativeUnifiedBaseChild {
+  width?: number;
+  height?: number;
+  backgroundColor?: string;
+}
+
+// 1.1 多图子项
+export class UnifiedImageItemChild extends NativeUnifiedBaseChild {
+  url?: string;
   width?: number;
   height?: number;
   backgroundColor?: string;
@@ -95,6 +104,7 @@ class UnifiedCloseChild extends NativeUnifiedBaseChild {
 // 主解析类，负责解析整个视图树
 export class NativeUnifiedModule {
   mainImgChildren?: UnifiedMainImgChild;
+  imagesChildren?: UnifiedImageItemChild[];
   titleChildren?: UnifiedTitleChild;
   descChildren?: UnifiedDescChild;
   actionButtonChildren?: UnifiedActionButtonChild;
@@ -133,6 +143,9 @@ export class NativeUnifiedModule {
         case ChildType.MAIN_IMAGE:
           this.mainImgChildren = this.createMainImageChild(childMap);
           break;
+        case ChildType.IMAGES_CHILD:
+          this.imagesChildren = this.createImagesChildren(childMap);
+          break;
         case ChildType.TITLE:
           this.titleChildren = this.createTitleChild(childMap);
           break;
@@ -166,6 +179,27 @@ export class NativeUnifiedModule {
     child.clickType = map.get('clickType');
     child.clickIdType = map.get('clickIdType')
     return child;
+  }
+
+  private createImagesChildren(map: Map<string, Any>): UnifiedImageItemChild[] {
+    const childrenList: List<Map<string, Any>> | undefined = map.get('children');
+    if (!childrenList) {
+      return [];
+    }
+    const result: UnifiedImageItemChild[] = [];
+    childrenList.forEach((childMap: Map<string, Any>) => {
+      const child = new UnifiedImageItemChild();
+      child.url = childMap.get('url');
+      child.width = childMap.get('width');
+      child.height = childMap.get('height');
+      child.x = childMap.get('x');
+      child.y = childMap.get('y');
+      child.backgroundColor = childMap.get('backgroundColor');
+      child.clickType = childMap.get('clickType');
+      child.clickIdType = childMap.get('clickIdType');
+      result.push(child);
+    });
+    return result;
   }
 
   private createTitleChild(map: Map<string, Any>): UnifiedTitleChild {
