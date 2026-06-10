@@ -214,11 +214,14 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
         images: Array<NativeUnifiedChild.Image>,
         unifiedItem: AMPSUnifiedNativeItem
     ): List<View> {
-        val fallbackUrls = unifiedItem.imagesUrl?.filter { !it.isNullOrBlank() } ?: emptyList()
-        return images.mapIndexedNotNull { index, child ->
-            val imageUrl = child.url?.takeIf { !it.isBlank() }
-                ?: fallbackUrls.getOrNull(index)
-                ?: return@mapIndexedNotNull null
+        val validUrls = unifiedItem.imagesUrl
+            ?.filter { !it.isNullOrBlank() }
+            ?.toSet()
+            ?: emptySet()
+
+        return images.mapNotNull { child ->
+            val imageUrl = child.url?.takeIf { !it.isBlank() && it in validUrls }
+                ?: return@mapNotNull null
             createConfiguredImageView(child, imageUrl)
         }
     }
