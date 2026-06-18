@@ -14,6 +14,79 @@ class RewardVideoPage extends StatefulWidget {
   State<RewardVideoPage> createState() => _RewardVideoPageState();
 }
 
+// 2. 需要给渠道氮素设置时候再选择渠道设置。
+//     Map<String, dynamic>? extraDataMap;
+//     if (Platform.isAndroid) {
+//       extraDataMap = <String, String>{
+//         AmpsAndroidConstants.ampsAdnCsj: '{"name":"csj_data"}',
+//         AmpsAndroidConstants.ampsAdnGm: '{"name":"gm_data"}',
+//         AmpsAndroidConstants.ampsAdnKs: '{"name":"ks_data"}',
+//         AmpsAndroidConstants.ampsAdnBd: '{"name":"bd_data"}',
+//         AmpsAndroidConstants.ampsAdnGdt: '{"name":"gdt_data"}',
+//       };
+//     } else if (Platform.isIOS) {
+//       extraDataMap = {
+//         AmpsIosConstants.ampsAdnGdt: {
+//           "userID": "111",
+//           "extra": '{"orderId":"order001"}',
+//         },
+//         AmpsIosConstants.ampsAdnKs: {
+//           "userID": "222",
+//           "extra": '{"orderId":"order001"}',
+//         },
+//         AmpsIosConstants.ampsAdnCsj: {
+//           "userID": "333",
+//           "extra": '{"orderId":"order001"}',
+//         },
+//         AmpsIosConstants.ampsAdnGm: {
+//           "userID": "444",
+//           "extra": '{"orderId":"order001"}',
+//         },
+//         AmpsIosConstants.ampsAdnBd: {
+//           "userID": "555",
+//           "extra": '{"orderId":"order001"}',
+//         },
+//       };
+//     }
+/****
+    String? useId = "xxxxx";//UserInfoManager.instance.getUserId().tostring()
+    Map<String, dynamic>? extraDataMap;
+    if (Platform.isAndroid) {
+    const data = 'xxxxxxx';
+    extraDataMap = <String, String>{
+    AmpsAndroidConstants.ampsAdnCsj: data,
+    AmpsAndroidConstants.ampsAdnGm: data,
+    AmpsAndroidConstants.ampsAdnKs: data,
+    AmpsAndroidConstants.ampsAdnBd: data,
+    AmpsAndroidConstants.ampsAdnGdt: data,
+    };
+    } else if (Platform.isIOS) {
+    const data = 'xxxxxx';
+    //TODO IOS端KEY必须和下面一致:userID,extra
+    extraDataMap = {
+    AmpsIosConstants.ampsAdnGdt: {
+    "userID": useId,
+    "extra": data,
+    },
+    AmpsIosConstants.ampsAdnKs: {
+    "userID": useId,
+    "extra": data,
+    },
+    AmpsIosConstants.ampsAdnCsj: {
+    "userID": useId,
+    "extra": data,
+    },
+    AmpsIosConstants.ampsAdnGm: {
+    "userID": useId,
+    "extra": data,
+    },
+    AmpsIosConstants.ampsAdnBd: {
+    "userID": useId,
+    "extra": data,
+    },
+    };
+    }
+ ****/
 class _RewardVideoPageState extends State<RewardVideoPage> {
   final Map<String, AMPSRewardVideoAd> _rewardAds = {};
   bool couldBack = true;
