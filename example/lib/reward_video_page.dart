@@ -48,45 +48,7 @@ class RewardVideoPage extends StatefulWidget {
 //         },
 //       };
 //     }
-/****
-    String? useId = "xxxxx";//UserInfoManager.instance.getUserId().tostring()
-    Map<String, dynamic>? extraDataMap;
-    if (Platform.isAndroid) {
-    const data = 'xxxxxxx';
-    extraDataMap = <String, String>{
-    AmpsAndroidConstants.ampsAdnCsj: data,
-    AmpsAndroidConstants.ampsAdnGm: data,
-    AmpsAndroidConstants.ampsAdnKs: data,
-    AmpsAndroidConstants.ampsAdnBd: data,
-    AmpsAndroidConstants.ampsAdnGdt: data,
-    };
-    } else if (Platform.isIOS) {
-    const data = 'xxxxxx';
-    //TODO IOS端KEY必须和下面一致:userID,extra
-    extraDataMap = {
-    AmpsIosConstants.ampsAdnGdt: {
-    "userID": useId,
-    "extra": data,
-    },
-    AmpsIosConstants.ampsAdnKs: {
-    "userID": useId,
-    "extra": data,
-    },
-    AmpsIosConstants.ampsAdnCsj: {
-    "userID": useId,
-    "extra": data,
-    },
-    AmpsIosConstants.ampsAdnGm: {
-    "userID": useId,
-    "extra": data,
-    },
-    AmpsIosConstants.ampsAdnBd: {
-    "userID": useId,
-    "extra": data,
-    },
-    };
-    }
- ****/
+
 class _RewardVideoPageState extends State<RewardVideoPage> {
   final Map<String, AMPSRewardVideoAd> _rewardAds = {};
   bool couldBack = true;
