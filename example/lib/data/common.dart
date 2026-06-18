@@ -3,7 +3,7 @@
 
 import 'dart:io';
 
-var appId = Platform.isAndroid ? "14657" :  Platform.isIOS ? "14659" : "55819";
+var appId = Platform.isAndroid ? "14657" :  Platform.isIOS ? "14659" : "57829";
 var splashSpaceId = Platform.isAndroid ? '15341' : Platform.isIOS ? "15351" : "124388";
 var interstitialSpaceId = Platform.isAndroid ? '15347' : Platform.isIOS ? "15352" : "133645";
 var nativeSpaceId = Platform.isAndroid ? '15349' : Platform.isIOS ? "15354" : "124579";
