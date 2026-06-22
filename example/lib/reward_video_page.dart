@@ -48,7 +48,7 @@ class RewardVideoPage extends StatefulWidget {
 //         },
 //       };
 //     }
-
+// 鸿蒙跟iOS一样
 class _RewardVideoPageState extends State<RewardVideoPage> {
   final Map<String, AMPSRewardVideoAd> _rewardAds = {};
   bool couldBack = true;
