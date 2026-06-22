@@ -74,7 +74,7 @@ class _NativePageState extends State<NativePage> {
           _adIdToLabel[adId] = label;
           setState(() => feedAdList.add(adId));
         }
-        // 获取 seatId
+        // 新增api 获取 seatId
         final seatId = await _nativeAds[label]?.getSeatId();
         debugPrint('[$label] native render seatId=$seatId');
       },
