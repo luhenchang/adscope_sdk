@@ -11,6 +11,7 @@ import 'interstitial_page.dart';
 import 'interstitial_show_page.dart';
 import 'native_page.dart';
 import 'native_unified_page.dart';
+import 'native_unified_multi_page.dart';
 import 'splash_show_page.dart' show SplashShowPage;
 import 'widgets/blurred_background.dart';
 import 'widgets/button_widget.dart';
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
       'InterstitialPage':(context)=> const InterstitialPage(title: '插屏组件页面'),
       'NativePage':(context)=> const NativePage(title: '原生页面'),
       'NativeUnifiedPage':(context)=> const NativeUnifiedPage(title: '原生自渲染页面'),
+      'NativeUnifiedMultiPage':(context)=> const NativeUnifiedMultiPage(title: '自渲染8条Feed插入'),
       'RewardVideoPage':(context)=> const RewardVideoPage(title: '激励视频页面'),
       'BannerPage':(context)=> const BannerWidgetPage(title: 'Banner页面'),
       'DrawPage':(context)=> const DrawPage(title: 'Draw页面'),
@@ -72,6 +74,7 @@ class _SplashPageState extends State<SplashPage> {
     {'text': '插屏组件案例页面', 'route': 'InterstitialPage'},
     {'text': '点击跳转原生页面', 'route': 'NativePage'},
     {'text': '点击跳转自渲染页面', 'route': 'NativeUnifiedPage'},
+    {'text': '自渲染8条插入Feed', 'route': 'NativeUnifiedMultiPage'},
     {'text': '点击跳转激励视频页面', 'route': 'RewardVideoPage'},
     {'text': '点击跳转Banner页面', 'route': 'BannerPage'},
     {'text': '点击跳转Draw页面', 'route': 'DrawPage'},
