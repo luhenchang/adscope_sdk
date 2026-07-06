@@ -162,16 +162,17 @@ class AMPSUnifiedView(
         }
 
         runCatching {
-            // 使用 let 避免嵌套，同时确保 nativeView 渲染成功
-            AmpsUnifiedFrameLayout(context).let { it ->
-                it.render(module, adItem, params, currentAdId)?.let { renderResult ->
-                    rootView.addView(it)
+            val activity = context.asActivity()
+            AmpsUnifiedFrameLayout(context).let { frame ->
+                frame.render(module, adItem, params, currentAdId)?.let { renderResult ->
+                    rootView.addView(frame)
                     adItem.bindAdToRootContainer(
-                        context.asActivity(),
+                        activity,
                         rootView as AMPSUnifiedRootContainer?,
                         renderResult.clickableViews,
                         renderResult.creativeViews
                     )
+                    frame.bindMediaViews(activity, adItem, currentAdId)
                 }
             }
         }.onFailure {

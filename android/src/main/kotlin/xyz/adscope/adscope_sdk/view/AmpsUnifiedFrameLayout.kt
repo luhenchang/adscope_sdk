@@ -1,5 +1,6 @@
 package xyz.adscope.adscope_sdk.view
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -20,7 +21,6 @@ import xyz.adscope.adscope_sdk.data.ErrorModel
 import xyz.adscope.adscope_sdk.data.NativeUnifiedChild
 import xyz.adscope.adscope_sdk.data.NativeUnifiedModule
 import xyz.adscope.adscope_sdk.manager.AMPSEventManager
-import xyz.adscope.adscope_sdk.utils.asActivity
 import xyz.adscope.adscope_sdk.utils.dpToPx
 import xyz.adscope.amps.ad.unified.AMPSUnifiedNativeAdError
 import xyz.adscope.amps.ad.unified.inter.AMPSUnifiedNativeItem
@@ -53,6 +53,7 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
     // 用来记录可点击的视图和需要上报的视图
     private val clickableViews = mutableListOf<View>()
     private val creativeViews = mutableListOf<View>()
+    private val pendingMediaStubs = mutableListOf<AMPSUnifiedMediaViewStub>()
 
     /**
      * 主构建方法，接收数据模型和广告数据，并生成 UI
@@ -70,6 +71,7 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
         removeAllViews()
         clickableViews.clear()
         creativeViews.clear()
+        pendingMediaStubs.clear()
         if (module == null) {
             Log.e(TAG, "render module is null")
             return null
@@ -90,7 +92,7 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
         }
 
         module.videoChild?.let { child ->
-            addView(createVideoChild(child, unifiedItem, adId))
+            addView(createVideoChild(child, adId))
         }
 
         module.titleChild?.let { child ->
@@ -155,6 +157,27 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
 
         //在方法末尾，创建并返回 AdRenderResult 实例
         return AdRenderResult(clickableViews, creativeViews)
+    }
+
+    /**
+     * 在 [bindAdToRootContainer] 之后绑定视频，顺序与官方 Demo 一致。
+     * 使用 post 确保 View 已完成 attach / reparent（GDT TextureView 需要有效 Surface）。
+     */
+    fun bindMediaViews(activity: Activity?, unifiedItem: AMPSUnifiedNativeItem, adId: String) {
+        if (activity == null) {
+            Log.e(TAG, "bindMediaViews: activity is null, adId=$adId")
+            return
+        }
+        if (pendingMediaStubs.isEmpty()) {
+            return
+        }
+        val stubs = pendingMediaStubs.toList()
+        pendingMediaStubs.clear()
+        stubs.forEach { stub ->
+            stub.post {
+                unifiedItem.bindAdToMediaView(activity, stub, createVideoListener(adId))
+            }
+        }
     }
 
 
@@ -244,67 +267,66 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
 
     private fun createVideoChild(
         child: NativeUnifiedChild.Video,
-        unifiedItem: AMPSUnifiedNativeItem,
         adId: String
     ): View {
         val mediaView = AMPSUnifiedMediaViewStub(context)
         mediaView.layoutParams = createLayoutParams(child.width, child.height, child.x, child.y)
-        unifiedItem.bindAdToMediaView(
-            context.asActivity(),
-            mediaView,
-            object : AMPSUnifiedVideoListener {
-                override fun onVideoInit() {
-                    sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_INIT, adId)
-                }
-
-                override fun onVideoLoading() {
-                    sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_LOADING, adId)
-                }
-
-                override fun onVideoReady() {
-                    sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_READY, adId)
-                }
-
-                override fun onVideoLoaded(p0: Int) {
-                    sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_LOADED, adId)
-                }
-
-                override fun onVideoStart() {
-                    sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_PLAY_START, adId)
-                }
-
-                override fun onVideoPause() {
-                    sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_PAUSE, adId)
-                }
-
-                override fun onVideoResume() {
-                    sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_RESUME, adId)
-                }
-
-                override fun onVideoCompleted() {
-                    sendMessageToFlutter(
-                        AMPSNativeCallBackChannelMethod.ON_VIDEO_PLAY_COMPLETE,
-                        adId
-                    )
-                }
-
-                override fun onVideoError(p0: AMPSUnifiedNativeAdError?) {
-                    sendMessageToFlutter(
-                        AMPSNativeCallBackChannelMethod.ON_VIDEO_PLAY_ERROR,
-                        mapOf(AD_ID to adId, ErrorModel.CODE to p0?.code, ErrorModel.MESSAGE to p0?.msg)
-                    )
-                }
-
-                override fun onVideoStop() {
-                    sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_STOP, adId)
-                }
-
-                override fun onVideoClicked() {
-                    sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_CLICKED, adId)
-                }
-
-            })
+        pendingMediaStubs.add(mediaView)
         return mediaView
+    }
+
+    private fun createVideoListener(adId: String): AMPSUnifiedVideoListener {
+        return object : AMPSUnifiedVideoListener {
+            override fun onVideoInit() {
+                sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_INIT, adId)
+            }
+
+            override fun onVideoLoading() {
+                sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_LOADING, adId)
+            }
+
+            override fun onVideoReady() {
+                sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_READY, adId)
+            }
+
+            override fun onVideoLoaded(p0: Int) {
+                sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_LOADED, adId)
+            }
+
+            override fun onVideoStart() {
+                sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_PLAY_START, adId)
+            }
+
+            override fun onVideoPause() {
+                sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_PAUSE, adId)
+            }
+
+            override fun onVideoResume() {
+                sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_RESUME, adId)
+            }
+
+            override fun onVideoCompleted() {
+                sendMessageToFlutter(
+                    AMPSNativeCallBackChannelMethod.ON_VIDEO_PLAY_COMPLETE,
+                    adId
+                )
+            }
+
+            override fun onVideoError(p0: AMPSUnifiedNativeAdError?) {
+                sendMessageToFlutter(
+                    AMPSNativeCallBackChannelMethod.ON_VIDEO_PLAY_ERROR,
+                    mapOf(AD_ID to adId, ErrorModel.CODE to p0?.code, ErrorModel.MESSAGE to p0?.msg)
+                )
+            }
+
+            override fun onVideoStop() {
+                sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_STOP, adId)
+            }
+
+            override fun onVideoClicked() {
+                sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_VIDEO_CLICKED, adId)
+            }
+        }
     }
 
     //--主题添加--
