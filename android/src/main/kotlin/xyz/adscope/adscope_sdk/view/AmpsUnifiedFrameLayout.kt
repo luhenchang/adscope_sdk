@@ -90,9 +90,7 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
         }
 
         module.videoChild?.let { child ->
-            unifiedItem.videoUrl?.let { _ ->
-                addView(createVideoChild(child, unifiedItem, adId))
-            }
+            addView(createVideoChild(child, unifiedItem, adId))
         }
 
         module.titleChild?.let { child ->
