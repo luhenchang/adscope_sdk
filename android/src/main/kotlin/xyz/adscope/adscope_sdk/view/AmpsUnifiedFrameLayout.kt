@@ -26,7 +26,8 @@ import xyz.adscope.amps.ad.unified.AMPSUnifiedNativeAdError
 import xyz.adscope.amps.ad.unified.inter.AMPSUnifiedNativeItem
 import xyz.adscope.amps.ad.unified.inter.AMPSUnifiedVideoListener
 import xyz.adscope.amps.ad.unified.view.AMPSUnifiedMediaViewStub
-import xyz.adscope.common.imageloader.ImageLoader
+import xyz.adscope.common.v2.image.loader.IImageFillResult
+import xyz.adscope.common.v2.image.loader.ImageLoader
 
 
 // 定义点击事件类型，与 Flutter 端和数据模型保持一致
@@ -213,7 +214,12 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
                 AppCompatImageView(context).apply {
                     layoutParams = createLayoutParams(child.width, child.height, child.x, child.y)
                     scaleType = ImageView.ScaleType.CENTER_CROP//目前用户设置多大就多大。
-                    ImageLoader().loadImage(this, imageUrl)
+                    ImageLoader.getInstance().loadMainImage(
+                        this,
+                        imageUrl,
+                        false,
+                        imageFillResult("mainImage", imageUrl)
+                    )
                     // 为我们自己创建的视图设置点击监听
                     setupClickListener(this, child.clickType, child.clickIdType)
                 }
@@ -258,8 +264,12 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
                 }
             }
             setupClickListener(this, child.clickType, child.clickIdType)
-            ImageLoader().loadImage(this, imageUrl)
-            Log.d(TAG, "load imagesChild url=$imageUrl")
+            ImageLoader.getInstance().loadMainImage(
+                this,
+                imageUrl,
+                false,
+                imageFillResult("imagesChild", imageUrl)
+            )
         }
     }
 
@@ -381,7 +391,12 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
             val actionIv = ImageView(context)
             actionIv.scaleType = ImageView.ScaleType.FIT_CENTER
             actionIv.layoutParams = layoutParams
-            ImageLoader().loadImage(actionIv, actionButtonText)
+            ImageLoader.getInstance().loadMainImage(
+                actionIv,
+                actionButtonText,
+                false,
+                imageFillResult("actionButton", actionButtonText)
+            )
             return actionIv
         } else {
             val textView = TextView(context)
@@ -459,7 +474,12 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
         } else if (!TextUtils.isEmpty(unifiedItem.adSourceLogoUrl)) {
             AppCompatImageView(context).apply {
                 layoutParams = createLayoutParams(child.width, child.height, child.x, child.y)
-                ImageLoader().loadImage(this, unifiedItem.adSourceLogoUrl)
+                ImageLoader.getInstance().loadMainImage(
+                    this,
+                    unifiedItem.adSourceLogoUrl,
+                    false,
+                    imageFillResult("adSourceLogo", unifiedItem.adSourceLogoUrl)
+                )
                 setupClickListener(this, child.clickType, child.clickIdType)
             }
         } else {
@@ -475,7 +495,12 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
         return if (unifiedItem.iconUrl != null) {
             AppCompatImageView(context).apply {
                 layoutParams = createLayoutParams(child.width, child.height, child.x, child.y)
-                ImageLoader().loadImage(this, unifiedItem.iconUrl)
+                ImageLoader.getInstance().loadMainImage(
+                    this,
+                    unifiedItem.iconUrl,
+                    false,
+                    imageFillResult("appIcon", unifiedItem.iconUrl)
+                )
                 setupClickListener(this, child.clickType, child.clickIdType)
             }
         } else {
@@ -504,6 +529,18 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
             // 关闭按钮通常有固定的点击行为
             setOnClickListener {
                 sendMessageToFlutter(AMPSNativeCallBackChannelMethod.ON_AD_CLOSED, adId)
+            }
+        }
+    }
+
+    private fun imageFillResult(imageTag: String, imageUrl: String?): IImageFillResult {
+        return object : IImageFillResult {
+            override fun onImageLoaded() {
+                Log.d(TAG, "loadMainImage success, tag=$imageTag, url=$imageUrl")
+            }
+
+            override fun onImageLoadFailed() {
+                Log.d(TAG, "loadMainImage failed, tag=$imageTag, url=$imageUrl")
             }
         }
     }
