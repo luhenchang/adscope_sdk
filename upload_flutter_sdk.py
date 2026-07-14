@@ -24,10 +24,10 @@ UPLOAD_URL = "https://m-new.adscope.com.cn/api/product/mediation/sdk/upload/flut
 
 DEFAULT_FLUTTER_VERSIONS = [
     {
-        "version": "0.1.8",
+        "version": "0.2.2",
         "downloadUrl": "https://pub.dev/packages/adscope_sdk",
         "fileSize": 8600263,
-        "flutterUpdateTime": "2025-06-09 16:30:00",
+        "flutterUpdateTime": "2025-07-14 16:20:00",
         "supportedSdkVersions": "Android ≥ v5.1.2.6, iOS ≥ v5.1.2.3",
     }
 ]

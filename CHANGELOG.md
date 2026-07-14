@@ -1,3 +1,6 @@
+## 0.2.2
+Android 端在onClicked之后不能移除视图，避免无法收到onClosed回调。
+
 ## 0.2.1
 Android 端移除V1相关common，使用V2代替。
 
