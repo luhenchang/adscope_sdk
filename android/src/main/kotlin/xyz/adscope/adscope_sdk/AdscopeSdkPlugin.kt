@@ -22,11 +22,16 @@ class AdscopeSdkPlugin : FlutterPlugin, ActivityAware {
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
+        // 配置变更（如旋转屏幕）导致旧 Activity 销毁，清空引用避免使用已销毁的 Activity
+        FlutterPluginUtil.setActivity(null)
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        // 配置变更后重新挂载新 Activity，必须更新引用，否则 getActivity() 返回 null
+        FlutterPluginUtil.setActivity(binding.activity)
     }
 
     override fun onDetachedFromActivity() {
+        FlutterPluginUtil.setActivity(null)
     }
 }

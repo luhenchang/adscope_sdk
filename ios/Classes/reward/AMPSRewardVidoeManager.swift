@@ -25,6 +25,17 @@ class AMPSRewardVideoManager: NSObject {
                 return
             }
             handleRewardVideoLoad(instanceId: instanceId, result: result)
+        case AMPSAdSdkMethodNames.rewardVideoPreLoad:
+            guard let instanceId = instanceId else {
+                result(FlutterError(code: "INVALID_ARGS", message: "adInstanceId is required", details: nil))
+                return
+            }
+            guard let ad = rewardVideoAds[instanceId] else {
+                result(FlutterError(code: "LOAD_FAILED", message: "Reward ad instance not found", details: instanceId))
+                return
+            }
+            ad.preloadAd()
+            result(nil)
         case AMPSAdSdkMethodNames.rewardVideoShowAd:
             guard let instanceId = instanceId else {
                 result(FlutterError(code: "INVALID_ARGS", message: "adInstanceId is required", details: nil))
@@ -35,11 +46,6 @@ class AMPSRewardVideoManager: NSObject {
             result(rewardVideoAds[instanceId ?? ""]?.eCPM() ?? 0)
         case AMPSAdSdkMethodNames.rewardVideoGetSeatId:
             result(rewardVideoAds[instanceId ?? ""]?.successAdInfo.adapterSeatId)
-        case AMPSAdSdkMethodNames.rewardVideoPreLoad:
-            if let instanceId = instanceId {
-                rewardVideoAds[instanceId]?.preloadAd()
-            }
-            result(nil)
         case AMPSAdSdkMethodNames.rewardVideoDestroyAd:
             if let instanceId = instanceId {
                 cleanupViewsAfterAdClosed(instanceId: instanceId)
@@ -95,11 +101,11 @@ class AMPSRewardVideoManager: NSObject {
         
     private func handleRewardVideoShowAd(instanceId: String, result: @escaping FlutterResult) {
         guard let rewardVideoAd = rewardVideoAds[instanceId] else {
-            result(false)
+            result(FlutterError(code: "SHOW_FAILED", message: "Reward ad instance not found, it may have been destroyed after close", details: instanceId))
             return
         }
         guard let vc = getKeyWindow()?.rootViewController else {
-            result(false)
+            result(FlutterError(code: "SHOW_FAILED", message: "RootViewController not available", details: instanceId))
             return
         }
         rewardVideoAd.show(withRootViewController: vc)
@@ -144,7 +150,7 @@ extension AMPSRewardVideoManager : AMPSRewardedVideoAdDelegate {
     func ampsRewardedVideoAdDidClose(_ rewardVideoAd: AMPSRewardedVideoAd) {
         guard let id = rewardId(for: rewardVideoAd) else { return }
         sendMessage(AMPSRewardedVideoCallBackChannelMethod.onAdClosed, instanceId: id)
-        cleanupViewsAfterAdClosed(instanceId: id)
+        // 不在此处自动销毁实例，与 Android 端行为对齐，由 Flutter 侧 destroy() 统一清理
     }
     func ampsRewardedVideoAdDidPlayFinish(_ rewardVideoAd: AMPSRewardedVideoAd) {
         guard let id = rewardId(for: rewardVideoAd) else { return }

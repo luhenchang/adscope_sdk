@@ -36,7 +36,7 @@ class RewardVideoCallbackRouter {
         cb.onLoadSuccess?.call();
         break;
       case AMPSRewardedVideoCallBackChannelMethod.onLoadFailure:
-        cb.onLoadFailure?.call(mapArgs[AMPSSdkCallBackErrorKey.code], mapArgs[AMPSSdkCallBackErrorKey.message]);
+        cb.onLoadFailure?.call(_errorCode(mapArgs), _errorMessage(mapArgs));
         break;
       case AMPSRewardedVideoCallBackChannelMethod.onAdShow:
         cb.onAdShow?.call();
@@ -54,7 +54,7 @@ class RewardVideoCallbackRouter {
         cb.onVideoPlayEnd?.call();
         break;
       case AMPSRewardedVideoCallBackChannelMethod.onVideoPlayError:
-        cb.onVideoPlayError?.call(mapArgs[AMPSSdkCallBackErrorKey.code], mapArgs[AMPSSdkCallBackErrorKey.message]);
+        cb.onVideoPlayError?.call(_errorCode(mapArgs), _errorMessage(mapArgs));
         break;
       case AMPSRewardedVideoCallBackChannelMethod.onVideoSkipToEnd:
         cb.onVideoSkipToEnd?.call(mapArgs[AMPSSdkCallBackParamsKey.playDurationMs]);
@@ -66,9 +66,24 @@ class RewardVideoCallbackRouter {
         cb.onAdCached?.call();
         break;
       case AMPSRewardedVideoCallBackChannelMethod.onServerRewardDidFail:
-        cb.onServerRewardFailed?.call(mapArgs[AMPSSdkCallBackErrorKey.code], mapArgs[AMPSSdkCallBackErrorKey.message]);
+        cb.onServerRewardFailed?.call(_errorCode(mapArgs), _errorMessage(mapArgs));
         break;
     }
+  }
+
+  ///原生端传来的code可能为null或非int类型，做安全转换避免回调抛类型异常被吞掉
+  int _errorCode(Map<dynamic, dynamic> args) {
+    final code = args[AMPSSdkCallBackErrorKey.code];
+    if (code is int) return code;
+    if (code is num) return code.toInt();
+    if (code is String) return int.tryParse(code) ?? -1;
+    return -1;
+  }
+
+  ///原生端传来的message可能为null，做安全转换避免回调抛类型异常被吞掉
+  String _errorMessage(Map<dynamic, dynamic> args) {
+    final message = args[AMPSSdkCallBackErrorKey.message];
+    return message?.toString() ?? 'unknown error';
   }
 
   String? _resolveInstanceId(dynamic args) {

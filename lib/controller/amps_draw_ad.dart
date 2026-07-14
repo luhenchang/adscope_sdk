@@ -29,10 +29,37 @@ class AMPSDrawAd {
     String? instanceId,
   }) : instanceId = instanceId ?? _generateInstanceId() {
     DrawCallbackRouter.instance.register(this.instanceId, _handleCall);
-    AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.drawCreate,
-      _wrapArgs(config.toMap()),
-    );
+    _createNativeAd();
+  }
+
+  ///创建原生广告实例，失败时通过loadFail通知，避免静默失败
+  Future<void> _createNativeAd() async {
+    try {
+      await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.drawCreate,
+        _wrapArgs(config.toMap()),
+      );
+    } on PlatformException catch (e) {
+      _notifyLoadFailure(e);
+    }
+  }
+
+  ///将原生端返回的错误转发给loadFail回调
+  void _notifyLoadFailure(PlatformException e) {
+    mCallBack?.loadFail?.call(int.tryParse(e.code) ?? -1, e.message ?? e.code);
+  }
+
+  ///回调参数中的错误码可能为null或非int类型，统一安全转换，避免回调分发时抛类型错误
+  static int _safeCode(dynamic code) {
+    if (code is int) return code;
+    if (code is num) return code.toInt();
+    if (code is String) return int.tryParse(code) ?? -1;
+    return -1;
+  }
+
+  ///回调参数中的错误信息可能为null，统一安全转换
+  static String _safeMessage(dynamic message) {
+    return message?.toString() ?? 'unknown error';
   }
 
   static String _generateInstanceId() {
@@ -70,8 +97,8 @@ class AMPSDrawAd {
         break;
       case AmpsDrawCallbackChannelMethod.onLoadFailure:
         mCallBack?.loadFail?.call(
-          mapArgs[AMPSSdkCallBackErrorKey.code],
-          mapArgs[AMPSSdkCallBackErrorKey.message],
+          _safeCode(mapArgs[AMPSSdkCallBackErrorKey.code]),
+          _safeMessage(mapArgs[AMPSSdkCallBackErrorKey.message]),
         );
         break;
       case AmpsDrawCallbackChannelMethod.onRenderSuccess:
@@ -79,9 +106,9 @@ class AMPSDrawAd {
         break;
       case AmpsDrawCallbackChannelMethod.onRenderFail:
         mRenderCallBack?.renderFailed?.call(
-          mapArgs[AMPSSdkCallBackErrorKey.adId],
-          mapArgs[AMPSSdkCallBackErrorKey.code],
-          mapArgs[AMPSSdkCallBackErrorKey.message],
+          mapArgs[AMPSSdkCallBackErrorKey.adId]?.toString() ?? '',
+          _safeCode(mapArgs[AMPSSdkCallBackErrorKey.code]),
+          _safeMessage(mapArgs[AMPSSdkCallBackErrorKey.message]),
         );
         break;
       case AmpsDrawCallbackChannelMethod.onAdShow:
@@ -125,9 +152,9 @@ class AMPSDrawAd {
         {
           final adId = mapArgs[AMPSSdkCallBackErrorKey.adId];
           mVideoPlayerCallBackMap[adId]?.onProgressUpdate?.call(
-            adId,
-            mapArgs[AMPSSdkCallBackErrorKey.current],
-            mapArgs[AMPSSdkCallBackErrorKey.duration],
+            adId?.toString() ?? '',
+            (mapArgs[AMPSSdkCallBackErrorKey.current] as num?)?.toInt() ?? 0,
+            (mapArgs[AMPSSdkCallBackErrorKey.duration] as num?)?.toInt() ?? 0,
           );
         }
         break;
@@ -135,9 +162,9 @@ class AMPSDrawAd {
         {
           final adId = mapArgs[AMPSSdkCallBackErrorKey.adId];
           mVideoPlayerCallBackMap[adId]?.onVideoError?.call(
-            adId,
-            mapArgs[AMPSSdkCallBackErrorKey.code],
-            mapArgs[AMPSSdkCallBackErrorKey.message],
+            adId?.toString() ?? '',
+            _safeCode(mapArgs[AMPSSdkCallBackErrorKey.code]),
+            _safeMessage(mapArgs[AMPSSdkCallBackErrorKey.message]),
           );
         }
         break;
@@ -172,8 +199,13 @@ class AMPSDrawAd {
     }
   }
 
+  ///加载调用，失败时通过loadFail通知
   void load() async {
-    AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.drawLoad, _instanceOnlyArgs());
+    try {
+      await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.drawLoad, _instanceOnlyArgs());
+    } on PlatformException catch (e) {
+      _notifyLoadFailure(e);
+    }
   }
 
   ///获取信息
@@ -189,53 +221,77 @@ class AMPSDrawAd {
     }
   }
 
-  ///获取是否有预加载
+  ///获取是否有预加载，异常时返回false
   Future<bool> isReadyAd(String adId) async {
-    return await AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.drawIsReadyAd,
-      _argsWithAdId(adId),
-    );
+    try {
+      return await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.drawIsReadyAd,
+        _argsWithAdId(adId),
+      ) ?? false;
+    } on PlatformException {
+      return false;
+    }
   }
 
-  ///获取ecpm
+  ///获取ecpm，异常时返回0
   Future<num> getECPM(String adId) async {
-    return await AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.drawGetEcpm,
-      _argsWithAdId(adId),
-    );
+    try {
+      return await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.drawGetEcpm,
+        _argsWithAdId(adId),
+      ) ?? 0;
+    } on PlatformException {
+      return 0;
+    }
   }
 
-  ///获取胜出渠道的seatId
+  ///获取胜出渠道的seatId，异常时返回null
   Future<String?> getSeatId() async {
-    return await AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.drawGetSeatId,
-      _instanceOnlyArgs(),
-    );
+    try {
+      return await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.drawGetSeatId,
+        _instanceOnlyArgs(),
+      );
+    } on PlatformException {
+      return null;
+    }
   }
 
   ///页面销毁时调用
-  void destroy() {
+  void destroy() async {
     DrawCallbackRouter.instance.unregister(instanceId);
-    AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.drawDestroyAd,
-      _instanceOnlyArgs(),
-    );
+    try {
+      await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.drawDestroyAd,
+        _instanceOnlyArgs(),
+      );
+    } on PlatformException {
+      // 销毁失败不影响业务流程，但不能抛出未捕获异常
+    }
   }
 
   ///失去焦点时调用
-  void pauseAd() {
-    AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.drawPauseAd,
-      _instanceOnlyArgs(),
-    );
+  void pauseAd() async {
+    try {
+      await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.drawPauseAd,
+        _instanceOnlyArgs(),
+      );
+    } on PlatformException {
+      // 异常不能向上抛出，避免未捕获异常
+    }
   }
 
   ///再次获取焦点时候调用
-  void resumeAd() {
-    AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.drawResumeAd,
-      _instanceOnlyArgs(),
-    );
+  void resumeAd() async {
+    try {
+      await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.drawResumeAd,
+        _instanceOnlyArgs(),
+      );
+    } on PlatformException {
+      // 异常不能向上抛出，避免未捕获异常
+    }
   }
 
   void setAdCloseCallBack(String adId, VoidCallback? closeWidgetCall) {

@@ -53,12 +53,18 @@ class AMPSInterstitialManager private constructor() {
         }
 
         override fun onAmpsAdFailed(error: AMPSError?) {
+            // code 可能非数字、message 可能为 null，必须做安全兜底，否则异常会导致 Flutter 收不到失败回调
+            val code = try {
+                error?.code?.toInt() ?: -1
+            } catch (e: Exception) {
+                -1
+            }
             sendMessage(
                 instanceId,
                 AMPSInterAdCallBackChannelMethod.ON_LOAD_FAILURE,
                 mapOf(
-                    ErrorModel.CODE to (error?.code?.toInt() ?: -1),
-                    ErrorModel.MESSAGE to error?.message
+                    ErrorModel.CODE to code,
+                    ErrorModel.MESSAGE to (error?.message ?: "load failed")
                 )
             )
         }
@@ -83,6 +89,19 @@ class AMPSInterstitialManager private constructor() {
     private fun instanceIdFrom(call: MethodCall): String? = argsAsMap(call)?.get(AD_INSTANCE_ID) as? String
 
     fun handleMethodCall(call: MethodCall, result: Result) {
+        // 兜底捕获：任何未处理异常都必须回调 result，否则 Flutter 侧 Future 永远不会完成
+        try {
+            handleMethodCallInternal(call, result)
+        } catch (e: Exception) {
+            try {
+                result.error("INTERSTITIAL_EXCEPTION", "Error handling ${call.method}: ${e.message}", e.toString())
+            } catch (ignored: Exception) {
+                // result 已被回调过，忽略二次回调异常
+            }
+        }
+    }
+
+    private fun handleMethodCallInternal(call: MethodCall, result: Result) {
         when (call.method) {
             AMPSAdSdkMethodNames.INTERSTITIAL_CREATE -> interstitialAdCreate(call, result)
             AMPSAdSdkMethodNames.INTERSTITIAL_LOAD -> handleInterstitialLoad(call, result)
@@ -99,8 +118,14 @@ class AMPSInterstitialManager private constructor() {
                 result.success(interstitialAds[instanceIdFrom(call)]?.isReady ?: false)
             }
             AMPSAdSdkMethodNames.INTERSTITIAL_PRE_LOAD -> {
-                interstitialAds[instanceIdFrom(call)]?.preLoad()
-                result.success(null)
+                val ad = interstitialAds[instanceIdFrom(call)]
+                if (ad == null) {
+                    // 实例不存在必须显式报错，避免 Dart 端误以为预加载成功
+                    result.error("PRELOAD_FAILED", "Interstitial ad instance not found, create may have failed.", null)
+                } else {
+                    ad.preLoad()
+                    result.success(null)
+                }
             }
 
             AMPSAdSdkMethodNames.INTERSTITIAL_ADD_PRE_LOAD_AD_INFO -> {
@@ -150,8 +175,18 @@ class AMPSInterstitialManager private constructor() {
     }
     
     private fun handleInterstitialLoad(call: MethodCall, result: Result) {
-        interstitialAds[instanceIdFrom(call)]?.loadAd()
-        result.success(true)
+        val ad = interstitialAds[instanceIdFrom(call)]
+        if (ad == null) {
+            // 实例不存在（create 失败或已销毁），必须显式报错，避免静默失败
+            result.error("LOAD_FAILED", "Interstitial ad instance not found, create may have failed.", null)
+            return
+        }
+        try {
+            ad.loadAd()
+            result.success(true)
+        } catch (e: Exception) {
+            result.error("LOAD_EXCEPTION", "Error loading Interstitial ad: ${e.message}", e.toString())
+        }
     }
 
     // handleInterstitialShowAd 现在也接收 MethodCall 和 Result，以便统一错误处理和参数获取
@@ -162,18 +197,32 @@ class AMPSInterstitialManager private constructor() {
             result.error("SHOW_FAILED", "InterstitiaAd ad not loaded.", null)
             return
         }
-       ad.show(activity)
-       result.success(null)
+        if (activity == null) {
+            // activity 为空时也必须回调 result，否则 Flutter 侧 Future 永远不会完成
+            result.error("SHOW_FAILED", "Activity not available for showing Interstitial ad.", null)
+            return
+        }
+        try {
+            ad.show(activity)
+            result.success(null)
+        } catch (e: Exception) {
+            // show 过程异常必须回调 error，否则 Flutter 侧收不到任何消息
+            result.error("SHOW_EXCEPTION", "Error showing Interstitial ad: ${e.message}", e.toString())
+        }
     }
 
     private fun sendMessage(instanceId: String, method: String, args: Any? = null) {
-        val payload = mutableMapOf<String, Any?>(AD_INSTANCE_ID to instanceId)
-        if (args is Map<*, *>) {
-            @Suppress("UNCHECKED_CAST")
-            payload.putAll(args as Map<String, Any?>)
-        } else if (args != null) {
-            payload["data"] = args
+        try {
+            val payload = mutableMapOf<String, Any?>(AD_INSTANCE_ID to instanceId)
+            if (args is Map<*, *>) {
+                @Suppress("UNCHECKED_CAST")
+                payload.putAll(args as Map<String, Any?>)
+            } else if (args != null) {
+                payload["data"] = args
+            }
+            AMPSEventManager.getInstance().sendMessageToFlutter(method, payload)
+        } catch (e: Exception) {
+            // 回传 Flutter 失败不应把异常抛回 AMPS SDK 回调线程
         }
-        AMPSEventManager.getInstance().sendMessageToFlutter(method, payload)
     }
 }

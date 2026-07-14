@@ -39,10 +39,37 @@ class AMPSNativeAd {
     String? instanceId,
   }) : instanceId = instanceId ?? _generateInstanceId() {
     NativeCallbackRouter.instance.register(this.instanceId, _handleCall);
-    AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.nativeCreate,
-      _wrapArgs(config.toMap(nativeType: nativeType)),
-    );
+    _createNativeAd();
+  }
+
+  ///创建原生广告实例，失败时通过loadFail通知，避免静默失败
+  Future<void> _createNativeAd() async {
+    try {
+      await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.nativeCreate,
+        _wrapArgs(config.toMap(nativeType: nativeType)),
+      );
+    } on PlatformException catch (e) {
+      _notifyLoadFailure(e);
+    }
+  }
+
+  ///将原生端返回的错误转发给loadFail回调
+  void _notifyLoadFailure(PlatformException e) {
+    mCallBack?.loadFail?.call(int.tryParse(e.code) ?? -1, e.message ?? e.code);
+  }
+
+  ///回调参数中的错误码可能为null或非int类型，统一安全转换，避免回调分发时抛类型错误
+  static int _safeCode(dynamic code) {
+    if (code is int) return code;
+    if (code is num) return code.toInt();
+    if (code is String) return int.tryParse(code) ?? -1;
+    return -1;
+  }
+
+  ///回调参数中的错误信息可能为null，统一安全转换
+  static String _safeMessage(dynamic message) {
+    return message?.toString() ?? 'unknown error';
   }
 
   static String _generateInstanceId() {
@@ -84,8 +111,8 @@ class AMPSNativeAd {
         break;
       case AMPSNativeCallBackChannelMethod.loadFail:
         mCallBack?.loadFail?.call(
-          mapArgs[AMPSSdkCallBackErrorKey.code],
-          mapArgs[AMPSSdkCallBackErrorKey.message],
+          _safeCode(mapArgs[AMPSSdkCallBackErrorKey.code]),
+          _safeMessage(mapArgs[AMPSSdkCallBackErrorKey.message]),
         );
         break;
       case AMPSNativeCallBackChannelMethod.renderSuccess:
@@ -93,9 +120,9 @@ class AMPSNativeAd {
         break;
       case AMPSNativeCallBackChannelMethod.renderFailed:
         mRenderCallBack?.renderFailed?.call(
-          mapArgs[AMPSSdkCallBackErrorKey.adId],
-          mapArgs[AMPSSdkCallBackErrorKey.code],
-          mapArgs[AMPSSdkCallBackErrorKey.message],
+          mapArgs[AMPSSdkCallBackErrorKey.adId]?.toString() ?? '',
+          _safeCode(mapArgs[AMPSSdkCallBackErrorKey.code]),
+          _safeMessage(mapArgs[AMPSSdkCallBackErrorKey.message]),
         );
         break;
       case AMPSNativeCallBackChannelMethod.onAdShow:
@@ -193,9 +220,9 @@ class AMPSNativeAd {
         {
           final adId = mapArgs[AMPSSdkCallBackErrorKey.adId];
           mVideoPlayerCallBackMap[adId]?.onVideoPlayError?.call(
-            adId,
-            mapArgs[AMPSSdkCallBackErrorKey.code],
-            mapArgs[AMPSSdkCallBackErrorKey.extra],
+            adId?.toString() ?? '',
+            _safeCode(mapArgs[AMPSSdkCallBackErrorKey.code]),
+            _safeMessage(mapArgs[AMPSSdkCallBackErrorKey.extra]),
           );
         }
         break;
@@ -262,32 +289,45 @@ class AMPSNativeAd {
     }
   }
 
+  ///加载调用，失败时通过loadFail通知
   void load() async {
-    AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.nativeLoad,
-      _typedArgs(),
-    );
-  }
-
-  //自渲染类型
-  Future<List<String>> getUnifiedImages(String adId) async {
-    final images = await AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.nativeImages,
-      _argsWithAdId(adId),
-    );
-    if (images is List) {
-      return images.map((item) => item?.toString() ?? '').where((url) => url.isNotEmpty).toList();
+    try {
+      await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.nativeLoad,
+        _typedArgs(),
+      );
+    } on PlatformException catch (e) {
+      _notifyLoadFailure(e);
     }
-    return const [];
   }
 
-  //自渲染类型
+  //自渲染类型，异常时返回空列表
+  Future<List<String>> getUnifiedImages(String adId) async {
+    try {
+      final images = await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.nativeImages,
+        _argsWithAdId(adId),
+      );
+      if (images is List) {
+        return images.map((item) => item?.toString() ?? '').where((url) => url.isNotEmpty).toList();
+      }
+      return const [];
+    } on PlatformException {
+      return const [];
+    }
+  }
+
+  //自渲染类型，异常时返回未知类型
   Future<AMPSUnifiedPattern> getUnifiedPattern(String adId) async {
-    final pattern = await AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.nativePattern,
-      _argsWithAdId(adId),
-    );
-    return AMPSUnifiedPattern.fromValue(pattern);
+    try {
+      final pattern = await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.nativePattern,
+        _argsWithAdId(adId),
+      );
+      return AMPSUnifiedPattern.fromValue(pattern);
+    } on PlatformException {
+      return AMPSUnifiedPattern.adPatternUnknown;
+    }
   }
 
   //下载相关信息
@@ -323,58 +363,86 @@ class AMPSNativeAd {
   ///销毁
   Future<void> destroy() async {
     NativeCallbackRouter.instance.unregister(instanceId);
-    return await AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.nativeDestroy,
-      _typedArgs(),
-    );
+    try {
+      return await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.nativeDestroy,
+        _typedArgs(),
+      );
+    } on PlatformException {
+      // 销毁失败不影响业务流程，但不能抛出未捕获异常
+    }
   }
 
   ///失去焦点
   Future<void> resume() async {
-    return await AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.nativeResume,
-      _typedArgs(),
-    );
+    try {
+      return await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.nativeResume,
+        _typedArgs(),
+      );
+    } on PlatformException {
+      // 异常不能向上抛出，避免未捕获异常
+    }
   }
 
   ///失去焦点
   Future<void> pause() async {
-    return await AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.nativePause,
-      _typedArgs(),
-    );
+    try {
+      return await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.nativePause,
+        _typedArgs(),
+      );
+    } on PlatformException {
+      // 异常不能向上抛出，避免未捕获异常
+    }
   }
 
-  ///获取是否有预加载
+  ///获取是否有预加载，异常时返回false
   Future<bool> isReadyAd(String adId) async {
-    return await AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.nativeIsReadyAd,
-      _argsWithAdId(adId),
-    );
+    try {
+      return await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.nativeIsReadyAd,
+        _argsWithAdId(adId),
+      ) ?? false;
+    } on PlatformException {
+      return false;
+    }
   }
 
-  ///获取ecpm
+  ///获取ecpm，异常时返回0
   Future<num> getECPM(String adId) async {
-    return await AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.nativeGetECPM,
-      _argsWithAdId(adId),
-    );
+    try {
+      return await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.nativeGetECPM,
+        _argsWithAdId(adId),
+      ) ?? 0;
+    } on PlatformException {
+      return 0;
+    }
   }
 
-  ///获取胜出渠道的seatId
+  ///获取胜出渠道的seatId，异常时返回null
   Future<String?> getSeatId() async {
-    return await AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.nativeGetSeatId,
-      _typedArgs(),
-    );
+    try {
+      return await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.nativeGetSeatId,
+        _typedArgs(),
+      );
+    } on PlatformException {
+      return null;
+    }
   }
 
-  ///获取是否是自渲染
+  ///获取是否是自渲染，异常时返回false
   Future<bool> isNativeExpress(String adId) async {
-    return await AdscopeSdk.invokeMethod(
-      AMPSAdSdkMethodNames.nativeIsNativeExpress,
-      _argsWithAdId(adId),
-    );
+    try {
+      return await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.nativeIsNativeExpress,
+        _argsWithAdId(adId),
+      ) ?? false;
+    } on PlatformException {
+      return false;
+    }
   }
 
   void setAdCloseCallBack(String adId, VoidCallback? closeWidgetCall) {

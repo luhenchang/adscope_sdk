@@ -147,7 +147,7 @@ export class AMPSRewardVideoManager {
       },
       onAdClosed: (): void => {
         this.sendMessage(instanceId, AMPSRewardedVideoCallBackChannelMethod.onAdClosed)
-        this.releaseRewardVideo(instanceId)
+        // 不在此处自动销毁实例，与 Android 端行为对齐，由 Flutter 侧 destroy() 统一清理
       },
       onVideoPlayStart: (): void => {
         this.sendMessage(instanceId, AMPSRewardedVideoCallBackChannelMethod.onVideoPlayStart)
@@ -243,7 +243,19 @@ export class AMPSRewardVideoManager {
   }
 
   private sendPayload(method: string, payload: RewardVideoCallbackPayload): void {
-    AMPSEventManager.getInstance().sendMessageToFlutter(method, payload as ESObject)
+    // 以 Map 形式下发，确保 Flutter 侧能解析出 adInstanceId（多实例场景必需）
+    const args = new Map<string, ESObject>()
+    args.set(AD_INSTANCE_ID, payload.adInstanceId)
+    if (payload.code !== undefined) {
+      args.set('code', payload.code)
+    }
+    if (payload.message !== undefined) {
+      args.set('message', payload.message)
+    }
+    if (payload.playDurationMs !== undefined) {
+      args.set('playDurationMs', payload.playDurationMs)
+    }
+    AMPSEventManager.getInstance().sendMessageToFlutter(method, args)
   }
 
   private sendMessage(instanceId: string, method: string): void {

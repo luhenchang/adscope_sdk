@@ -49,11 +49,7 @@ class SplashCallbackRouter {
         break;
       case AMPSSplashAdCallBackChannelMethod.onLoadFailure:
         entry.closeCallback?.call();
-        final failMap = call.arguments as Map<dynamic, dynamic>?;
-        adCallBack?.onLoadFailure?.call(
-          failMap?[AMPSSdkCallBackErrorKey.code],
-          failMap?[AMPSSdkCallBackErrorKey.message],
-        );
+        adCallBack?.onLoadFailure?.call(_errorCode(call.arguments), _errorMessage(call.arguments));
         break;
       case AMPSSplashAdCallBackChannelMethod.onRenderOk:
         adCallBack?.onRenderOk?.call();
@@ -77,11 +73,7 @@ class SplashCallbackRouter {
         break;
       case AMPSSplashAdCallBackChannelMethod.onAdShowError:
         entry.closeCallback?.call();
-        final showErrMap = call.arguments as Map<dynamic, dynamic>?;
-        adCallBack?.onAdShowError?.call(
-          showErrMap?[AMPSSdkCallBackErrorKey.code],
-          showErrMap?[AMPSSdkCallBackErrorKey.message],
-        );
+        adCallBack?.onAdShowError?.call(_errorCode(call.arguments), _errorMessage(call.arguments));
         break;
       case AMPSSplashAdCallBackChannelMethod.onVideoPlayStart:
         adCallBack?.onVideoPlayStart?.call();
@@ -90,11 +82,7 @@ class SplashCallbackRouter {
         adCallBack?.onVideoPlayEnd?.call();
         break;
       case AMPSSplashAdCallBackChannelMethod.onVideoPlayError:
-        final videoErrMap = call.arguments as Map<dynamic, dynamic>?;
-        adCallBack?.onVideoPlayError?.call(
-          videoErrMap?[AMPSSdkCallBackErrorKey.code],
-          videoErrMap?[AMPSSdkCallBackErrorKey.message],
-        );
+        adCallBack?.onVideoPlayError?.call(_errorCode(call.arguments), _errorMessage(call.arguments));
         break;
       case AMPSSplashAdCallBackChannelMethod.onVideoSkipToEnd:
         final skipMap = call.arguments as Map<dynamic, dynamic>?;
@@ -106,6 +94,21 @@ class SplashCallbackRouter {
         adCallBack?.onAdReward?.call();
         break;
     }
+  }
+
+  ///原生端传来的code可能为null或非int类型，做安全转换避免回调抛类型异常被吞掉
+  int _errorCode(dynamic args) {
+    final code = args is Map ? args[AMPSSdkCallBackErrorKey.code] : null;
+    if (code is int) return code;
+    if (code is num) return code.toInt();
+    if (code is String) return int.tryParse(code) ?? -1;
+    return -1;
+  }
+
+  ///原生端传来的message可能为null，做安全转换避免回调抛类型异常被吞掉
+  String _errorMessage(dynamic args) {
+    final message = args is Map ? args[AMPSSdkCallBackErrorKey.message] : null;
+    return message?.toString() ?? 'unknown error';
   }
 
   String? _extractInstanceId(dynamic arguments) {

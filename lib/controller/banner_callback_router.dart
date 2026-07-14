@@ -37,7 +37,7 @@ class BannerCallbackRouter {
         break;
       case AMPSBannerCallBackChannelMethod.onLoadFailure:
         entry.closeCallback?.call();
-        cb?.onLoadFailure?.call(mapArgs[AMPSSdkCallBackErrorKey.code], mapArgs[AMPSSdkCallBackErrorKey.message]);
+        cb?.onLoadFailure?.call(_errorCode(mapArgs), _errorMessage(mapArgs));
         break;
       case AMPSBannerCallBackChannelMethod.onAdShow:
         cb?.onAdShow?.call();
@@ -56,7 +56,7 @@ class BannerCallbackRouter {
         cb?.onVideoPlayEnd?.call();
         break;
       case AMPSBannerCallBackChannelMethod.onVideoPlayError:
-        cb?.onVideoPlayError?.call(mapArgs[AMPSSdkCallBackErrorKey.code], mapArgs[AMPSSdkCallBackErrorKey.message]);
+        cb?.onVideoPlayError?.call(_errorCode(mapArgs), _errorMessage(mapArgs));
         break;
       case AMPSBannerCallBackChannelMethod.onVideoReady:
         cb?.onVideoReady?.call();
@@ -68,6 +68,21 @@ class BannerCallbackRouter {
         cb?.onVideoResume?.call();
         break;
     }
+  }
+
+  ///原生端传来的code可能为null或非int类型，做安全转换避免回调抛类型异常被吞掉
+  int _errorCode(Map<dynamic, dynamic> args) {
+    final code = args[AMPSSdkCallBackErrorKey.code];
+    if (code is int) return code;
+    if (code is num) return code.toInt();
+    if (code is String) return int.tryParse(code) ?? -1;
+    return -1;
+  }
+
+  ///原生端传来的message可能为null，做安全转换避免回调抛类型异常被吞掉
+  String _errorMessage(Map<dynamic, dynamic> args) {
+    final message = args[AMPSSdkCallBackErrorKey.message];
+    return message?.toString() ?? 'unknown error';
   }
 
   String? _resolveInstanceId(dynamic args) {

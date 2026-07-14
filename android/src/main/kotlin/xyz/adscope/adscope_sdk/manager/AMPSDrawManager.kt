@@ -183,12 +183,18 @@ class AMPSDrawManager private constructor() {
         }
 
         override fun onAmpsAdFailed(error: AMPSError?) {
+            // code 可能非数字、message 可能为 null，必须做安全兜底，否则异常会导致 Flutter 收不到失败回调
+            val code = try {
+                error?.code?.toInt() ?: -1
+            } catch (e: Exception) {
+                -1
+            }
             sendMessage(
                 instanceId,
                 AMPSDrawCallbackChannelMethod.ON_LOAD_FAILURE,
                 mapOf(
-                    ErrorModel.CODE to (error?.code?.toInt() ?: -1),
-                    ErrorModel.MESSAGE to error?.message
+                    ErrorModel.CODE to code,
+                    ErrorModel.MESSAGE to (error?.message ?: "load failed")
                 )
             )
         }
@@ -201,6 +207,19 @@ class AMPSDrawManager private constructor() {
 
     @Suppress("UNCHECKED_CAST")
     fun handleMethodCall(call: MethodCall, result: Result) {
+        // 兜底捕获：任何未处理异常都必须回调 result，否则 Flutter 侧 Future 永远不会完成
+        try {
+            handleMethodCallInternal(call, result)
+        } catch (e: Exception) {
+            try {
+                result.error("DRAW_EXCEPTION", "Error handling ${call.method}: ${e.message}", e.toString())
+            } catch (ignored: Exception) {
+                // result 已被回调过，忽略二次回调异常
+            }
+        }
+    }
+
+    private fun handleMethodCallInternal(call: MethodCall, result: Result) {
         when (call.method) {
             AMPSAdSdkMethodNames.DRAW_CREATE -> drawAdCreate(call, result)
             AMPSAdSdkMethodNames.DRAW_LOAD -> handleDrawLoad(call, result)
@@ -275,13 +294,27 @@ class AMPSDrawManager private constructor() {
 
     private fun handleDrawLoad(call: MethodCall, result: Result) {
         val instanceId = instanceIdFrom(call)
-        drawAds[instanceId]?.loadAd()
-        result.success(true)
+        val ad = drawAds[instanceId]
+        if (ad == null) {
+            // 实例不存在（create 失败或已销毁），必须显式报错，避免静默失败
+            result.error("LOAD_FAILED", "Draw ad instance not found, create may have failed.", null)
+            return
+        }
+        try {
+            ad.loadAd()
+            result.success(true)
+        } catch (e: Exception) {
+            result.error("LOAD_EXCEPTION", "Error loading draw ad: ${e.message}", e.toString())
+        }
     }
 
     private fun sendMessage(instanceId: String, method: String, args: Map<String, Any?>) {
-        val payload = mutableMapOf<String, Any?>(AD_INSTANCE_ID to instanceId)
-        payload.putAll(args)
-        AMPSEventManager.getInstance().sendMessageToFlutter(method, payload)
+        try {
+            val payload = mutableMapOf<String, Any?>(AD_INSTANCE_ID to instanceId)
+            payload.putAll(args)
+            AMPSEventManager.getInstance().sendMessageToFlutter(method, payload)
+        } catch (e: Exception) {
+            // 回传 Flutter 失败不应把异常抛回 AMPS SDK 回调线程
+        }
     }
 }

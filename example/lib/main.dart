@@ -7,6 +7,7 @@ import 'banner_widget_page.dart';
 import 'data/common.dart';
 import 'data/init_data.dart';
 import 'draw_page.dart';
+import 'exception_test/exception_test_page.dart';
 import 'interstitial_page.dart';
 import 'interstitial_show_page.dart';
 import 'native_page.dart';
@@ -48,7 +49,8 @@ class MyApp extends StatelessWidget {
       'RewardVideoPage':(context)=> const RewardVideoPage(title: '激励视频页面'),
       'BannerPage':(context)=> const BannerWidgetPage(title: 'Banner页面'),
       'DrawPage':(context)=> const DrawPage(title: 'Draw页面'),
-      'UnionDownloadAppInfoPage': (context) => const UnionDownloadAppInfoPage()
+      'UnionDownloadAppInfoPage': (context) => const UnionDownloadAppInfoPage(),
+      'ExceptionTestPage': (context) => const ExceptionTestPage(),
     };
   }
 }
@@ -78,6 +80,7 @@ class _SplashPageState extends State<SplashPage> {
     {'text': '点击跳转激励视频页面', 'route': 'RewardVideoPage'},
     {'text': '点击跳转Banner页面', 'route': 'BannerPage'},
     {'text': '点击跳转Draw页面', 'route': 'DrawPage'},
+    {'text': '异常防护测试中心', 'route': 'ExceptionTestPage'},
   ];
 
   @override

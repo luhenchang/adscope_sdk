@@ -60,12 +60,18 @@ class AMPSSplashManager private constructor() {
 
         override fun onAmpsAdFailed(error: AMPSError?) {
             cleanupViewsAfterAdClosed(instanceId)
+            // code 可能非数字、message 可能为 null，必须做安全兜底，否则异常会导致 Flutter 收不到失败回调
+            val code = try {
+                error?.code?.toInt() ?: -1
+            } catch (e: Exception) {
+                -1
+            }
             sendMessage(
                 instanceId,
                 AMPSAdCallBackChannelMethod.ON_LOAD_FAILURE,
                 mapOf(
-                    ErrorModel.CODE to (error?.code?.toInt() ?: -1),
-                    ErrorModel.MESSAGE to error?.message
+                    ErrorModel.CODE to code,
+                    ErrorModel.MESSAGE to (error?.message ?: "load failed")
                 )
             )
         }
@@ -104,6 +110,19 @@ class AMPSSplashManager private constructor() {
 
     @Suppress("UNCHECKED_CAST")
     fun handleMethodCall(call: MethodCall, result: Result) {
+        // 兜底捕获：任何未处理异常都必须回调 result，否则 Flutter 侧 Future 永远不会完成
+        try {
+            handleMethodCallInternal(call, result)
+        } catch (e: Exception) {
+            try {
+                result.error("SPLASH_EXCEPTION", "Error handling ${call.method}: ${e.message}", e.toString())
+            } catch (ignored: Exception) {
+                // result 已被回调过，忽略二次回调异常
+            }
+        }
+    }
+
+    private fun handleMethodCallInternal(call: MethodCall, result: Result) {
         val args = argsAsMap(call)
         val instanceId = extractInstanceId(args)
         when (call.method) {
@@ -136,8 +155,14 @@ class AMPSSplashManager private constructor() {
             }
 
             AMPSAdSdkMethodNames.SPLASH_PRE_LOAD -> {
-                splashAds[instanceId]?.preLoad()
-                result.success(null)
+                val ad = splashAds[instanceId]
+                if (ad == null) {
+                    // 实例不存在必须显式报错，避免 Dart 端误以为预加载成功
+                    result.error("PRELOAD_FAILED", "Splash ad instance not found, create may have failed.", null)
+                } else {
+                    ad.preLoad()
+                    result.success(null)
+                }
             }
 
             AMPSAdSdkMethodNames.SPLASH_ADD_PRE_LOAD_AD_INFO -> {
@@ -197,8 +222,13 @@ class AMPSSplashManager private constructor() {
             result.error("LOAD_FAILED", "Splash ad instance not found: $instanceId", null)
             return
         }
-        ad.loadAd()
-        result.success(true)
+        try {
+            ad.loadAd()
+            result.success(true)
+        } catch (e: Exception) {
+            // load 过程异常必须回调 error，否则 Flutter 侧收不到任何消息
+            result.error("LOAD_EXCEPTION", "Error loading splash ad: ${e.message}", e.toString())
+        }
     }
 
     private fun handleSplashShowAd(instanceId: String, call: MethodCall, result: Result) {
@@ -283,15 +313,19 @@ class AMPSSplashManager private constructor() {
     }
 
     private fun sendMessage(instanceId: String, method: String, args: Any? = null) {
-        val payload: MutableMap<String, Any?> = mutableMapOf(SPLASH_INSTANCE_ID to instanceId)
-        when (args) {
-            null -> Unit
-            is Map<*, *> -> {
-                @Suppress("UNCHECKED_CAST")
-                payload.putAll(args as Map<String, Any?>)
+        try {
+            val payload: MutableMap<String, Any?> = mutableMapOf(SPLASH_INSTANCE_ID to instanceId)
+            when (args) {
+                null -> Unit
+                is Map<*, *> -> {
+                    @Suppress("UNCHECKED_CAST")
+                    payload.putAll(args as Map<String, Any?>)
+                }
+                else -> payload["data"] = args
             }
-            else -> payload["data"] = args
+            AMPSEventManager.getInstance().sendMessageToFlutter(method, payload)
+        } catch (e: Exception) {
+            // 回传 Flutter 失败不应把异常抛回 AMPS SDK 回调线程
         }
-        AMPSEventManager.getInstance().sendMessageToFlutter(method, payload)
     }
 }
