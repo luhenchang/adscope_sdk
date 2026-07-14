@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- app_installer：应用内 files 目录（更新包下载路径） -->
+    <files-path name="files" path="." />
+    <cache-path name="cache" path="." />
+    <external-files-path name="external_files" path="." />
+    <external-cache-path name="external_cache" path="." />
+    <!-- 倍孜 SDK -->
+    <external-path name="external_beizi" path="Beizi" />
+    <external-path name="external" path="." />
+</paths>

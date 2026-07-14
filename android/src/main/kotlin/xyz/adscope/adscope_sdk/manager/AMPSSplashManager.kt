@@ -1,5 +1,6 @@
 package xyz.adscope.adscope_sdk.manager
 
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -49,7 +50,6 @@ class AMPSSplashManager private constructor() {
         }
 
         override fun onAmpsAdClicked() {
-            cleanupViewsAfterAdClosed(instanceId)
             sendMessage(instanceId, AMPSAdCallBackChannelMethod.ON_AD_CLICKED)
         }
 

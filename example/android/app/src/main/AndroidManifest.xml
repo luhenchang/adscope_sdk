@@ -6,6 +6,14 @@
     <uses-sdk tools:overrideLibrary="xyz.adscope.amps,
     xyz.adscope.ad,xyz.adscope.amps.adapter.asnp,
     com.beizi.ad,com.beizi.fusion,xyz.adscope.amps.adapter.bz,
+    com.qq.e,xyz.adscope.amps.adapter.gdt,
+    com.kwad.sdk,xyz.adscope.amps.adapter.ks,
+    com.bytedance.pangle,xyz.adscope.amps.adapter.csj,xyz.adscope.amps.adapter.gm,
+    com.baidu.mobads.proxy,xyz.adscope.amps.adapter.bd,
+    com.sigmob.sdk,com.czhj.sdk.common,xyz.adscope.amps.adapter.sigmob,
+    com.qumeng.advlib,xyz.adscope.amps.adapter.qm,
+    com.jd.ad.sdk.multi,xyz.adscope.amps.adapter.jd,
+    com.huawei.hms.ads,xyz.adscope.amps.adapter.hw,
     xyz.adscope.common.v2" />
 
     <!--AsnpSDK所需权限 start-->
