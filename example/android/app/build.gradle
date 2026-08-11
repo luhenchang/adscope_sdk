@@ -72,6 +72,33 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.3.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
+
+    // 必须依赖的库
+    implementation "androidx.lifecycle:lifecycle-process:2.4.1"
+
+    def support_version = "28.0.0" //建议使⽤的26以上的support库版本，建议使⽤28最新的即可。
+// supprot库依赖，SDK内部依赖如下support，请确保添加  BeiZi 快手 百度 需要添加这个
+    //noinspection GradleCompatible
+    implementation "com.android.support:appcompat-v7:$support_version"
+    //noinspection GradleCompatible
+    implementation "com.android.support:recyclerview-v7:$support_version"
+
+    //穿山甲-GroMore融合版本SDK maven库和aar文件二选一集成
+//    implementation "com.pangle.cn:mediation-sdk:6.6.0.7"
+
+
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+
+    // 方歌（SY）渠道的必要依赖
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.31"
+
+
+    //以下是美数的必要依赖
+    implementation 'com.squareup.okhttp3:okhttp:3.12.1'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.android.support:cardview-v7:21.0.0'
+    //使用appcompat:1.1.0版本的，内部不再依赖localbroadcastmanager，需要媒体自己添加
+    implementation "androidx.localbroadcastmanager:localbroadcastmanager:1.0.0"
 }
 flutter {
     source = "../.."
