@@ -7,11 +7,18 @@ import android.util.TypedValue
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import xyz.adscope.adscope_sdk.data.ImageScaleType
 import xyz.adscope.adscope_sdk.data.SplashBottomModule
 
 
 object SplashBottomViewFactory {
     fun String.toColorInt(): Int = Color.parseColor(this)
+
+    private fun ImageScaleType.toImageViewScaleType(): ImageView.ScaleType = when (this) {
+        ImageScaleType.CONTAIN -> ImageView.ScaleType.FIT_CENTER
+        ImageScaleType.COVER -> ImageView.ScaleType.CENTER_CROP
+        ImageScaleType.FILL -> ImageView.ScaleType.FIT_XY
+    }
     /**
      * 根据 SplashBottomModule 数据动态创建一个 RelativeLayout 作为自定义底部视图。
      *
@@ -49,8 +56,7 @@ object SplashBottomViewFactory {
             val inputStream = context.assets.open(flutterAssetPath)
             // 将文件流解码为 Bitmap 对象
             val bitmap: Bitmap = BitmapFactory.decodeStream(inputStream)
-            imageView.setBackgroundColor(Color.LTGRAY) // 临时占位符颜色
-            imageView.scaleType = ImageView.ScaleType.FIT_CENTER // 或其他适合的 ScaleType
+            imageView.scaleType = imgChild.scaleType.toImageViewScaleType()
             imageView.setImageBitmap(bitmap)
             val imgParams = RelativeLayout.LayoutParams(
                 (imgChild.width?.let { it * displayMetrics.density } ?: RelativeLayout.LayoutParams.WRAP_CONTENT).toInt(),

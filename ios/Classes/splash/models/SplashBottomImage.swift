@@ -6,6 +6,28 @@
 //
 
 import Foundation
+import UIKit
+
+enum ImageScaleType: String, Codable {
+    case contain
+    case cover
+    case fill
+
+    var contentMode: UIView.ContentMode {
+        switch self {
+        case .contain:
+            return .scaleAspectFit
+        case .cover:
+            return .scaleAspectFill
+        case .fill:
+            return .scaleToFill
+        }
+    }
+
+    var clipsToBounds: Bool {
+        return self == .cover
+    }
+}
 
 struct SplashBottomImage : Codable{
     
@@ -14,6 +36,5 @@ struct SplashBottomImage : Codable{
     var imagePath: String?
     var width: CGFloat?
     var height: CGFloat?
-    
-    
+    var scaleType: ImageScaleType?
 }

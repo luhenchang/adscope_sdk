@@ -13,6 +13,18 @@ enum class ChildType(val typeName: String) {
     }
 }
 
+enum class ImageScaleType(val typeName: String) {
+    CONTAIN("contain"),
+    COVER("cover"),
+    FILL("fill");
+
+    companion object {
+        fun fromTypeName(name: String?): ImageScaleType {
+            return values().find { it.typeName == name } ?: FILL
+        }
+    }
+}
+
 open class SplashBottomBaseChild(
     open val x: Double? = null,
     open val y: Double? = null
@@ -22,6 +34,7 @@ data class SplashBottomImageChild(
     val width: Double? = null,
     val height: Double? = null,
     val imagePath: String? = null,
+    val scaleType: ImageScaleType = ImageScaleType.FILL,
     override val x: Double? = null,
     override val y: Double? = null
 ) : SplashBottomBaseChild(x, y)
@@ -96,7 +109,8 @@ data class SplashBottomModule(
                 height = (map["height"] as? Number)?.toDouble(),
                 x = (map["x"] as? Number)?.toDouble(),
                 y = (map["y"] as? Number)?.toDouble(),
-                imagePath = map["imagePath"] as? String
+                imagePath = map["imagePath"] as? String,
+                scaleType = ImageScaleType.fromTypeName(map["scaleType"] as? String)
             )
         }
 
