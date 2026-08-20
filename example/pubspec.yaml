@@ -63,6 +63,7 @@ flutter:
     - assets/images/img.png
     - assets/images/close.png
     - assets/images/video_bg.png
+    - assets/images/splash_scale_test.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

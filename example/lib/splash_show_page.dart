@@ -57,7 +57,26 @@ class _SplashShowPageState extends State<SplashShowPage> {
           final b = _splashAds['B'];
           if (b != null) {
             if (_bRenderReady) {
-              b.showAd();
+              b.showAd(splashBottomWidget: SplashBottomWidget(
+                  height: 100,
+                  backgroundColor: "#FFFFFFFF",
+                  children: [
+                    ImageComponent(
+                      width: 45,
+                      height: 45,
+                      x: 170,
+                      y: 10,
+                      imagePath: 'assets/images/img.png',
+                      scaleType: ImageScaleType.cover,
+                    ),
+                    TextComponent(
+                      fontSize: 24,
+                      color: "#00ff00",
+                      x: 140,
+                      y: 50,
+                      text: 'Hello Android!',
+                    ),
+                  ]));
             } else {
               _pendingShowB = true;
             }

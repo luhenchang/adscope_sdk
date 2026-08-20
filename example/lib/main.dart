@@ -12,6 +12,7 @@ import 'interstitial_show_page.dart';
 import 'native_page.dart';
 import 'native_unified_page.dart';
 import 'native_unified_multi_page.dart';
+import 'splash_scale_test_page.dart';
 import 'splash_show_page.dart' show SplashShowPage;
 import 'widgets/blurred_background.dart';
 import 'widgets/button_widget.dart';
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
     return {
       'SplashPage': (context) => const SplashPage(title: '主控面板'),
       'SplashShowPage':(context)=>const SplashShowPage(title: '开屏show页面'),
+      'SplashScaleTestPage': (context) => const SplashScaleTestPage(title: '开屏多分辨率验证'),
       'SplashWidgetPage':(context)=>const SplashWidgetPage(title: '开屏页面'),
       'InterstitialShowPage':(context)=> const InterstitialShowPage(title: '插屏show页面'),
       'InterstitialPage':(context)=> const InterstitialPage(title: '插屏组件页面'),
@@ -69,6 +71,7 @@ class _SplashPageState extends State<SplashPage> {
   // 1. 将重复的按钮配置数据化，方便维护
   final List<Map<String, String>> _menuConfig = [
     {'text': '开屏show案例页面', 'route': 'SplashShowPage'},
+    {'text': '开屏多分辨率验证', 'route': 'SplashScaleTestPage'},
     {'text': '开屏组件案例页面', 'route': 'SplashWidgetPage'},
     {'text': '插屏show案例页面', 'route': 'InterstitialShowPage'},
     {'text': '插屏组件案例页面', 'route': 'InterstitialPage'},
