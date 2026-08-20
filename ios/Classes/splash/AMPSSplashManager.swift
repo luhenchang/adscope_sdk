@@ -144,6 +144,9 @@ class AMPSSplashManager: NSObject {
                     }
                     let imageView = UIImageView(frame: CGRect(x: imageModel.x ?? 0, y: imageModel.y ?? 0, width: imageWidth, height: imageHeight))
                     imageView.image = image
+                    let scaleType = imageModel.scaleType ?? .fill
+                    imageView.contentMode = scaleType.contentMode
+                    imageView.clipsToBounds = scaleType.clipsToBounds
                     
                     bottomView.addSubview(imageView)
 //                    imageView.backgroundColor  = UIColor.orange

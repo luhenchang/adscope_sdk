@@ -1,4 +1,15 @@
 import 'widget_layout.dart';
+
+/// 图片缩放类型，与 Android ImageView.ScaleType 对应
+enum ImageScaleType {
+  /// 完整显示、等比、居中、允许留白 → FIT_CENTER
+  contain,
+  /// 等比铺满，超出裁剪 → CENTER_CROP
+  cover,
+  /// 拉伸变形填满 → FIT_XY
+  fill,
+}
+
 ///开屏底部自定义组件
 class SplashBottomWidget extends LayoutWidget {
   final double height;
@@ -28,6 +39,7 @@ class ImageComponent extends LayoutWidget {
   final double x;
   final double y;
   final String imagePath;
+  final ImageScaleType scaleType;
 
   ImageComponent({
     required this.width,
@@ -35,6 +47,7 @@ class ImageComponent extends LayoutWidget {
     required this.x,
     required this.y,
     required this.imagePath,
+    this.scaleType = ImageScaleType.fill,
   });
 
   @override
@@ -46,6 +59,7 @@ class ImageComponent extends LayoutWidget {
       'x': x,
       'y': y,
       'imagePath': imagePath,
+      'scaleType': scaleType.name,
     };
   }
 }
