@@ -1,7 +1,7 @@
 import PlatformView, { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformView';
 import { AMPSSplashComponent } from './AMPSSplashComponent';
 import { SPLASH_BOTTOM, SPLASH_INSTANCE_ID } from '../common/common';
-import { SplashBottomImageChild, SplashBottomModule, SplashBottomTextChild } from '../splash/SplashBottomModule';
+import { SplashBottomImageChild, SplashBottomModule, SplashBottomTextChild, toImageFit } from '../splash/SplashBottomModule';
 
 //底部自定义组件全局WrappedBuilder
 export let globalSplashBottomBuilder: WrappedBuilder<[]> | undefined  = wrapBuilder(MyBuilder);
@@ -48,6 +48,7 @@ export function MyBuilder() {
         Image($rawfile(`flutter_assets/${imgItem.imagePath}`))
           .width(imgItem?.width)
           .height(imgItem?.height)
+          .objectFit(toImageFit(imgItem?.scaleType))
           .offset({
             x: imgItem?.x,
             y: imgItem?.y

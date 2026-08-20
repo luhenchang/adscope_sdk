@@ -6,6 +6,24 @@ enum ChildType {
   TEXT = 'text'
 }
 
+export enum ImageScaleType {
+  CONTAIN = 'contain',
+  COVER = 'cover',
+  FILL = 'fill'
+}
+
+export function toImageFit(scaleType?: ImageScaleType): ImageFit {
+  switch (scaleType) {
+    case ImageScaleType.CONTAIN:
+      return ImageFit.Contain;
+    case ImageScaleType.COVER:
+      return ImageFit.Cover;
+    case ImageScaleType.FILL:
+    default:
+      return ImageFit.Fill;
+  }
+}
+
 // 提取子组件通用属性，减少重复代码
 class SplashBottomBaseChild {
   x?: number;
@@ -17,6 +35,7 @@ export class SplashBottomImageChild extends SplashBottomBaseChild {
   width?: number;
   height?: number;
   imagePath?: string;
+  scaleType: ImageScaleType = ImageScaleType.FILL;
 }
 
 // 继承通用父类，并补充自身特有属性
@@ -77,7 +96,19 @@ export class SplashBottomModule {
     child.x = map.get('x') as number;
     child.y = map.get('y') as number;
     child.imagePath = map.get('imagePath') as string;
+    child.scaleType = this.parseScaleType(map.get('scaleType'));
     return child;
+  }
+
+  private parseScaleType(value: Object | undefined): ImageScaleType {
+    const typeName = value as string;
+    if (typeName === ImageScaleType.CONTAIN) {
+      return ImageScaleType.CONTAIN;
+    }
+    if (typeName === ImageScaleType.COVER) {
+      return ImageScaleType.COVER;
+    }
+    return ImageScaleType.FILL;
   }
 
   private createTextChild(map: Map<string, Object>): SplashBottomTextChild {
