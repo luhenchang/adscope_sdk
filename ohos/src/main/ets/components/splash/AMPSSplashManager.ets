@@ -8,7 +8,7 @@ import {
 import { AMPSEventManager } from '../common/AMPSEventManager';
 import { ampsAd, AMPSSplashAd } from 'xyz.adscope.amps';
 import { AdOptionsModule } from '../common/AdOptionsModule';
-import { SplashBottomImageChild, SplashBottomModule, SplashBottomTextChild } from '../splash/SplashBottomModule';
+import { SplashBottomImageChild, SplashBottomModule, SplashBottomTextChild, toImageFit } from '../splash/SplashBottomModule';
 import { window } from '@kit.ArkUI';
 
 export let globalSplashBottomBuilder: WrappedBuilder<[]> | undefined  = wrapBuilder(SplashBottomBuilder);
@@ -329,6 +329,7 @@ export function SplashBottomBuilder() {
         Image($rawfile(`flutter_assets/${imgItem.imagePath}`))
           .width(imgItem?.width)
           .height(imgItem?.height)
+          .objectFit(toImageFit(imgItem?.scaleType))
           .offset({
             x: imgItem?.x,
             y: imgItem?.y
