@@ -73,17 +73,20 @@ class _SplashScaleTestPageState extends State<SplashScaleTestPage> {
     _isLoading = true;
     _splashAd?.destroy();
     final size = MediaQuery.of(context).size;
+    const bottomHeight = 120.0;
     late final AMPSSplashAd splashAd;
     splashAd = AMPSSplashAd(
       config: AdOptions(
         spaceId: splashSpaceId,
         timeoutInterval: timeOut,
-        expressSize: [size.width, size.height],
+        expressSize: [size.width, size.height - bottomHeight],
+        splashAdBottomBuilderHeight: bottomHeight.toInt(),
+        splashBottomWidget: _buildBottomWidget(autoSize: autoSize),
       ),
       mCallBack: AdCallBack(
         onRenderOk: () {
           _isLoading = false;
-          splashAd.showAd(splashBottomWidget: _buildBottomWidget(autoSize: autoSize));
+          splashAd.showAd();
         },
         onLoadFailure: (code, msg) {
           _isLoading = false;

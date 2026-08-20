@@ -19,6 +19,30 @@ class _SplashShowPageState extends State<SplashShowPage> {
   bool _pendingShowB = false;
   bool couldBack = true;
 
+  SplashBottomWidget _splashBottomWidget() {
+    return SplashBottomWidget(
+      height: 100,
+      backgroundColor: '#FFFFFFFF',
+      children: [
+        ImageComponent(
+          width: 45,
+          height: 45,
+          x: 170,
+          y: 10,
+          imagePath: 'assets/images/img.png',
+          scaleType: ImageScaleType.cover,
+        ),
+        TextComponent(
+          fontSize: 24,
+          color: '#00ff00',
+          x: 140,
+          y: 50,
+          text: 'Hello Android!',
+        ),
+      ],
+    );
+  }
+
   AdCallBack _callbackFor(String label) {
     return AdCallBack(
       onRenderOk: () async {
@@ -57,26 +81,7 @@ class _SplashShowPageState extends State<SplashShowPage> {
           final b = _splashAds['B'];
           if (b != null) {
             if (_bRenderReady) {
-              b.showAd(splashBottomWidget: SplashBottomWidget(
-                  height: 100,
-                  backgroundColor: "#FFFFFFFF",
-                  children: [
-                    ImageComponent(
-                      width: 45,
-                      height: 45,
-                      x: 170,
-                      y: 10,
-                      imagePath: 'assets/images/img.png',
-                      scaleType: ImageScaleType.cover,
-                    ),
-                    TextComponent(
-                      fontSize: 24,
-                      color: "#00ff00",
-                      x: 140,
-                      y: 50,
-                      text: 'Hello Android!',
-                    ),
-                  ]));
+              b.showAd();
             } else {
               _pendingShowB = true;
             }
@@ -95,7 +100,9 @@ class _SplashShowPageState extends State<SplashShowPage> {
     final options = AdOptions(
       spaceId: splashSpaceId,
       timeoutInterval: timeOut,
-      expressSize: [size.width, size.height-100],
+      expressSize: [size.width,  size.height - 100],
+      splashAdBottomBuilderHeight: 100,
+      splashBottomWidget:  _splashBottomWidget(),
     );
     final ad = AMPSSplashAd(config: options, mCallBack: _callbackFor(label));
     _splashAds[label] = ad;

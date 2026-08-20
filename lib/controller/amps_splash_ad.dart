@@ -3,7 +3,6 @@ import 'dart:ui';
 import '../adscope_sdk.dart';
 import '../common.dart';
 import '../data/amps_ad.dart';
-import '../widget/splash_bottom_widget.dart';
 import 'splash_callback_router.dart';
 
 ///开屏广告类
@@ -63,12 +62,11 @@ class AMPSSplashAd {
   }
 
   ///开屏广告显示调用
-  void showAd({SplashBottomWidget? splashBottomWidget}) async {
-    final Map<String, dynamic> args = _instanceOnlyArgs();
-    if (splashBottomWidget != null) {
-      args[splashBottomView] = splashBottomWidget.toMap();
-    }
-    await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.splashShowAd, args);
+  void showAd() async {
+    await AdscopeSdk.invokeMethod(
+      AMPSAdSdkMethodNames.splashShowAd,
+      _instanceOnlyArgs(),
+    );
   }
 
   ///开屏广告是否有预加载

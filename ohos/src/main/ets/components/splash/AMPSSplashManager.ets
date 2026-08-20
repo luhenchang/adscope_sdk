@@ -257,6 +257,12 @@ export class AMPSSplashManager {
 
       const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(args);
       adOption.adCount = 1
+      const splashBottomModule = this.resolveBottomModule(args)
+      if (splashBottomModule) {
+        this.splashBottomModules.set(instanceId, splashBottomModule)
+      } else {
+        this.splashBottomModules.delete(instanceId)
+      }
       let context = AMPSEventManager.getInstance().getContext()
       this.mWindowStage = context?.windowStage;
       if (this.mWindowStage) {
@@ -286,13 +292,7 @@ export class AMPSSplashManager {
       const context = AMPSEventManager.getInstance().getContext()
       const windowStage = context?.windowStage ?? this.mWindowStage
       if (splashAd && windowStage) {
-        const splashBottomModule = this.resolveBottomModule(args)
         this.currentShowingInstanceId = instanceId
-        if (splashBottomModule) {
-          this.splashBottomModules.set(instanceId, splashBottomModule)
-        } else {
-          this.splashBottomModules.delete(instanceId)
-        }
         const showOptions = new SplashShowAdOptions(windowStage, globalSplashBottomBuilder)
         splashAd.showAd(showOptions);
         result.success(true);

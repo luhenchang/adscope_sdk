@@ -1,6 +1,7 @@
 
 import 'dart:ui';
 import '../common.dart';
+import '../widget/splash_bottom_widget.dart';
 
 ///广告加载入参参数
 class AdOptions {
@@ -11,6 +12,7 @@ class AdOptions {
   final int? timeoutInterval;
   final List<num?>? expressSize;
   final int? splashAdBottomBuilderHeight;
+  final SplashBottomWidget? splashBottomWidget;
   final String? userId;
   final String? extra;
   final Map<String,dynamic>? extraDataMap;
@@ -25,6 +27,7 @@ class AdOptions {
     this.timeoutInterval,
     this.expressSize,
     this.splashAdBottomBuilderHeight,
+    this.splashBottomWidget,
     this.userId,
     this.extra,
     this.extraDataMap,
@@ -33,7 +36,7 @@ class AdOptions {
   });
 
   Map<dynamic, dynamic> toMap({NativeType? nativeType}) {
-    return {
+    final map = <dynamic, dynamic>{
       'nativeType': nativeType?.value??0,
       'spaceId': spaceId,
       'apiKey': apiKey,
@@ -48,6 +51,10 @@ class AdOptions {
       'customExtraParameters': customExtraMap,
       'ipAddress': ipAddress
     };
+    if (splashBottomWidget != null) {
+      map[splashBottomView] = splashBottomWidget!.toMap();
+    }
+    return map;
   }
 }
 

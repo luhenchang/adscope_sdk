@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class AMPSSplashManager private constructor() {
     private val splashAds = ConcurrentHashMap<String, AMPSSplashAd>()
+    private val splashBottomModules = ConcurrentHashMap<String, SplashBottomModule>()
 
     companion object {
         @Volatile
@@ -55,6 +56,7 @@ class AMPSSplashManager private constructor() {
 
         override fun onAmpsAdDismiss() {
             cleanupViewsAfterAdClosed(instanceId)
+            splashBottomModules.remove(instanceId)
             sendMessage(instanceId, AMPSAdCallBackChannelMethod.ON_AD_CLOSED)
         }
 
@@ -161,6 +163,7 @@ class AMPSSplashManager private constructor() {
             AMPSAdSdkMethodNames.SPLASH_DESTROY -> {
                 if (instanceId != null) {
                     splashAds.remove(instanceId)?.destroy()
+                    splashBottomModules.remove(instanceId)
                     cleanupViewsAfterAdClosed(instanceId)
                 }
                 result.success(null)
@@ -183,6 +186,13 @@ class AMPSSplashManager private constructor() {
             return
         }
         val adOption = AdOptionsModule.getAdOptionFromMap(adOptionsMap, activity)
+        SplashBottomModule.fromMap(resolveBottomMap(adOptionsMap))?.let { module ->
+            if (module.initialized && module.height > 0) {
+                splashBottomModules[instanceId] = module
+            } else {
+                splashBottomModules.remove(instanceId)
+            }
+        } ?: splashBottomModules.remove(instanceId)
         try {
             splashAds[instanceId] = AMPSSplashAd(activity, adOption, createAdCallback(instanceId))
             result.success(true)
@@ -231,8 +241,7 @@ class AMPSSplashManager private constructor() {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
 
-            val args = argsAsMap(call)
-            val splashBottomData = SplashBottomModule.fromMap(resolveBottomMap(args))
+            val splashBottomData = splashBottomModules[instanceId]
 
             var customBottomLayoutLocal: View? = null
             var customBottomLayoutId: Int = View.NO_ID

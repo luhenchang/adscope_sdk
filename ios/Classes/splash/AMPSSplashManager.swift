@@ -15,6 +15,7 @@ class AMPSSplashManager: NSObject {
     private override init() {super.init()}
     
     private var splashAds: [String: AMPSSplashAd] = [:]
+    private var splashBottomParams: [String: [String: Any]] = [:]
     
     // MARK: - Public Methods
     func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -76,6 +77,11 @@ class AMPSSplashManager: NSObject {
         let ad = AMPSSplashAd(spaceId: config.spaceId, adConfiguration: config)
         ad.delegate = self
         splashAds[instanceId] = ad
+        if let bottom = resolveBottomParams(param) {
+            splashBottomParams[instanceId] = bottom
+        } else {
+            splashBottomParams.removeValue(forKey: instanceId)
+        }
         result(true)
     }
     
@@ -110,7 +116,7 @@ class AMPSSplashManager: NSObject {
             result(false)
             return
         }
-        if let param = resolveBottomParams(arguments) {
+        if let param = splashBottomParams[instanceId] {
             let height = param["height"] as? CGFloat ?? 0
             let bgColor = param["backgroundColor"] as? String
             var imageModel: SplashBottomImage?
@@ -180,6 +186,7 @@ class AMPSSplashManager: NSObject {
         splashAds[instanceId]?.delegate = nil
         splashAds[instanceId]?.remove()
         splashAds.removeValue(forKey: instanceId)
+        splashBottomParams.removeValue(forKey: instanceId)
     }
     
     private func sendMessage(_ method: String, instanceId: String, args: [String: Any]? = nil) {
