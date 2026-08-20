@@ -95,7 +95,7 @@ class _SplashShowPageState extends State<SplashShowPage> {
     final options = AdOptions(
       spaceId: splashSpaceId,
       timeoutInterval: timeOut,
-      expressSize: [size.width, size.height],
+      expressSize: [size.width, size.height-100],
     );
     final ad = AMPSSplashAd(config: options, mCallBack: _callbackFor(label));
     _splashAds[label] = ad;
