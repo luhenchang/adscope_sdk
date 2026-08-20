@@ -1,7 +1,5 @@
 package xyz.adscope.adscope_sdk.view
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.util.TypedValue
 import android.widget.ImageView
@@ -9,6 +7,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import xyz.adscope.adscope_sdk.data.ImageScaleType
 import xyz.adscope.adscope_sdk.data.SplashBottomModule
+import xyz.adscope.adscope_sdk.utils.FlutterAssetLoader
 
 
 object SplashBottomViewFactory {
@@ -51,17 +50,19 @@ object SplashBottomViewFactory {
 
         // 2. 添加图片子视图 (如果存在)
         bottomModule.imgChildren?.let { imgChild ->
+            val asset = FlutterAssetLoader.loadImage(context, imgChild.imagePath) ?: return@let
             val imageView = ImageView(context)
-            val flutterAssetPath = "flutter_assets/${imgChild.imagePath}"
-            val inputStream = context.assets.open(flutterAssetPath)
-            // 将文件流解码为 Bitmap 对象
-            val bitmap: Bitmap = BitmapFactory.decodeStream(inputStream)
             imageView.scaleType = imgChild.scaleType.toImageViewScaleType()
-            imageView.setImageBitmap(bitmap)
-            val imgParams = RelativeLayout.LayoutParams(
-                (imgChild.width?.let { it * displayMetrics.density } ?: RelativeLayout.LayoutParams.WRAP_CONTENT).toInt(),
-                (imgChild.height?.let { it * displayMetrics.density } ?: RelativeLayout.LayoutParams.WRAP_CONTENT).toInt()
-            )
+            imageView.setImageBitmap(asset.bitmap)
+            val imageWidthPx = imgChild.width
+                ?.takeIf { it > 0 }
+                ?.let { (it * displayMetrics.density).toInt() }
+                ?: FlutterAssetLoader.logicalWidthPx(context, asset.bitmap, asset.assetScale)
+            val imageHeightPx = imgChild.height
+                ?.takeIf { it > 0 }
+                ?.let { (it * displayMetrics.density).toInt() }
+                ?: FlutterAssetLoader.logicalHeightPx(context, asset.bitmap, asset.assetScale)
+            val imgParams = RelativeLayout.LayoutParams(imageWidthPx, imageHeightPx)
             // 设置边距来模拟 x, y 坐标 (相对于父 RelativeLayout 的左上角)
             imgParams.leftMargin = (imgChild.x?.let { it * displayMetrics.density } ?: 0.0).toInt()
             imgParams.topMargin = (imgChild.y?.let { it * displayMetrics.density } ?: 0.0).toInt()
