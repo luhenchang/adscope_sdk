@@ -132,13 +132,21 @@ class AMPSSplashManager: NSObject {
                 }
                 
                 if let imageModel = imageModel {
-                    let imageView = UIImageView(frame: CGRect(x: imageModel.x ?? 0, y: imageModel.y ?? 0, width: imageModel.width ?? 100, height: imageModel.height ?? 100))
-                    if let imageName =  imageModel.imagePath {
-                        imageView.image = AMPSEventManager.shared.getImage(imageName)
+                    let image = imageModel.imagePath.flatMap { AMPSEventManager.shared.getImage($0) }
+                    var imageWidth = imageModel.width ?? 0
+                    var imageHeight = imageModel.height ?? 0
+                    // 宽或高传 0 时，自适应图片原始大小
+                    if imageWidth <= 0 {
+                        imageWidth = image?.size.width ?? 100
                     }
+                    if imageHeight <= 0 {
+                        imageHeight = image?.size.height ?? 100
+                    }
+                    let imageView = UIImageView(frame: CGRect(x: imageModel.x ?? 0, y: imageModel.y ?? 0, width: imageWidth, height: imageHeight))
+                    imageView.image = image
                     
                     bottomView.addSubview(imageView)
-                    imageView.backgroundColor  = UIColor.orange
+//                    imageView.backgroundColor  = UIColor.orange
                 }
                 if let text = textModel?.text {
                     let widht = window.bounds.width - (textModel?.x ?? 0)

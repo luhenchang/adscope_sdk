@@ -60,10 +60,25 @@ class AMPSEventManager : NSObject{
         arr1.removeLast()
         let dir = arr1.joined(separator: "/")
         
+        guard let frameworkPath = Bundle.main.path(forResource: "App", ofType: "framework", inDirectory: "Frameworks"),
+              let bundle = Bundle(path: frameworkPath) else {
+            return nil
+        }
         
-        if let frameworkPath = Bundle.main.path(forResource: "App", ofType: "framework", inDirectory: "Frameworks"),
-           let imagePath = Bundle(path: frameworkPath)?.path(forResource: source, ofType: type, inDirectory: dir) { // 从路径加载图片
-            if let image = UIImage(contentsOfFile: imagePath) {
+        // 根据屏幕 scale 优先选择对应分辨率的变体目录，不存在时回退到低分辨率
+        let scale = UIScreen.main.scale
+        let variants: [String]
+        if scale >= 3 {
+            variants = ["3.0x", "2.0x", ""]
+        } else if scale >= 2 {
+            variants = ["2.0x", ""]
+        } else {
+            variants = [""]
+        }
+        for variant in variants {
+            let variantDir = variant.isEmpty ? dir : dir + "/" + variant
+            if let imagePath = bundle.path(forResource: source, ofType: type, inDirectory: variantDir),
+               let image = UIImage(contentsOfFile: imagePath) {
                 return image
             }
         }
