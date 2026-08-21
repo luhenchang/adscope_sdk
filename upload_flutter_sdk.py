@@ -20,15 +20,15 @@ from pathlib import Path
 from urllib import error, request
 
 
-UPLOAD_URL = "https://m-new.adscope.com.cn/api/product/mediation/sdk/upload/flutter"
+UPLOAD_URL = "https://product-api.ad-scope.com.cn/media/sdk/upload/flutter"
 
 DEFAULT_FLUTTER_VERSIONS = [
     {
-        "version": "0.2.2",
+        "version": "0.2.4",
         "downloadUrl": "https://pub.dev/packages/adscope_sdk",
         "fileSize": 8600263,
-        "flutterUpdateTime": "2025-07-14 16:20:00",
-        "supportedSdkVersions": "Android ≥ v5.1.2.6, iOS ≥ v5.1.2.3",
+        "flutterUpdateTime": "2026-08-21 10:20:00",
+        "supportedSdkVersions": "Android ≥ v5.1.3.0, iOS ≥ v5.1.2.8",
     }
 ]
 
