@@ -98,6 +98,9 @@ class AMPSNativeAd {
           mapArgs[AMPSSdkCallBackErrorKey.message],
         );
         break;
+      case AMPSNativeCallBackChannelMethod.onCarouselAdLoad:
+        mRenderCallBack?.onCarouselAdLoad?.call(mapArgs[AMPSSdkCallBackErrorKey.adId]);
+        break;
       case AMPSNativeCallBackChannelMethod.onAdShow:
         {
           final adId = mapArgs[AMPSSdkCallBackErrorKey.adId];

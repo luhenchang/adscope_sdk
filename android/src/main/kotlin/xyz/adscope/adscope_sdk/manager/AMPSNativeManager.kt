@@ -15,6 +15,7 @@ import xyz.adscope.adscope_sdk.data.ErrorModel.MESSAGE
 import xyz.adscope.adscope_sdk.data.NATIVE_TYPE
 import xyz.adscope.adscope_sdk.data.NativeType
 import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
+import xyz.adscope.adscope_sdk.view.AMPSUnifiedView
 import xyz.adscope.amps.ad.nativead.AMPSNativeAd
 import xyz.adscope.amps.ad.nativead.AMPSNativeLoadEventListener
 import xyz.adscope.amps.ad.nativead.adapter.AMPSNativeAdExpressListener
@@ -269,7 +270,8 @@ class AMPSNativeManager {
     private fun setNoExpressAdListener(
         instanceId: String,
         uniqueId: String?,
-        item: AMPSUnifiedNativeItem
+        item: AMPSUnifiedNativeItem,
+        notifyRenderSuccess: Boolean = true
     ) {
         if (uniqueId != null) {
             item.setNativeAdEventListener(object : AMPSUnifiedAdEventListener {
@@ -301,14 +303,64 @@ class AMPSNativeManager {
                         mapOf(AD_ID to uniqueId, CODE to p0, MESSAGE to p1)
                     )
                 }
+
+                override fun onCarouselAdLoad(newItem: AMPSUnifiedNativeItem?) {
+                    handleCarouselAdLoad(instanceId, uniqueId, item, newItem)
+                }
             })
             AdUnifiedWrapperManager.getInstance().addAdItem(uniqueId, item)
+            if (notifyRenderSuccess) {
+                sendMessage(
+                    instanceId,
+                    AMPSNativeCallBackChannelMethod.RENDER_SUCCESS,
+                    mapOf(AD_ID to uniqueId)
+                )
+            }
+        }
+    }
+
+    /**
+     * SDK 轮播下一条素材：同一 Flutter [uniqueId] 槽位替换 [AMPSUnifiedNativeItem]，
+     * 旧 item 由 SDK 延后 destroy，这里只换映射、重绑监听并通知 Dart 刷新布局。
+     */
+    private fun handleCarouselAdLoad(
+        instanceId: String,
+        uniqueId: String,
+        oldItem: AMPSUnifiedNativeItem,
+        newItem: AMPSUnifiedNativeItem?
+    ) {
+        if (newItem == null || newItem === oldItem) {
+            return
+        }
+        val idMap = unifiedIdMap(instanceId)
+        idMap.remove(oldItem)
+        idMap[newItem] = uniqueId
+        bindCarouselItem(instanceId, uniqueId, newItem)
+        AMPSUnifiedView.refresh(uniqueId)
+        sendMessage(
+            instanceId,
+            AMPSNativeCallBackChannelMethod.ON_CAROUSEL_AD_LOAD,
+            mapOf(AD_ID to uniqueId)
+        )
+    }
+
+    private fun bindCarouselItem(
+        instanceId: String,
+        uniqueId: String,
+        item: AMPSUnifiedNativeItem
+    ) {
+        setDownLoadListener(instanceId, item, uniqueId)
+        item.setNegativeFeedbackListener {
             sendMessage(
                 instanceId,
-                AMPSNativeCallBackChannelMethod.RENDER_SUCCESS,
+                AMPSNativeCallBackChannelMethod.ON_COMPLAIN_SUCCESS,
                 mapOf(AD_ID to uniqueId)
             )
         }
+        if (item.isExpressAd) {
+            return
+        }
+        setNoExpressAdListener(instanceId, uniqueId, item, notifyRenderSuccess = false)
     }
 
     fun handleMethodCall(call: MethodCall, result: MethodChannel.Result) {

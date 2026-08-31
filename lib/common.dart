@@ -117,6 +117,8 @@ class AMPSNativeCallBackChannelMethod {
   static const String loadFail = "loadFail";
   static const String renderSuccess = "renderSuccess";
   static const String renderFailed = "renderFailed";
+  /// 自渲染轮播刷新：同一 adId 素材被替换，需重新取 pattern/images 并重建 PlatformView
+  static const String onCarouselAdLoad = "onCarouselAdLoad";
   ///具体广告组件回调
   static const String onAdShow = "onAdShow";
   static const String onAdExposure = "onAdExposure";

@@ -24,7 +24,18 @@ class AMPSUnifiedNAtiveViewFactory: NSObject, FlutterPlatformViewFactory {
       
 class AMPSSelfRenderView : NSObject, FlutterPlatformView {
     
+    private static let views = NSMapTable<NSString, AMPSSelfRenderView>(keyOptions: .strongMemory, valueOptions: .weakMemory)
+    private static let selfRenderTag = 0xAD5C0DE
+    
+    static func refresh(_ adId: String) {
+        views.object(forKey: adId as NSString)?.reloadAd()
+    }
+    
     private var iosView: UIView
+    private var adId: String?
+    private var layoutModel: FlutterUnifiedParam?
+    private weak var unifiedAdView: AMPSUnifiedNativeView?
+    
     init(frame: CGRect,viewId: Int64,args:Any?) {
         self.iosView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 300))
         super.init()
@@ -34,19 +45,21 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
             let model: FlutterUnifiedParam? = Tools.convertToModel(from: param as [String : Any])
             if let adId = model?.adId {
                if let adView = AMPSNativeManager.shared.getUnifiedNativeView(adId) {
+                   self.adId = adId
+                   self.layoutModel = model
+                   self.unifiedAdView = adView
+                   AMPSSelfRenderView.views.setObject(self, forKey: adId as NSString)
                    if adView.nativeAd.nativeMode == .nativeExpress {
+                       adView.removeFromSuperview()
                        self.iosView.addSubview(adView)
                        return
                    }
                    
-//                   self.iosView.frame.size.width = UIScreen.main.bounds.width
-//                   self.iosView.frame.size.height = model?.unifiedWidget?.height ?? 200
-//                   let x =  (UIScreen.main.bounds.width - (model?.unifiedWidget?.width ?? 0))/2
                    adView.frame  =  CGRect(x:0, y: 0, width: model?.unifiedWidget?.width ?? UIScreen.main.bounds.width, height: model?.unifiedWidget?.height ?? self.iosView.frame.size.height)
                    if let bgColor = model?.unifiedWidget?.backgroundColor {
                        adView.backgroundColor = UIColor(hexString: bgColor)
                    }
-//                   adView.backgroundColor = UIColor.blue
+                   adView.removeFromSuperview()
                    self.iosView.addSubview(adView)
                    self.layoutItems(adView,model!)
                }
@@ -57,8 +70,26 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
         return iosView
     }
     
+    /// 轮播换素材后，同一套 Flutter 布局模型重新填充新的 nativeAd。
+    func reloadAd() {
+        guard let adView = unifiedAdView ?? (adId.flatMap { AMPSNativeManager.shared.getUnifiedNativeView($0) }),
+              let model = layoutModel else { return }
+        unifiedAdView = adView
+        layoutItems(adView, model)
+    }
+    
+    private func clearSelfRenderSubviews(_ adView: AMPSUnifiedNativeView) {
+        adView.subviews.filter { $0.tag == AMPSSelfRenderView.selfRenderTag }.forEach {
+            $0.removeFromSuperview()
+        }
+    }
+    
+    private func markSelfRender(_ view: UIView) {
+        view.tag = AMPSSelfRenderView.selfRenderTag
+    }
     
     func layoutItems(_ adView: AMPSUnifiedNativeView, _ model: FlutterUnifiedParam){
+        clearSelfRenderSubviews(adView)
                 
         var clickViews: [UIView] = []
         let ad = adView.nativeAd
@@ -105,6 +136,7 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
                         }
                     }
                 }
+                markSelfRender(imageView)
                 adView.addSubview(imageView)
                 if imgModel.clickType == 0 {
                     clickViews.append(imageView)
@@ -132,7 +164,7 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
                     }
                 }
             }
-            
+            markSelfRender(imageView)
             adView.addSubview(imageView)
                              
         }
@@ -152,6 +184,7 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
                     }
                 }
             }
+            markSelfRender(adLogoImageView)
             adView.addSubview(adLogoImageView)
             if imgModel.clickType == 0 {
                 clickViews.append(adLogoImageView)
@@ -182,6 +215,7 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
                         }
                 }
             }
+            markSelfRender(iconImageView)
             adView.addSubview(iconImageView)
             if imgModel.clickType == 0 {
                 clickViews.append(iconImageView)
@@ -205,6 +239,7 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
             if let color = imgModel.color {
                 titleLabel.textColor = UIColor(hexString: color)
             }
+            markSelfRender(titleLabel)
             adView.addSubview(titleLabel)
             if imgModel.clickType == 0 {
                 clickViews.append(titleLabel)
@@ -237,6 +272,7 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
             if let color = imgModel.color {
                 descLabel.textColor = UIColor(hexString: color)
             }
+            markSelfRender(descLabel)
             adView.addSubview(descLabel)
             if imgModel.clickType == 0 {
                 clickViews.append(descLabel)

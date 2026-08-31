@@ -214,12 +214,7 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
                 AppCompatImageView(context).apply {
                     layoutParams = createLayoutParams(child.width, child.height, child.x, child.y)
                     scaleType = ImageView.ScaleType.CENTER_CROP//目前用户设置多大就多大。
-                    ImageLoader.getInstance().loadMainImage(
-                        this,
-                        imageUrl,
-                        false,
-                        imageFillResult("mainImage", imageUrl)
-                    )
+                    loadAdImage(this, imageUrl, "mainImage")
                     // 为我们自己创建的视图设置点击监听
                     setupClickListener(this, child.clickType, child.clickIdType)
                 }
@@ -264,12 +259,7 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
                 }
             }
             setupClickListener(this, child.clickType, child.clickIdType)
-            ImageLoader.getInstance().loadMainImage(
-                this,
-                imageUrl,
-                false,
-                imageFillResult("imagesChild", imageUrl)
-            )
+            loadAdImage(this, imageUrl, "imagesChild")
         }
     }
 
@@ -391,12 +381,7 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
             val actionIv = ImageView(context)
             actionIv.scaleType = ImageView.ScaleType.FIT_CENTER
             actionIv.layoutParams = layoutParams
-            ImageLoader.getInstance().loadMainImage(
-                actionIv,
-                actionButtonText,
-                false,
-                imageFillResult("actionButton", actionButtonText)
-            )
+            loadAdImage(actionIv, actionButtonText, "actionButton")
             return actionIv
         } else {
             val textView = TextView(context)
@@ -474,12 +459,7 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
         } else if (!TextUtils.isEmpty(unifiedItem.adSourceLogoUrl)) {
             AppCompatImageView(context).apply {
                 layoutParams = createLayoutParams(child.width, child.height, child.x, child.y)
-                ImageLoader.getInstance().loadMainImage(
-                    this,
-                    unifiedItem.adSourceLogoUrl,
-                    false,
-                    imageFillResult("adSourceLogo", unifiedItem.adSourceLogoUrl)
-                )
+                loadAdImage(this, unifiedItem.adSourceLogoUrl, "adSourceLogo", saveTemporary = false)
                 setupClickListener(this, child.clickType, child.clickIdType)
             }
         } else {
@@ -495,12 +475,7 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
         return if (unifiedItem.iconUrl != null) {
             AppCompatImageView(context).apply {
                 layoutParams = createLayoutParams(child.width, child.height, child.x, child.y)
-                ImageLoader.getInstance().loadMainImage(
-                    this,
-                    unifiedItem.iconUrl,
-                    false,
-                    imageFillResult("appIcon", unifiedItem.iconUrl)
-                )
+                loadAdImage(this, unifiedItem.iconUrl, "appIcon", saveTemporary = false)
                 setupClickListener(this, child.clickType, child.clickIdType)
             }
         } else {
@@ -533,14 +508,44 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
         }
     }
 
-    private fun imageFillResult(imageTag: String, imageUrl: String?): IImageFillResult {
+    /**
+     * common 5.1.3.x：[ImageLoader.with] 链式加载。
+     * 使用 applicationContext，避免 Flutter PlatformView 的 Context 拿不到 cacheDir。
+     * 主图走临时缓存；logo / icon 走永久缓存，对应旧 API 的 loadMainImage / loadPermanentImage。
+     */
+    private fun loadAdImage(
+        imageView: ImageView,
+        url: String?,
+        tag: String,
+        saveTemporary: Boolean = true
+    ) {
+        if (url.isNullOrEmpty()) {
+            Log.w(TAG, "loadAdImage skip empty url, tag=$tag")
+            return
+        }
+        val loadContext = imageView.context.applicationContext ?: imageView.context
+        imageView.post {
+            ImageLoader.with(loadContext)
+                .load(url)
+                .saveTemporary(saveTemporary)
+                .listener(imageFillResult(imageView, tag, url))
+                .into(imageView)
+        }
+    }
+
+    private fun imageFillResult(
+        imageView: ImageView,
+        imageTag: String,
+        imageUrl: String?
+    ): IImageFillResult {
         return object : IImageFillResult {
             override fun onImageLoaded() {
-                Log.d(TAG, "loadMainImage success, tag=$imageTag, url=$imageUrl")
+                Log.d(TAG, "loadAdImage success, tag=$imageTag, url=$imageUrl")
+                imageView.requestLayout()
             }
 
             override fun onImageLoadFailed() {
-                Log.d(TAG, "loadMainImage failed, tag=$imageTag, url=$imageUrl")
+                Log.d(TAG, "loadAdImage failed, tag=$imageTag, url=$imageUrl")
             }
         }
     }

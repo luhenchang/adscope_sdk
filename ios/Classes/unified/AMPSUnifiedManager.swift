@@ -10,7 +10,9 @@ class AmpsIosUnifiedNativeManager: NSObject, AMPSUnifiedNativeManagerDelegate {
     let instanceId: String
     var unifiedNative: AMPSUnifiedNativeManager?
     var adIdMap: [String: AMPSUnifiedNativeView] = [:]
-    
+    /// 轮播 refreshData 可能再次触发 renderSuccess，这些 adId 不应通知 Dart 插入新广告。
+    private var carouselRefreshingAdIds: Set<String> = []
+
     init(instanceId: String) {
         self.instanceId = instanceId
         super.init()
@@ -109,6 +111,7 @@ class AmpsIosUnifiedNativeManager: NSObject, AMPSUnifiedNativeManagerDelegate {
         self.unifiedNative?.delegate = nil
         self.unifiedNative = nil
         self.adIdMap.removeAll()
+        self.carouselRefreshingAdIds.removeAll()
     }
     
     private func sendMessage(_ method: String, _ args: [String: Any] = [:]) {
@@ -151,6 +154,9 @@ class AmpsIosUnifiedNativeManager: NSObject, AMPSUnifiedNativeManagerDelegate {
 extension AmpsIosUnifiedNativeManager: AMPSUnifiedNativeViewDelegate, AMPSMediaVideoViewDelegate {
     func ampsNativeAdRenderSuccess(_ nativeView: AMPSUnifiedNativeView) {
         if let adId = self.getadId(unifiedAd: nativeView) {
+            if carouselRefreshingAdIds.remove(adId) != nil {
+                return
+            }
             sendAdIdMessage(AMPSNativeCallBackChannelMethod.renderSuccess, adId)
         }
     }
@@ -184,6 +190,17 @@ extension AmpsIosUnifiedNativeManager: AMPSUnifiedNativeViewDelegate, AMPSMediaV
         if self.adIdMap.isEmpty {
             cleanup()
         }
+    }
+    
+    /// 自渲染轮播：同一 Flutter adId 槽位换素材，不发 renderSuccess，避免 Feed 插重复项。
+    func ampsNativeAdCarouselRefresh(_ nativeView: AMPSUnifiedNativeView, ad nativeAd: AMPSUnifiedNativeAd) {
+        guard let adId = getadId(unifiedAd: nativeView) else { return }
+        carouselRefreshingAdIds.insert(adId)
+        nativeView.viewController = UIViewController.current()
+        nativeView.delegate = self
+        nativeView.refreshData(nativeAd)
+        AMPSSelfRenderView.refresh(adId)
+        sendAdIdMessage(AMPSNativeCallBackChannelMethod.onCarouselAdLoad, adId)
     }
     
     func ampsNativeAdDidPlayFinish(_ nativeView: AMPSUnifiedNativeView) { }

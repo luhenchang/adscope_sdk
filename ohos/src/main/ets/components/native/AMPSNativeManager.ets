@@ -17,6 +17,7 @@ import { AdOptionsModule } from '../common/AdOptionsModule';
 import { window } from '@kit.ArkUI';
 import { AdWrapperManager } from '../native/AdWrapperManager';
 import { AMPSEventManager } from '../common/AMPSEventManager';
+import { OhosPlatformUnifiedView } from '../native/OhosPlatformUnifiedView';
 
 class NativeCallbackPayload {
   adInstanceId: string = ''
@@ -75,6 +76,9 @@ export class AMPSNativeManager {
         break;
       case AMPSAdSdkMethodNames.nativeGetVideoDuration:
         result.success(this.getAdWrapper(args)?.getVideoDuration() ?? 0)
+        break;
+      case AMPSAdSdkMethodNames.nativeImages:
+        result.success(this.getUnifiedImageUrls(this.getAdWrapper(args)))
         break;
       case AMPSAdSdkMethodNames.nativeUnifiedGetDownLoad:
         result.success(null)
@@ -220,6 +224,114 @@ export class AMPSNativeManager {
     return 0
   }
 
+  private getUnifiedImageUrls(wrapper?: AMPSNativeAdWrapper): Array<string> {
+    if (!wrapper) {
+      return []
+    }
+    const urls: Array<string> = []
+    const imgList = wrapper.getImgList()
+    if (imgList) {
+      for (let i = 0; i < imgList.length; i++) {
+        const imageUrl = imgList[i]?.imageUrl
+        if (imageUrl) {
+          urls.push(imageUrl)
+        }
+      }
+    }
+    if (urls.length === 0) {
+      const main = wrapper.getMainImageUrl()
+      if (main) {
+        urls.push(main)
+      }
+    }
+    return urls
+  }
+
+  private resolveCarouselAdId(instanceId: string, previousAdId: string, wrapper: AMPSNativeAdWrapper): string | undefined {
+    if (previousAdId && AdWrapperManager.getInstance().getAd(previousAdId)) {
+      return previousAdId
+    }
+    const adIds = this.adIdsByInstance.get(instanceId)
+    if (!adIds || adIds.length === 0) {
+      return undefined
+    }
+    if (previousAdId) {
+      for (let i = 0; i < adIds.length; i++) {
+        const flutterAdId = adIds[i]
+        const oldWrapper = AdWrapperManager.getInstance().getAd(flutterAdId)
+        if (oldWrapper && oldWrapper.adId === previousAdId) {
+          return flutterAdId
+        }
+      }
+    }
+    if (adIds.length === 1) {
+      return adIds[0]
+    }
+    return undefined
+  }
+
+  private createVideoPlayCallback(instanceId: string, adId: string): ESObject {
+    return {
+      onVideoReady: () => {
+        this.sendPayload(AMPSNativeCallBackChannelMethod.onVideoReady, this.createAdPayload(instanceId, adId))
+      },
+      onVideoPlayStart: () => {
+        this.sendPayload(AMPSNativeCallBackChannelMethod.onVideoPlayStart, this.createAdPayload(instanceId, adId))
+      },
+      onVideoPlayComplete: () => {
+        this.sendPayload(AMPSNativeCallBackChannelMethod.onVideoPlayComplete, this.createAdPayload(instanceId, adId))
+      },
+      onVideoPause: () => {
+        this.sendPayload(AMPSNativeCallBackChannelMethod.onVideoPause, this.createAdPayload(instanceId, adId))
+      },
+      onVideoResume: () => {
+        this.sendPayload(AMPSNativeCallBackChannelMethod.onVideoResume, this.createAdPayload(instanceId, adId))
+      },
+      onVideoPlayError: (code: number, extra: string) => {
+        this.sendPayload(
+          AMPSNativeCallBackChannelMethod.onVideoPlayError,
+          this.createAdErrorPayload(instanceId, adId, code, undefined, extra)
+        )
+      }
+    }
+  }
+
+  private bindWrapperCallbacks(
+    instanceId: string,
+    adId: string,
+    wrapper: AMPSNativeAdWrapper,
+    notifyRenderSuccess: boolean
+  ): void {
+    wrapper.renderCallBack = this.createRenderCallback(instanceId, adId, notifyRenderSuccess)
+    wrapper.interactCallBack = this.createInteractiveCallback(instanceId, adId)
+    wrapper.videoPlayCallBack = this.createVideoPlayCallback(instanceId, adId)
+  }
+
+  /**
+   * SDK 轮播下一条素材：同一 Flutter adId 槽位替换 wrapper，
+   * 旧 wrapper 由 SDK 延后 destroy，这里只换映射、重绑监听并通知 Dart 刷新布局。
+   */
+  private handleCarouselRefresh(instanceId: string, previousAdId: string, wrapper: AMPSNativeAdWrapper): void {
+    if (!wrapper) {
+      return
+    }
+    const flutterAdId = this.resolveCarouselAdId(instanceId, previousAdId, wrapper)
+    if (!flutterAdId) {
+      return
+    }
+    const oldWrapper = AdWrapperManager.getInstance().getAd(flutterAdId)
+    if (oldWrapper === wrapper) {
+      return
+    }
+    AdWrapperManager.getInstance().addAd(flutterAdId, wrapper)
+    this.bindWrapperCallbacks(instanceId, flutterAdId, wrapper, false)
+    OhosPlatformUnifiedView.refresh(flutterAdId)
+    this.sendPayload(
+      AMPSNativeCallBackChannelMethod.onCarouselAdLoad,
+      this.createAdPayload(instanceId, flutterAdId)
+    )
+  }
+
   private createInteractiveCallback(instanceId: string, adId: string): AMPSNativeInteractiveListener {
     return {
       onAdShow: (): void => {
@@ -239,35 +351,15 @@ export class AMPSNativeManager {
     }
   }
 
-  private createRenderCallback(instanceId: string, adId: string): AMPSNativeRenderListener {
+  private createRenderCallback(instanceId: string, adId: string, notifyRenderSuccess: boolean = true): AMPSNativeRenderListener {
     return {
       renderSuccess: (adWrapper: AMPSNativeAdWrapper): void => {
         AdWrapperManager.getInstance().addAd(adId, adWrapper)
         adWrapper.interactCallBack = this.createInteractiveCallback(instanceId, adId)
-        adWrapper.videoPlayCallBack = {
-          onVideoReady: () => {
-            this.sendPayload(AMPSNativeCallBackChannelMethod.onVideoReady, this.createAdPayload(instanceId, adId))
-          },
-          onVideoPlayStart: () => {
-            this.sendPayload(AMPSNativeCallBackChannelMethod.onVideoPlayStart, this.createAdPayload(instanceId, adId))
-          },
-          onVideoPlayComplete: () => {
-            this.sendPayload(AMPSNativeCallBackChannelMethod.onVideoPlayComplete, this.createAdPayload(instanceId, adId))
-          },
-          onVideoPause: () => {
-            this.sendPayload(AMPSNativeCallBackChannelMethod.onVideoPause, this.createAdPayload(instanceId, adId))
-          },
-          onVideoResume: () => {
-            this.sendPayload(AMPSNativeCallBackChannelMethod.onVideoResume, this.createAdPayload(instanceId, adId))
-          },
-          onVideoPlayError: (code: number, extra: string) => {
-            this.sendPayload(
-              AMPSNativeCallBackChannelMethod.onVideoPlayError,
-              this.createAdErrorPayload(instanceId, adId, code, undefined, extra)
-            )
-          }
+        adWrapper.videoPlayCallBack = this.createVideoPlayCallback(instanceId, adId)
+        if (notifyRenderSuccess) {
+          this.sendPayload(AMPSNativeCallBackChannelMethod.renderSuccess, this.createAdPayload(instanceId, adId))
         }
-        this.sendPayload(AMPSNativeCallBackChannelMethod.renderSuccess, this.createAdPayload(instanceId, adId))
       },
       renderFailed: (): void => {
         this.sendPayload(AMPSNativeCallBackChannelMethod.renderFailed, this.createAdPayload(instanceId, adId))
@@ -284,7 +376,7 @@ export class AMPSNativeManager {
           const adId = this.generateAdId(instanceId)
           adIdList.push(adId)
           AdWrapperManager.getInstance().addAd(adId, item)
-          item.renderCallBack = this.createRenderCallback(instanceId, adId)
+          this.bindWrapperCallbacks(instanceId, adId, item, true)
           item.renderAd()
         })
         this.adIdsByInstance.set(instanceId, adIdList)
@@ -292,6 +384,9 @@ export class AMPSNativeManager {
       },
       loadFail: (code: number, message: string): void => {
         this.sendPayload(AMPSNativeCallBackChannelMethod.loadFail, this.createErrorPayload(instanceId, code, message))
+      },
+      carouselRefresh: (previousAdId: string, wrapper: AMPSNativeAdWrapper): void => {
+        this.handleCarouselRefresh(instanceId, previousAdId, wrapper)
       }
     }
   }

@@ -141,6 +141,8 @@ enum AMPSNativeCallBackChannelMethod {
     static let loadFail = "loadFail"
     static let renderSuccess = "renderSuccess"
     static let renderFailed = "renderFailed"
+    /// 自渲染轮播：同一 adId 素材被替换，需重新取 pattern/images 并刷新 PlatformView
+    static let onCarouselAdLoad = "onCarouselAdLoad"
     
     // 特定广告组件回调
     static let onAdShow = "onAdShow"

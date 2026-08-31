@@ -15,6 +15,8 @@ import xyz.adscope.adscope_sdk.manager.AdWrapperManager
 import xyz.adscope.adscope_sdk.utils.asActivity
 import xyz.adscope.adscope_sdk.utils.dpToPx
 import xyz.adscope.amps.ad.unified.view.AMPSUnifiedRootContainer
+import java.lang.ref.WeakReference
+import java.util.concurrent.ConcurrentHashMap
 
 private const val TAG = "AMPSUnifiedView"
 private const val UNIFIED_WIDGET_KEY = "unifiedWidget"
@@ -25,6 +27,13 @@ class AMPSUnifiedView(
     binaryMessenger: BinaryMessenger,
     args: Any?
 ) : PlatformView {
+    companion object {
+        private val views = ConcurrentHashMap<String, WeakReference<AMPSUnifiedView>>()
+
+        fun refresh(adId: String) {
+            views[adId]?.get()?.reloadAd()
+        }
+    }
     // 但由于构造函数中需要对 rootView 进行 addView，因此保留非延迟初始化
     private val unifiedView = FrameLayout(context).apply {
         layoutParams = FrameLayout.LayoutParams(
@@ -71,6 +80,7 @@ class AMPSUnifiedView(
                     }
                 }
             }
+            adId?.let { views[it] = WeakReference(this) }
 
         }
     }
@@ -163,6 +173,9 @@ class AMPSUnifiedView(
 
         runCatching {
             val activity = context.asActivity()
+            // Flutter 换 ValueKey 时新 PlatformView 会先 create、旧的后 dispose。
+            // 同一条渠道广告的容器还在旧 root 上，必须先拆掉再 bind。
+            views[currentAdId]?.get()?.takeIf { it !== this }?.releaseBoundViews()
             AmpsUnifiedFrameLayout(context).let { frame ->
                 frame.render(module, adItem, params, currentAdId)?.let { renderResult ->
                     rootView.addView(frame)
@@ -180,11 +193,31 @@ class AMPSUnifiedView(
         }
     }
 
+    /**
+     * 轮播换素材后，用同一套 Flutter 布局模型重新 bind 新的 [AMPSUnifiedNativeItem]。
+     */
+    fun reloadAd() {
+        val currentAdId = adId ?: return
+        val adItem = AdUnifiedWrapperManager.getInstance().getAdItem(currentAdId) ?: return
+        if (adItem.isExpressAd) {
+            return
+        }
+        rootView.removeAllViews()
+        addAdViewToRoot()
+    }
+
+    private fun releaseBoundViews() {
+        rootView.removeAllViews()
+    }
+
     override fun getView(): View = unifiedView // 简化 getter
 
     override fun dispose() {
         adId?.let { id ->
-            AdUnifiedWrapperManager.getInstance().removeAdItem(id) // 清理 Manager 资源
+            if (views[id]?.get() === this) {
+                views.remove(id)
+            }
+            // ad item 生命周期由 AMPSNativeManager 管理，这里不能 remove，否则轮播重建 PlatformView 会把新素材删掉
             AdWrapperManager.getInstance().removeAdView(id)
         }
         rootView.removeAllViews()
