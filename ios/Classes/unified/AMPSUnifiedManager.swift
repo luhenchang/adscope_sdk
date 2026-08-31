@@ -186,6 +186,11 @@ extension AmpsIosUnifiedNativeManager: AMPSUnifiedNativeViewDelegate, AMPSMediaV
         }
     }
     
+    //自渲染刷新回调
+    func ampsNativeAdCarouselRefresh(_ nativeView: AMPSUnifiedNativeView, ad nativeAd: AMPSUnifiedNativeAd) {
+        
+    }
+    
     func ampsNativeAdDidPlayFinish(_ nativeView: AMPSUnifiedNativeView) { }
     func ampsNativeAdDidCloseOtherController(_ nativeView: AMPSUnifiedNativeView) { }
     
