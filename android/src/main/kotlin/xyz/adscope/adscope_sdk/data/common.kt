@@ -74,6 +74,7 @@ object AMPSNativeCallBackChannelMethod {
     const val LOAD_FAIL = "loadFail"
     const val RENDER_SUCCESS = "renderSuccess"
     const val RENDER_FAILED = "renderFailed"
+    const val ON_CAROUSEL_AD_LOAD = "onCarouselAdLoad"
 
     // Specific ad component callbacks
     const val ON_AD_SHOW = "onAdShow"

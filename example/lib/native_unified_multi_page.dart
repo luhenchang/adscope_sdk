@@ -43,6 +43,7 @@ class _AdSlotData {
     required this.images,
     required this.layoutChildren,
     this.downloadInfo,
+    this.carouselEpoch = 0,
   });
 
   final String adId;
@@ -50,6 +51,7 @@ class _AdSlotData {
   final List<String> images;
   final List<LayoutWidget> layoutChildren;
   final UnifiedAdDownloadAppInfo? downloadInfo;
+  final int carouselEpoch;
 }
 
 class _NativeUnifiedMultiPageState extends State<NativeUnifiedMultiPage> {
@@ -110,27 +112,38 @@ class _NativeUnifiedMultiPageState extends State<NativeUnifiedMultiPage> {
 
   AMPSNativeRenderListener _renderListenerFor(int slot) {
     return AMPSNativeRenderListener(
-      renderSuccess: (adId) async {
-        debugPrint('[slot$slot] renderSuccess adId=$adId');
-        final ad = _nativeAdsBySlot[slot];
-        final pattern = await ad?.getUnifiedPattern(adId) ?? AMPSUnifiedPattern.adPatternUnknown;
-        final images = await ad?.getUnifiedImages(adId) ?? const <String>[];
-        final downloadInfo = await ad?.getDownLoadInfo(adId);
-        if (!mounted) return;
-        _adIdToSlot[adId] = slot;
-        _slotNotifiers[slot].value = _AdSlotData(
-          adId: adId,
-          pattern: pattern,
-          images: images,
-          layoutChildren: _buildLayoutChildren(pattern.value, imageUrls: images),
-          downloadInfo: downloadInfo,
-        );
-        _refreshVisibleCount();
-      },
+      renderSuccess: (adId) => _applySlotMaterial(slot, adId),
       renderFailed: (adId, code, message) {
         debugPrint('[slot$slot] renderFailed adId=$adId code=$code msg=$message');
       },
+      onCarouselAdLoad: (adId) => _applySlotMaterial(slot, adId, isCarousel: true),
     );
+  }
+
+  Future<void> _applySlotMaterial(
+    int slot,
+    String adId, {
+    bool isCarousel = false,
+  }) async {
+    debugPrint('[slot$slot] ${isCarousel ? 'carouselAdLoad' : 'renderSuccess'} adId=$adId');
+    final ad = _nativeAdsBySlot[slot];
+    final pattern = await ad?.getUnifiedPattern(adId) ?? AMPSUnifiedPattern.adPatternUnknown;
+    final images = await ad?.getUnifiedImages(adId) ?? const <String>[];
+    final downloadInfo = await ad?.getDownLoadInfo(adId);
+    if (!mounted) return;
+    _adIdToSlot[adId] = slot;
+    final prev = _slotNotifiers[slot].value;
+    _slotNotifiers[slot].value = _AdSlotData(
+      adId: adId,
+      pattern: pattern,
+      images: images,
+      layoutChildren: _buildLayoutChildren(pattern.value, imageUrls: images),
+      downloadInfo: downloadInfo,
+      carouselEpoch: isCarousel ? (prev?.carouselEpoch ?? 0) + 1 : 0,
+    );
+    if (!isCarousel) {
+      _refreshVisibleCount();
+    }
   }
 
   AmpsNativeInteractiveListener _interactiveListenerFor(int slot) {
@@ -287,7 +300,7 @@ class _NativeUnifiedMultiPageState extends State<NativeUnifiedMultiPage> {
     final adId = data.adId;
     final downloadInfo = data.downloadInfo;
     return KeyedSubtree(
-      key: ValueKey('ad_content_${slotIndex}_$adId'),
+      key: ValueKey('ad_content_${slotIndex}_${adId}_${data.carouselEpoch}'),
       child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -307,7 +320,7 @@ class _NativeUnifiedMultiPageState extends State<NativeUnifiedMultiPage> {
               UnifiedWidget(
                 nativeAd,
                 mInteractiveCallBack: _interactiveListenerFor(slotIndex),
-                key: ValueKey('unified_${slotIndex}_$adId'),
+                key: ValueKey('unified_${slotIndex}_${adId}_${data.carouselEpoch}'),
                 adId: adId,
                 unifiedContent: NativeUnifiedWidget(
                   width: expressWidth,

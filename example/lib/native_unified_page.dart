@@ -21,6 +21,7 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
   final Map<String, UnifiedAdDownloadAppInfo?> _downloadInfoByAdId = {};
   final Map<String, AMPSUnifiedPattern> _patternByAdId = {};
   final Map<String, List<String>> _imagesByAdId = {};
+  final Map<String, int> _carouselEpochByAdId = {};
 
   List<String> feedList = [];
   List<String> feedAdList = [];
@@ -59,44 +60,59 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
 
   AMPSNativeRenderListener _renderListenerFor(String label) {
     return AMPSNativeRenderListener(
-      renderSuccess: (adId) async {
-        debugPrint('[$label] unified renderSuccess adId=$adId');
-        final ad = _nativeAds[label];
-        final pattern =
-            await ad?.getUnifiedPattern(adId) ?? AMPSUnifiedPattern.adPatternUnknown;
-        final images = await ad?.getUnifiedImages(adId) ?? const <String>[];
-        if (!mounted) return;
-        debugPrint('[$label] unified pattern=$pattern images=$images');
-        ad?.getDownLoadInfo(adId).then((info) {
-          if (!mounted) return;
-          setState(() {
-            _downloadInfoByAdId[adId] = info;
-          });
-        });
-        _adIdsByLabel[label]?.add(adId);
-        _adIdToLabel[adId] = label;
-        if (_sequentialMode && label == 'B') {
-          final aAdIds = _adIdsByLabel['A'] ?? const <String>[];
-          final aHasShown = aAdIds.any(feedAdList.contains);
-          if (aHasShown) {
-            setState(() {
-              _patternByAdId[adId] = pattern;
-              _imagesByAdId[adId] = images;
-              _pendingBAdIds.add(adId);
-            });
-            return;
-          }
-        }
-        setState(() {
-          _patternByAdId[adId] = pattern;
-          _imagesByAdId[adId] = images;
-          feedAdList.add(adId);
-        });
-      },
+      renderSuccess: (adId) => _refreshUnifiedMaterial(label, adId),
       renderFailed: (adId, code, message) {
         debugPrint('[$label] unified renderFailed=$code, $message');
       },
+      onCarouselAdLoad: (adId) => _refreshUnifiedMaterial(label, adId, isCarousel: true),
     );
+  }
+
+  Future<void> _refreshUnifiedMaterial(
+    String label,
+    String adId, {
+    bool isCarousel = false,
+  }) async {
+    debugPrint('[$label] unified ${isCarousel ? 'carouselAdLoad' : 'renderSuccess'} adId=$adId');
+    final ad = _nativeAds[label];
+    final pattern =
+        await ad?.getUnifiedPattern(adId) ?? AMPSUnifiedPattern.adPatternUnknown;
+    final images = await ad?.getUnifiedImages(adId) ?? const <String>[];
+    if (!mounted) return;
+    debugPrint('[$label] unified pattern=$pattern images=$images');
+    ad?.getDownLoadInfo(adId).then((info) {
+      if (!mounted) return;
+      setState(() {
+        _downloadInfoByAdId[adId] = info;
+      });
+    });
+    if (isCarousel) {
+      setState(() {
+        _patternByAdId[adId] = pattern;
+        _imagesByAdId[adId] = images;
+        _carouselEpochByAdId[adId] = (_carouselEpochByAdId[adId] ?? 0) + 1;
+      });
+      return;
+    }
+    _adIdsByLabel[label]?.add(adId);
+    _adIdToLabel[adId] = label;
+    if (_sequentialMode && label == 'B') {
+      final aAdIds = _adIdsByLabel['A'] ?? const <String>[];
+      final aHasShown = aAdIds.any(feedAdList.contains);
+      if (aHasShown) {
+        setState(() {
+          _patternByAdId[adId] = pattern;
+          _imagesByAdId[adId] = images;
+          _pendingBAdIds.add(adId);
+        });
+        return;
+      }
+    }
+    setState(() {
+      _patternByAdId[adId] = pattern;
+      _imagesByAdId[adId] = images;
+      feedAdList.add(adId);
+    });
   }
 
   AmpsNativeInteractiveListener _interactiveListenerFor(String label) {
@@ -121,6 +137,7 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
     _downloadInfoByAdId.remove(adId);
     _patternByAdId.remove(adId);
     _imagesByAdId.remove(adId);
+    _carouselEpochByAdId.remove(adId);
     if (_sequentialMode && label == 'A') {
       final remaining = _adIdsByLabel['A'] ?? const <String>[];
       final aStillVisible = remaining.any(feedAdList.contains);
@@ -163,6 +180,7 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
     _downloadInfoByAdId.clear();
     _patternByAdId.clear();
     _imagesByAdId.clear();
+    _carouselEpochByAdId.clear();
     _pendingBAdIds = [];
     setState(() => feedAdList.clear());
   }
@@ -231,7 +249,9 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
                             UnifiedWidget(
                               nativeAd,
                               mInteractiveCallBack: _interactiveListenerFor(label),
-                              key: ValueKey('$adId-${pattern.value}-${images.length}'),
+                              key: ValueKey(
+                                '$adId-${pattern.value}-${images.length}-${_carouselEpochByAdId[adId] ?? 0}',
+                              ),
                               adId: adId,
                               unifiedContent: NativeUnifiedWidget(
                                 width: expressWidth,

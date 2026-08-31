@@ -120,6 +120,8 @@ export class AMPSNativeCallBackChannelMethod {
   static readonly loadFail = "loadFail";
   static readonly renderSuccess = "renderSuccess";
   static readonly renderFailed = "renderFailed";
+  // 自渲染轮播刷新：同一 adId 素材被替换，需重新取 pattern/images 并重建 PlatformView
+  static readonly onCarouselAdLoad = "onCarouselAdLoad";
   //具体广告组件回调
   static readonly onAdShow = "onAdShow";
   static readonly onAdExposure = "onAdExposure";
@@ -298,6 +300,7 @@ export let NativeMethodNames: string[] = [
   AMPSAdSdkMethodNames.nativeIsReadyAd,
   AMPSAdSdkMethodNames.nativeIsNativeExpress,
   AMPSAdSdkMethodNames.nativeGetVideoDuration,
+  AMPSAdSdkMethodNames.nativeImages,
   AMPSAdSdkMethodNames.nativeDestroy,
   AMPSAdSdkMethodNames.nativeResume,
   AMPSAdSdkMethodNames.nativePause,

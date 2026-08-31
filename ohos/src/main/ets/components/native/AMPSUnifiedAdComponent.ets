@@ -21,12 +21,26 @@ export struct AMPSUnifiedAdComponent {
   @State customView: OhosPlatformUnifiedView = this.params.platformView as OhosPlatformUnifiedView
   @State wrapper: AMPSNativeAdWrapper | undefined = undefined
   @State closeAd: boolean = false
+  @State refreshToken: number = 0
   @Prop unifiedModule?: NativeUnifiedModule = undefined
   private rootComponentId: string = util.generateRandomUUID();
 
   aboutToAppear(): void {
-    this.creativeViewIds.clear();
+    this.reloadWrapper()
+    OhosPlatformUnifiedView.register(this.adId, () => {
+      this.reloadWrapper()
+    })
+  }
+
+  aboutToDisappear(): void {
+    OhosPlatformUnifiedView.unregister(this.adId)
+  }
+
+  private reloadWrapper(): void {
+    this.creativeViewIds.clear()
+    this.clickIds.clear()
     this.wrapper = AdWrapperManager.getInstance().getAd(this.adId)
+    this.refreshToken += 1
   }
 
   @Builder
@@ -165,9 +179,14 @@ export struct AMPSUnifiedAdComponent {
               this.buildASNPBody(this.wrapper)
             }
           }
-        }).id(this.rootComponentId)
+        }).id(`${this.rootComponentId}_${this.refreshToken}`)
           .onAppear(() => {
-            this.wrapper?.prepare(this.rootComponentId, this.getUIContext(), this.clickIds, this.creativeViewIds)
+            this.wrapper?.prepare(
+              `${this.rootComponentId}_${this.refreshToken}`,
+              this.getUIContext(),
+              this.clickIds,
+              this.creativeViewIds
+            )
           })
       }
     }

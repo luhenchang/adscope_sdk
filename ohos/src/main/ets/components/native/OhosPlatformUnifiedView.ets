@@ -7,6 +7,7 @@ import { NativeUnifiedModule } from '../native/UnifiedNativeModule';
 
 @Observed
 export class OhosPlatformUnifiedView extends PlatformView {
+  private static reloaders: Map<string, () => void> = new Map()
   adId: string = ''
   instanceId: string = ''
   nativeUnifiedModule?: NativeUnifiedModule = undefined
@@ -21,11 +22,28 @@ export class OhosPlatformUnifiedView extends PlatformView {
     }
   }
 
+  static register(adId: string, reloader: () => void): void {
+    if (adId) {
+      OhosPlatformUnifiedView.reloaders.set(adId, reloader)
+    }
+  }
+
+  static unregister(adId: string): void {
+    if (adId) {
+      OhosPlatformUnifiedView.reloaders.delete(adId)
+    }
+  }
+
+  static refresh(adId: string): void {
+    OhosPlatformUnifiedView.reloaders.get(adId)?.()
+  }
+
   getView(): WrappedBuilder<[Params]> {
     return new WrappedBuilder(AMPSUnifiedWrappedBuilder);
   }
 
   dispose(): void {
+    OhosPlatformUnifiedView.unregister(this.adId)
   }
 }
 

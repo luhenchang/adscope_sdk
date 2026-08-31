@@ -26,7 +26,14 @@ class AMPSNativeRenderListener {
   final AMPSNativeRenderCallback? renderSuccess;
   final AMPSNativeRenderFailedCallback? renderFailed;
 
-  const AMPSNativeRenderListener({this.renderSuccess, this.renderFailed});
+  /// 自渲染轮播：SDK 自动加载下一条后回调，[adId] 与当前展示槽位相同。
+  final AMPSNativeRenderCallback? onCarouselAdLoad;
+
+  const AMPSNativeRenderListener({
+    this.renderSuccess,
+    this.renderFailed,
+    this.onCarouselAdLoad,
+  });
 }
 
 ///广告View事件相关回调
