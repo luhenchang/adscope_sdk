@@ -10,7 +10,8 @@
           "amps_csj_adapter",
           "amps_hw_adapter",
           "amps_sigmob_adapter",
-          "amps_gdt_adapter"
+          "amps_gdt_adapter",
+          "amps_asnp_adapter"
 //          "amps_jad_adapter"
         ]
       },

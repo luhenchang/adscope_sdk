@@ -11,6 +11,7 @@
     "amps_csj_adapter": "file:../libs/CSJ/amps_csj_adapter_5.32.764.har",
     "amps_hw_adapter": "file:../libs/HW/amps_hw_adapter_5.32.503.har",
     "amps_gdt_adapter": "file:../libs/GDT/amps_gdt_adapter_5.32.140.har",
-    "amps_sigmob_adapter": "file:../libs/SIGMOB/amps_sigmob_adapter_5.32.116.har"
+    "amps_sigmob_adapter": "file:../libs/SIGMOB/amps_sigmob_adapter_5.32.116.har",
+    "amps_asnp_adapter": "file:../libs/ASNP/amps_asnp_adapter_5.32.537.har"
   },
 }

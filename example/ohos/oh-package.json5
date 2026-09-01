@@ -9,7 +9,8 @@
   "overrides": {
     "xyz.adscope.amps": "file:./libs/AMPSAdSDK_5.3.2.har",
     "ksadsdk": "file:./libs/KS/KSAdSDK-3.0.10.har",
-    '@gdt/gdt-union-sdk': "file:./libs/GDT/GDTUnionSDK-1.4.0.har"
+    '@gdt/gdt-union-sdk': "file:./libs/GDT/GDTUnionSDK-1.4.0.har",
+    "biz.beizi.adn" : "file:./libs/ASNP/biz.beizi.adn-5.3.7.har"
   },
   "dependencies": {},
   "devDependencies": {
