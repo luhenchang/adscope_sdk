@@ -126,7 +126,7 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
       config: _buildOptions(),
       adCallBack: _callbackFor(label),
     );
-    ad.setExtraDataMap(null);
+    ad.setExtraDataMap(<String, String>{'adn_amps': '{"position":2}'});
     _rewardAds[label] = ad;
     debugPrint('[$label] created reward instanceId=${ad.instanceId}');
     ad.load();

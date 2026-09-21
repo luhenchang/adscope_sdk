@@ -12,6 +12,7 @@ class AMPSRewardVideoManager: NSObject {
     private override init() {super.init()}
     
     private var rewardVideoAds: [String: AMPSRewardedVideoAd] = [:]
+    private var rewardVideoAdConfigs: [String: AMPSAdConfiguration] = [:]
     
     func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as? [String: Any]
@@ -51,6 +52,8 @@ class AMPSRewardVideoManager: NSObject {
             } else {
                 result(false)
             }
+        case AMPSAdSdkMethodNames.rewardVideoSetExtraDataMap:
+            handleSetExtraDataMap(arguments: arguments, result: result)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -79,8 +82,35 @@ class AMPSRewardVideoManager: NSObject {
         }
         let ad = AMPSRewardedVideoAd(spaceId: config.spaceId, adConfiguration: config)
         ad.delegate = self
+        rewardVideoAdConfigs[instanceId] = config
         rewardVideoAds[instanceId] = ad
         result(nil)
+    }
+
+    private func handleSetExtraDataMap(arguments: [String: Any]?, result: @escaping FlutterResult) {
+        guard let instanceId = instanceId(from: arguments) else {
+            result(FlutterError(code: "INVALID_ARGS", message: "adInstanceId is required", details: nil))
+            return
+        }
+        guard let config = rewardVideoAdConfigs[instanceId] else {
+            result(FlutterError(code: "UPDATE_FAILED", message: "Reward ad instance not found", details: instanceId))
+            return
+        }
+        let extraDataMap = arguments?[AdOptionKeys.keyExtraDataMap] as? [String: Any]
+        if let value = extraDataMap?[AdOptionKeys.keyAdnAmps] {
+            config.extra = extraString(from: value)
+        }
+        result(nil)
+    }
+
+    private func extraString(from value: Any) -> String {
+        if let extra = value as? String {
+            return extra
+        }
+        if let extraDict = value as? [String: Any], let extra = extraDict[AdOptionKeys.keyExtra] as? String {
+            return extra
+        }
+        return "\(value)"
     }
     
     private func handleRewardVideoLoad(instanceId: String, result: @escaping FlutterResult) {
@@ -110,6 +140,7 @@ class AMPSRewardVideoManager: NSObject {
         rewardVideoAds[instanceId]?.delegate = nil
         rewardVideoAds[instanceId]?.remove()
         rewardVideoAds.removeValue(forKey: instanceId)
+        rewardVideoAdConfigs.removeValue(forKey: instanceId)
     }
     
     private func sendMessage(_ method: String, instanceId: String, args: [String: Any]? = nil) {
