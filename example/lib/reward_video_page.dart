@@ -59,6 +59,7 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
     return RewardVideoCallBack(
       onLoadSuccess: () async {
         final ad = _rewardAds[label];
+        ad?.setExtraDataMap(<String, String>{'adn_amps': '{"position":2}'});
         debugPrint('[$label] reward onLoadSuccess id=${ad?.instanceId}');
         final seatId = await ad?.getSeatId();
         debugPrint('[$label] reward seatId=$seatId');
@@ -126,7 +127,6 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
       config: _buildOptions(),
       adCallBack: _callbackFor(label),
     );
-    ad.setExtraDataMap(<String, String>{'adn_amps': '{"position":2}'});
     _rewardAds[label] = ad;
     debugPrint('[$label] created reward instanceId=${ad.instanceId}');
     ad.load();
