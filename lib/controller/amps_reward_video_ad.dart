@@ -32,7 +32,16 @@ class AMPSRewardVideoAd {
   Map<String, dynamic> _instanceOnlyArgs() {
     return {AMPSAdInstanceKey.adInstanceId: instanceId};
   }
-
+  ///激励服务回调参数，整体覆盖 extraDataMap
+  void setExtraDataMap(Map<String, dynamic>? extraDataMap) {
+    AdscopeSdk.invokeMethod(
+      AMPSAdSdkMethodNames.rewardVideoSetExtraDataMap,
+      {
+        ..._instanceOnlyArgs(),
+        'extraDataMap': extraDataMap,
+      },
+    );
+  }
   ///激励视频广告加载调用
   void load() async {
     await AdscopeSdk.invokeMethod(AMPSAdSdkMethodNames.rewardVideoLoad, _instanceOnlyArgs());

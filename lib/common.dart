@@ -207,6 +207,7 @@ class AMPSAdSdkMethodNames {
   static const String rewardVideoDestroyAd = "AMPSRewardVideo_destroy";
   static const String rewardVideoAddPreLoadAdInfo = "AMPSRewardVideo_addPreLoadAdInfo";
   static const String rewardVideoGetMediaExtraInfo = "AMPSRewardVideo_getMediaExtraInfo";
+  static const String rewardVideoSetExtraDataMap = "AMPSRewardVideo_setExtraDataMap";
 
   //Banner
   static const String bannerCreate = 'AMPSBanner_create';

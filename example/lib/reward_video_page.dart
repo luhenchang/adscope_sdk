@@ -108,8 +108,7 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
   }
 
   AdOptions _buildOptions() {
-    const data = 'xxxxxx';
-    const useId = 'xxxxx';
+    const data = '{"position":1}';
     if (Platform.isAndroid) {
       return AdOptions(
         spaceId: rewardVideoSpaceId,
@@ -117,7 +116,7 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
       );
     }
     if (Platform.isIOS) {
-      return AdOptions(spaceId: rewardVideoSpaceId, extra: data, userId: useId);
+      return AdOptions(spaceId: rewardVideoSpaceId, extra: data);
     }
     return AdOptions(spaceId: rewardVideoSpaceId);
   }
@@ -127,6 +126,7 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
       config: _buildOptions(),
       adCallBack: _callbackFor(label),
     );
+    ad.setExtraDataMap(null);
     _rewardAds[label] = ad;
     debugPrint('[$label] created reward instanceId=${ad.instanceId}');
     ad.load();
