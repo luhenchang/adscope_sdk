@@ -212,6 +212,7 @@ export class AMPSAdSdkMethodNames {
   static readonly rewardVideoDestroyAd = "AMPSRewardVideo_destroy";
   static readonly rewardVideoAddPreLoadAdInfo = "AMPSRewardVideo_addPreLoadAdInfo";
   static readonly rewardVideoGetMediaExtraInfo = "AMPSRewardVideo_getMediaExtraInfo";
+  static readonly rewardVideoSetExtraDataMap = "AMPSRewardVideo_setExtraDataMap";
 
   //Banner
   static readonly bannerCreate = 'AMPSBanner_create';
@@ -318,6 +319,7 @@ export let RewardVideoMethodNames: string[] = [
   AMPSAdSdkMethodNames.rewardVideoDestroyAd,
   AMPSAdSdkMethodNames.rewardVideoAddPreLoadAdInfo,
   AMPSAdSdkMethodNames.rewardVideoGetMediaExtraInfo,
+  AMPSAdSdkMethodNames.rewardVideoSetExtraDataMap,
   AMPSAdSdkMethodNames.rewardVideoGetSeatId
 ];
 
