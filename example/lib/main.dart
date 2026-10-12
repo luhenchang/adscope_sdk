@@ -10,6 +10,7 @@ import 'draw_page.dart';
 import 'interstitial_page.dart';
 import 'interstitial_show_page.dart';
 import 'native_page.dart';
+import 'native_reload_page.dart';
 import 'native_unified_page.dart';
 import 'native_unified_multi_page.dart';
 import 'splash_scale_test_page.dart';
@@ -45,6 +46,7 @@ class MyApp extends StatelessWidget {
       'InterstitialShowPage':(context)=> const InterstitialShowPage(title: '插屏show页面'),
       'InterstitialPage':(context)=> const InterstitialPage(title: '插屏组件页面'),
       'NativePage':(context)=> const NativePage(title: '原生页面'),
+      'NativeReloadPage':(context)=> const NativeReloadPage(title: '原生多次load替换'),
       'NativeUnifiedPage':(context)=> const NativeUnifiedPage(title: '原生自渲染页面'),
       'NativeUnifiedMultiPage':(context)=> const NativeUnifiedMultiPage(title: '自渲染8条Feed插入'),
       'RewardVideoPage':(context)=> const RewardVideoPage(title: '激励视频页面'),
@@ -76,6 +78,7 @@ class _SplashPageState extends State<SplashPage> {
     {'text': '插屏show案例页面', 'route': 'InterstitialShowPage'},
     {'text': '插屏组件案例页面', 'route': 'InterstitialPage'},
     {'text': '点击跳转原生页面', 'route': 'NativePage'},
+    {'text': '原生多次load替换Widget', 'route': 'NativeReloadPage'},
     {'text': '点击跳转自渲染页面', 'route': 'NativeUnifiedPage'},
     {'text': '自渲染8条插入Feed', 'route': 'NativeUnifiedMultiPage'},
     {'text': '点击跳转激励视频页面', 'route': 'RewardVideoPage'},
