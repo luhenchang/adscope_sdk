@@ -11,6 +11,11 @@ const KEY_SPLASH_BOTTOM_HEIGHT = "splashAdBottomBuilderHeight"
 const KEY_USER_ID = "userId"
 const KEY_EXTRA = "extra"
 const KEY_IP_ADDRESS = "ipAddress"
+const KEY_EXTRA_DATA_MAP = "extraDataMap"
+const KEY_CUSTOM_EXTRA_PARAMETERS = "customExtraParameters"
+
+// extraDataMap 值类型：string、number、boolean 或二级 Map
+type ExtraDataValue = string | number | boolean | Map<string, string | number | boolean>
 
 export class AdOptionsModule {
   /**
@@ -30,6 +35,10 @@ export class AdOptionsModule {
     const userId = map.has(KEY_USER_ID) ? map.get(KEY_USER_ID) as string : undefined
     const extra = map.has(KEY_EXTRA) ? map.get(KEY_EXTRA) as string : undefined
     const ipAddress = map.has(KEY_IP_ADDRESS) ? map.get(KEY_IP_ADDRESS) as string : undefined
+    const extraDataMap = map.has(KEY_EXTRA_DATA_MAP) ? map.get(KEY_EXTRA_DATA_MAP) as Map<string, ExtraDataValue> : undefined
+    // customExtraParameters 优先级高于 extraDataMap，若传入则覆盖
+    const customExtraParameters = map.has(KEY_CUSTOM_EXTRA_PARAMETERS) ? map.get(KEY_CUSTOM_EXTRA_PARAMETERS) as Map<string, ExtraDataValue> : undefined
+    const finalCustomParam = customExtraParameters ?? extraDataMap
 
     // 显式指定类型，符合ArkTS对象字面量规范
     const adOptions: ampsAd.AdOptions = {
@@ -41,7 +50,8 @@ export class AdOptionsModule {
       splashAdBottomBuilderHeight: splashAdBottomBuilderHeight,
       userId: userId,
       extra: extra,
-      ipAddress: ipAddress
+      ipAddress: ipAddress,
+      customParam: finalCustomParam
     }
 
     return adOptions

@@ -294,6 +294,7 @@ export let NativeMethodNames: string[] = [
   AMPSAdSdkMethodNames.nativeCreate,
   AMPSAdSdkMethodNames.nativeGetECPM,
   AMPSAdSdkMethodNames.nativePattern,
+  AMPSAdSdkMethodNames.nativeImages,
   AMPSAdSdkMethodNames.nativeUnifiedMaterialType,
   AMPSAdSdkMethodNames.nativeUnifiedGetDownLoad,
   AMPSAdSdkMethodNames.nativeGetMediaExtraInfo,
