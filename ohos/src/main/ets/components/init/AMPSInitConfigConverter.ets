@@ -1,6 +1,6 @@
 import { HashMap, JSON } from "@kit.ArkTS";
 import { Any } from "@ohos/flutter_ohos";
-import { AMPSConstants, AMPSCustomController, AMPSInitConfig, AMPSLocation } from "xyz.adscope.amps";
+import { AMPSAdSdk, AMPSConstants, AMPSCustomController, AMPSInitConfig, AMPSLocation } from "xyz.adscope.amps";
 import { common } from "@kit.AbilityKit";
 
 // -------------------------- 1. 定义常量对应的接口（一定和Flutter需一致） --------------------------
@@ -270,10 +270,10 @@ export class AMPSInitConfigConverter {
         if (OAID) {
           ampsCustomController.OAID = OAID;
         }
-        // const isSupportPersonalized = adCmController.get(AdControllerPropKey.IS_SUPPORT_PERSONALIZED) as boolean;
-        // if (isSupportPersonalized != undefined) {
-        //   ampsCustomController.isSupportPersonalized = isSupportPersonalized;
-        // }
+        const isSupportPersonalized = adCmController.get(AdControllerPropKey.IS_SUPPORT_PERSONALIZED) as boolean;
+        if (isSupportPersonalized != undefined) {
+          AMPSAdSdk.setPersonalRecommend(isSupportPersonalized);
+        }
         const getUnderageTag = adCmController.get(AdControllerPropKey.GET_UNDERAGE_TAG) as number;
         if (getUnderageTag != undefined) {
           ampsCustomController.getUnderageTag = getUnderageTag;
