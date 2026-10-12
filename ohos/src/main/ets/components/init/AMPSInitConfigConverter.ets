@@ -166,10 +166,10 @@ export class AMPSInitConfigConverter {
       if (_isDebugSetting != undefined) {
         ampsInitConfigBuilder?.setDebugSetting(_isDebugSetting);
       }
-      const _isUseHttps = flutterParams.get(ParamsKey.IS_USE_HTTPS) as boolean;
-      if (_isUseHttps != undefined) {
-        ampsInitConfigBuilder?.setUseHttps(_isUseHttps);
-      }
+      // const _isUseHttps = flutterParams.get(ParamsKey.IS_USE_HTTPS) as boolean;
+      // if (_isUseHttps != undefined) {
+      //   ampsInitConfigBuilder?.setUseHttps(_isUseHttps);
+      // }
       const isTestAd = flutterParams.get(ParamsKey.IS_TEST_AD) as boolean;
       if (isTestAd != undefined) {
         ampsInitConfigBuilder?.setIsTestAd(isTestAd);
@@ -270,10 +270,10 @@ export class AMPSInitConfigConverter {
         if (OAID) {
           ampsCustomController.OAID = OAID;
         }
-        const isSupportPersonalized = adCmController.get(AdControllerPropKey.IS_SUPPORT_PERSONALIZED) as boolean;
-        if (isSupportPersonalized != undefined) {
-          ampsCustomController.isSupportPersonalized = isSupportPersonalized;
-        }
+        // const isSupportPersonalized = adCmController.get(AdControllerPropKey.IS_SUPPORT_PERSONALIZED) as boolean;
+        // if (isSupportPersonalized != undefined) {
+        //   ampsCustomController.isSupportPersonalized = isSupportPersonalized;
+        // }
         const getUnderageTag = adCmController.get(AdControllerPropKey.GET_UNDERAGE_TAG) as number;
         if (getUnderageTag != undefined) {
           ampsCustomController.getUnderageTag = getUnderageTag;
