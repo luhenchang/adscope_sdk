@@ -59,6 +59,7 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
     return RewardVideoCallBack(
       onLoadSuccess: () async {
         final ad = _rewardAds[label];
+        ad?.setExtraDataMap(<String, String>{'adn_amps': '{"position":2}'});
         debugPrint('[$label] reward onLoadSuccess id=${ad?.instanceId}');
         final seatId = await ad?.getSeatId();
         debugPrint('[$label] reward seatId=$seatId');
@@ -108,8 +109,7 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
   }
 
   AdOptions _buildOptions() {
-    const data = 'xxxxxx';
-    const useId = 'xxxxx';
+    const data = '{"position":1}';
     if (Platform.isAndroid) {
       return AdOptions(
         spaceId: rewardVideoSpaceId,
@@ -117,7 +117,7 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
       );
     }
     if (Platform.isIOS) {
-      return AdOptions(spaceId: rewardVideoSpaceId, extra: data, userId: useId);
+      return AdOptions(spaceId: rewardVideoSpaceId, extra: data);
     }
     return AdOptions(spaceId: rewardVideoSpaceId);
   }

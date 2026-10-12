@@ -12,7 +12,7 @@ class AmpsIosUnifiedNativeManager: NSObject, AMPSUnifiedNativeManagerDelegate {
     var adIdMap: [String: AMPSUnifiedNativeView] = [:]
     /// 轮播 refreshData 可能再次触发 renderSuccess，这些 adId 不应通知 Dart 插入新广告。
     private var carouselRefreshingAdIds: Set<String> = []
-
+    
     init(instanceId: String) {
         self.instanceId = instanceId
         super.init()

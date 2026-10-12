@@ -389,10 +389,10 @@ class _NativeUnifiedPageState extends State<NativeUnifiedPage> {
           ),
           UnifiedActionButtonWidget(
             fontSize: 12,
-            width: 50,
-            height: 20,
+            width: 60,
+            height: 25,
             fontColor: '#FFFFFF',
-            backgroundColor: '#2F80ED',
+            backgroundColor: '#FF80ED',
             x: expressWidth - 60,
             y: expressHeight - 60,
           ),

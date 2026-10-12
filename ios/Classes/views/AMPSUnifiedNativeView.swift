@@ -156,7 +156,8 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
                     clickViews.append(imageView)
                 }
             }
-            imageView.contentMode = .scaleAspectFit
+            imageView.contentMode = .scaleAspectFill
+            imageView.clipsToBounds = true
             if let _ = URL(string: imageUrl) {
                 Tools.fetchImageData(from: imageUrl) { [weak imageView] result in
                     if case let .success(data) = result {
@@ -276,6 +277,60 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
             adView.addSubview(descLabel)
             if imgModel.clickType == 0 {
                 clickViews.append(descLabel)
+            }
+        }
+        // 操作按钮： actionText，可渲染文字或图片。
+        if let buttonModel = model.unifiedWidget?.children?.first(where: { $0.type == .actionButton }),
+           !ad.actionText.isEmpty {
+            let buttonFrame = CGRect(
+                x: buttonModel.x ?? 0,
+                y: buttonModel.y ?? 0,
+                width: buttonModel.width ?? adView.frame.width - 40,
+                height: buttonModel.height ?? 30
+            )
+            let actionView: UIView
+            if ad.actionText.hasPrefix("http") {
+                let imageView = UIImageView(frame: buttonFrame)
+                imageView.contentMode = .scaleAspectFit
+                actionView = imageView
+                Tools.fetchImageData(from: ad.actionText) { [weak imageView] result in
+                    guard case let .success(data) = result else { return }
+                    imageView?.image = UIImage(data: data)
+                }
+            } else {
+                let label = UILabel(frame: buttonFrame)
+                label.text = ad.actionText
+                label.textAlignment = .center
+                if let fontSize = buttonModel.fontSize {
+                    label.font = .systemFont(ofSize: fontSize)
+                }
+                if let fontColor = buttonModel.fontColor {
+                    label.textColor = UIColor(hexString: fontColor)
+                }
+                actionView = label
+            }
+
+            if let backgroundColor = buttonModel.backgroundColor {
+                actionView.backgroundColor = UIColor(hexString: backgroundColor)
+            }
+            let cornerRadius: CGFloat
+            switch buttonModel.buttonType {
+            case "normal":
+                cornerRadius = 0
+            case "roundedRectangle":
+                cornerRadius = 8
+            case "circle":
+                cornerRadius = min(buttonFrame.width, buttonFrame.height) / 2
+            default: // capsule（默认）
+                cornerRadius = buttonFrame.height / 2
+            }
+            actionView.layer.cornerRadius = cornerRadius
+            actionView.layer.masksToBounds = cornerRadius > 0
+
+            markSelfRender(actionView)
+            adView.addSubview(actionView)
+            if buttonModel.clickType == 0 {
+                clickViews.append(actionView)
             }
         }
         // 注册可点击视图

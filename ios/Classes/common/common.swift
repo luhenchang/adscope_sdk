@@ -223,6 +223,7 @@ enum AMPSAdSdkMethodNames {
     static let rewardVideoDestroyAd = "AMPSRewardVideo_destroy"
     static let rewardVideoAddPreLoadAdInfo = "AMPSRewardVideo_addPreLoadAdInfo"
     static let rewardVideoGetMediaExtraInfo = "AMPSRewardVideo_getMediaExtraInfo"
+    static let rewardVideoSetExtraDataMap = "AMPSRewardVideo_setExtraDataMap"
     
     //Banner
     static let bannerCreate = "AMPSBanner_create"
@@ -260,6 +261,7 @@ enum AdOptionKeys{
     static let keyIpAddress = "ipAddress"
     static let keyCustomExtraParameters = "customExtraParameters"
     static let keyExtraDataMap = "extraDataMap"
+    static let keyAdnAmps = "adn_amps"
 }
 
 enum ArgumentKeys {
@@ -343,7 +345,8 @@ let rewardVideoMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.rewardVideoDestroyAd,
     AMPSAdSdkMethodNames.rewardVideoIsReadyAd,
     AMPSAdSdkMethodNames.rewardVideoGetMediaExtraInfo,
-    AMPSAdSdkMethodNames.rewardVideoAddPreLoadAdInfo
+    AMPSAdSdkMethodNames.rewardVideoAddPreLoadAdInfo,
+    AMPSAdSdkMethodNames.rewardVideoSetExtraDataMap
 ]
 let bannerMethodNames: Set<String> = [
     AMPSAdSdkMethodNames.bannerCreate,

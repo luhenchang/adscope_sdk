@@ -5,11 +5,14 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.Outline
+import android.graphics.drawable.GradientDrawable
 import android.text.TextUtils
 import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
+import android.view.ViewOutlineProvider
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
@@ -236,11 +239,14 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
         images: Array<NativeUnifiedChild.Image>,
         unifiedItem: AMPSUnifiedNativeItem
     ): List<View> {
-        val fallbackUrls = unifiedItem.imagesUrl?.filter { !it.isNullOrBlank() } ?: emptyList()
-        return images.mapIndexedNotNull { index, child ->
-            val imageUrl = child.url?.takeIf { !it.isBlank() }
-                ?: fallbackUrls.getOrNull(index)
-                ?: return@mapIndexedNotNull null
+        val validUrls = unifiedItem.imagesUrl
+            ?.filter { !it.isNullOrBlank() }
+            ?.toSet()
+            ?: emptySet()
+
+        return images.mapNotNull { child ->
+            val imageUrl = child.url?.takeIf { !it.isBlank() && it in validUrls }
+                ?: return@mapNotNull null
             createConfiguredImageView(child, imageUrl)
         }
     }
@@ -373,36 +379,122 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
     ): View? {
         val layoutParams = createLayoutParams(child.width, child.height, child.x, child.y)
 
-        val actionButtonText = unifiedItem.actionButtonText
+        var actionButtonText = unifiedItem.actionButtonText
         if (actionButtonText == null || actionButtonText.isEmpty()) {
             return null
         }
-        if (actionButtonText.startsWith("http")) {
-            val actionIv = ImageView(context)
-            actionIv.scaleType = ImageView.ScaleType.FIT_CENTER
-            actionIv.layoutParams = layoutParams
-            loadAdImage(actionIv, actionButtonText, "actionButton")
-            return actionIv
+        val actionView = if (actionButtonText.startsWith("http")) {
+            ImageView(context).apply {
+                scaleType = ImageView.ScaleType.FIT_CENTER
+                this.layoutParams = layoutParams
+                loadAdImage(this, actionButtonText, "actionButton")
+            }
         } else {
-            val textView = TextView(context)
-            textView.text = actionButtonText
-            child.fontColor?.let {
-                try {
-                    textView.setTextColor(it.toColorInt())
-                } catch (_: Exception) {
+            TextView(context).apply {
+                text = actionButtonText
+                gravity = Gravity.CENTER
+                includeFontPadding = false
+                child.fontColor?.let { color ->
+                    try {
+                        setTextColor(color.toColorInt())
+                    } catch (_: Exception) {
+                    }
+                }
+                child.fontSize?.let { size ->
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, size.toFloat())
+                }
+                this.layoutParams = layoutParams
+            }
+        }
+        applyActionButtonShape(actionView, child)
+        return actionView
+    }
+
+    /**
+     * capsule / circle 用尺寸的一半做半径，roundedRectangle 用固定圆角，normal 为直角。
+     * 宽高要等布局后才能确定时，先画背景，布局完成后再更新圆角。
+     */
+    private fun applyActionButtonShape(view: View, child: NativeUnifiedChild.ActionButton) {
+        val (widthPx, heightPx) = resolveActionButtonSizePx(child, view)
+        val radius = actionButtonCornerRadiusPx(child.buttonType, widthPx, heightPx)
+        val waitForMeasure = radius <= 0f &&
+            child.buttonType != "normal" &&
+            child.buttonType != "roundedRectangle"
+        if (waitForMeasure) {
+            view.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+                override fun onLayoutChange(
+                    v: View,
+                    left: Int,
+                    top: Int,
+                    right: Int,
+                    bottom: Int,
+                    oldLeft: Int,
+                    oldTop: Int,
+                    oldRight: Int,
+                    oldBottom: Int
+                ) {
+                    if (v.width <= 0 || v.height <= 0) return
+                    v.removeOnLayoutChangeListener(this)
+                    bindActionButtonShape(v, child, v.width, v.height)
+                }
+            })
+        }
+        bindActionButtonShape(view, child, widthPx, heightPx)
+    }
+
+    private fun bindActionButtonShape(
+        view: View,
+        child: NativeUnifiedChild.ActionButton,
+        widthPx: Int,
+        heightPx: Int
+    ) {
+        val radius = actionButtonCornerRadiusPx(child.buttonType, widthPx, heightPx)
+        val backgroundColor = child.backgroundColor?.let { color ->
+            try {
+                color.toColorInt()
+            } catch (_: IllegalArgumentException) {
+                null
+            }
+        }
+        if (backgroundColor != null) {
+            view.background = GradientDrawable().apply {
+                cornerRadius = radius
+                setColor(backgroundColor)
+            }
+        }
+        if (radius > 0f) {
+            view.outlineProvider = object : ViewOutlineProvider() {
+                override fun getOutline(v: View, outline: Outline) {
+                    if (v.width <= 0 || v.height <= 0) return
+                    outline.setRoundRect(0, 0, v.width, v.height, radius)
                 }
             }
-            child.backgroundColor?.let {
-                try {
-                    textView.setBackgroundColor(it.toColorInt())
-                } catch (_: Exception) {
+            view.clipToOutline = true
+        }
+    }
+
+    private fun resolveActionButtonSizePx(
+        child: NativeUnifiedChild.ActionButton,
+        view: View
+    ): Pair<Int, Int> {
+        val widthPx = child.width?.dpToPx(context)?.takeIf { it > 0 } ?: view.width.takeIf { it > 0 } ?: 0
+        val heightPx = child.height?.dpToPx(context)?.takeIf { it > 0 } ?: view.height.takeIf { it > 0 } ?: 0
+        return widthPx to heightPx
+    }
+
+    private fun actionButtonCornerRadiusPx(buttonType: String?, widthPx: Int, heightPx: Int): Float {
+        return when (buttonType) {
+            "normal" -> 0f
+            "roundedRectangle" -> 8.dpToPx(context).toFloat()
+            "circle" -> {
+                val size = when {
+                    widthPx > 0 && heightPx > 0 -> minOf(widthPx, heightPx)
+                    widthPx > 0 -> widthPx
+                    else -> heightPx
                 }
+                if (size > 0) size / 2f else 0f
             }
-            child.fontSize?.let {
-                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, it.toFloat())
-            }
-            textView.layoutParams = layoutParams
-            return textView
+            else -> if (heightPx > 0) heightPx / 2f else 0f
         }
     }
 

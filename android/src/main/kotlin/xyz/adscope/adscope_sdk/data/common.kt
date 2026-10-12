@@ -220,6 +220,7 @@ object AMPSAdSdkMethodNames {
     const val REWARDED_VIDEO_IS_READY_AD = "AMPSRewardVideo_isReadyAd"
     const val REWARDED_VIDEO_ADD_PRE_LOAD_AD_INFO = "AMPSRewardVideo_addPreLoadAdInfo"
     const val REWARDED_VIDEO_GET_MEDIA_EXTRA_INFO = "AMPSRewardVideo_getMediaExtraInfo"
+    const val REWARDED_VIDEO_SET_EXTRA_DATA_MAP = "AMPSRewardVideo_setExtraDataMap"
 
     // Banner ad related methods
     const val BANNER_CREATE = "AMPSBanner_create"
@@ -334,7 +335,8 @@ val RewardedVideoMethodNames: Set<String> = setOf(
     AMPSAdSdkMethodNames.REWARDED_VIDEO_GET_SEAT_ID,
     AMPSAdSdkMethodNames.REWARDED_VIDEO_IS_READY_AD,
     AMPSAdSdkMethodNames.REWARDED_VIDEO_ADD_PRE_LOAD_AD_INFO,
-    AMPSAdSdkMethodNames.REWARDED_VIDEO_GET_MEDIA_EXTRA_INFO
+    AMPSAdSdkMethodNames.REWARDED_VIDEO_GET_MEDIA_EXTRA_INFO,
+    AMPSAdSdkMethodNames.REWARDED_VIDEO_SET_EXTRA_DATA_MAP
 )
 
 val BannerMethodNames: Set<String> = setOf(

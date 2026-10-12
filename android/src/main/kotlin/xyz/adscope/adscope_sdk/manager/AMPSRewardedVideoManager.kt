@@ -5,12 +5,14 @@ import io.flutter.plugin.common.MethodChannel.Result
 import xyz.adscope.adscope_sdk.data.AD_INSTANCE_ID
 import xyz.adscope.adscope_sdk.data.AMPSAdSdkMethodNames
 import xyz.adscope.adscope_sdk.data.AMPSRewardedVideoCallBackChannelMethod
+import xyz.adscope.adscope_sdk.data.AdOptionKeys
 import xyz.adscope.adscope_sdk.data.AdOptionsModule
 import xyz.adscope.adscope_sdk.data.ErrorModel
 import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import xyz.adscope.amps.ad.reward.AMPSRewardVideoAd
 import xyz.adscope.amps.ad.reward.AMPSRewardVideoLoadEventListener
 import xyz.adscope.amps.common.AMPSError
+import xyz.adscope.amps.config.AMPSRequestParameters
 import xyz.adscope.common.v2.gsonlite.Gson
 import java.util.concurrent.ConcurrentHashMap
 
@@ -20,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class AMPSRewardedVideoManager private constructor() {
     private val rewardedVideoAds = ConcurrentHashMap<String, AMPSRewardVideoAd>()
+    private val rewardedVideoAdOptions = ConcurrentHashMap<String, AMPSRequestParameters>()
 
     companion object {
         @Volatile
@@ -135,8 +138,13 @@ class AMPSRewardedVideoManager private constructor() {
                 val instanceId = instanceIdFrom(call)
                 if (instanceId != null) {
                     rewardedVideoAds.remove(instanceId)?.destroy()
+                    rewardedVideoAdOptions.remove(instanceId)
                 }
                 result.success(null)
+            }
+
+            AMPSAdSdkMethodNames.REWARDED_VIDEO_SET_EXTRA_DATA_MAP -> {
+                handleSetExtraDataMap(call, result)
             }
 
             AMPSAdSdkMethodNames.REWARDED_VIDEO_ADD_PRE_LOAD_AD_INFO -> {
@@ -173,8 +181,36 @@ class AMPSRewardedVideoManager private constructor() {
             return
         }
         val adOption = AdOptionsModule.getAdOptionFromMap(adOptionsMap, activity)
+        rewardedVideoAdOptions[instanceId] = adOption
         rewardedVideoAds[instanceId] = AMPSRewardVideoAd(activity, adOption, createAdCallback(instanceId))
         result.success(null)
+    }
+
+    private fun handleSetExtraDataMap(call: MethodCall, result: Result) {
+        val instanceId = instanceIdFrom(call)
+        if (instanceId.isNullOrEmpty()) {
+            result.error("INVALID_ARGS", "adInstanceId missing", null)
+            return
+        }
+        val adOption = rewardedVideoAdOptions[instanceId]
+        if (adOption == null) {
+            result.error("UPDATE_FAILED", "Reward ad instance not found", instanceId)
+            return
+        }
+        val extraDataMap = toStringMap(argsAsMap(call)?.get(AdOptionKeys.KEY_EXTRA_DATA_MAP))
+        adOption.extraDataMap = extraDataMap
+        result.success(null)
+    }
+
+    private fun toStringMap(raw: Any?): HashMap<String, String>? {
+        val map = raw as? Map<*, *> ?: return null
+        val result = HashMap<String, String>()
+        for ((key, value) in map) {
+            if (key != null && value != null) {
+                result[key.toString()] = value.toString()
+            }
+        }
+        return result
     }
 
     private fun handleRewardedVideoLoad(call: MethodCall, result: Result) {

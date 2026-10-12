@@ -15,6 +15,7 @@ class AMPSSplashManager: NSObject {
     private override init() {super.init()}
     
     private var splashAds: [String: AMPSSplashAd] = [:]
+    private var splashBottomParams: [String: [String: Any]] = [:]
     
     // MARK: - Public Methods
     func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -72,11 +73,88 @@ class AMPSSplashManager: NSObject {
             result(FlutterError(code: "INVALID_ARGS", message: "splashInstanceId is required", details: nil))
             return
         }
+        
+        
         let config = AdOptionModule.getAdConfig(para: param)
+        if let bottomView = buildBotteomView(arguments: arguments){
+            config.bottomView = bottomView
+        }
+        
         let ad = AMPSSplashAd(spaceId: config.spaceId, adConfiguration: config)
         ad.delegate = self
         splashAds[instanceId] = ad
+        if let bottom = resolveBottomParams(param) {
+            splashBottomParams[instanceId] = bottom
+        } else {
+            splashBottomParams.removeValue(forKey: instanceId)
+        }
         result(true)
+    }
+    
+    //构建底部view
+    private func buildBotteomView (arguments: [String: Any]?) -> UIView?{
+        if let param = resolveBottomParams(arguments) {
+            let windowWidth = getKeyWindow()?.bounds.width ?? 370
+            let height = param["height"] as? CGFloat ?? 0
+            let bgColor = param["backgroundColor"] as? String
+            var imageModel: SplashBottomImage?
+            var textModel: SplashBottomText?
+            if let children = param["children"] as? [[String: Any]] {
+                children.forEach { child in
+                    let type = child["type"] as? String ?? ""
+                    if type == "image"{
+                        imageModel = Tools.convertToModel(from: child)
+                    }else if type == "text" {
+                        textModel = Tools.convertToModel(from: child)
+                    }
+                }
+            }
+            if height > 1 {
+                let bottomView = UIView(frame: CGRect(x: 0, y: 0, width: CGFloat(windowWidth), height: height))
+                if let bgColor = bgColor{
+                    bottomView.backgroundColor = UIColor(hexString: bgColor)
+                }
+                
+                if let imageModel = imageModel {
+                    let image = imageModel.imagePath.flatMap { AMPSEventManager.shared.getImage($0) }
+                    var imageWidth = imageModel.width ?? 0
+                    var imageHeight = imageModel.height ?? 0
+                    // 宽或高传 0 时，自适应图片原始大小
+                    if imageWidth <= 0 {
+                        imageWidth = image?.size.width ?? 100
+                    }
+                    if imageHeight <= 0 {
+                        imageHeight = image?.size.height ?? 100
+                    }
+                    let imageView = UIImageView(frame: CGRect(x: imageModel.x ?? 0, y: imageModel.y ?? 0, width: imageWidth, height: imageHeight))
+                    imageView.image = image
+                    let scaleType = imageModel.scaleType ?? .fill
+                    imageView.contentMode = scaleType.contentMode
+                    imageView.clipsToBounds = scaleType.clipsToBounds
+                    
+                    bottomView.addSubview(imageView)
+//                    imageView.backgroundColor  = UIColor.orange
+                }
+                if let text = textModel?.text {
+                    let widht = windowWidth - (textModel?.x ?? 0)
+                    let tagLabel = UILabel(frame: CGRect(x: textModel?.x ?? 0, y: textModel?.y ?? 0, width: widht, height: 0))
+                    tagLabel.numberOfLines = 0
+                    if let color = textModel?.color {
+                        tagLabel.textColor = UIColor(hexString: color)
+                    }
+                    tagLabel.text = text
+                    if let font = textModel?.fontSize {
+                        tagLabel.font = UIFont.systemFont(ofSize: font)
+                    }
+                    bottomView.addSubview(tagLabel)
+                    let fittingSize = tagLabel.sizeThatFits(CGSize(width: widht, height: CGFloat.greatestFiniteMagnitude))
+                    tagLabel.frame.size.height = fittingSize.height
+                }
+                 
+                return bottomView
+            }
+        }
+        return nil
     }
     
     private func handleSplashLoad(instanceId: String, result: @escaping FlutterResult) {
@@ -110,68 +188,6 @@ class AMPSSplashManager: NSObject {
             result(false)
             return
         }
-        if let param = resolveBottomParams(arguments) {
-            let height = param["height"] as? CGFloat ?? 0
-            let bgColor = param["backgroundColor"] as? String
-            var imageModel: SplashBottomImage?
-            var textModel: SplashBottomText?
-            if let children = param["children"] as? [[String: Any]] {
-                children.forEach { child in
-                    let type = child["type"] as? String ?? ""
-                    if type == "image"{
-                        imageModel = Tools.convertToModel(from: child)
-                    }else if type == "text" {
-                        textModel = Tools.convertToModel(from: child)
-                    }
-                }
-            }
-            if height > 1 {
-                let bottomView = UIView(frame: CGRect(x: 0, y: 0, width: CGFloat(window.bounds.width), height: height))
-                if let bgColor = bgColor{
-                    bottomView.backgroundColor = UIColor(hexString: bgColor)
-                }
-                
-                if let imageModel = imageModel {
-                    let image = imageModel.imagePath.flatMap { AMPSEventManager.shared.getImage($0) }
-                    var imageWidth = imageModel.width ?? 0
-                    var imageHeight = imageModel.height ?? 0
-                    // 宽或高传 0 时，自适应图片原始大小
-                    if imageWidth <= 0 {
-                        imageWidth = image?.size.width ?? 100
-                    }
-                    if imageHeight <= 0 {
-                        imageHeight = image?.size.height ?? 100
-                    }
-                    let imageView = UIImageView(frame: CGRect(x: imageModel.x ?? 0, y: imageModel.y ?? 0, width: imageWidth, height: imageHeight))
-                    imageView.image = image
-                    let scaleType = imageModel.scaleType ?? .fill
-                    imageView.contentMode = scaleType.contentMode
-                    imageView.clipsToBounds = scaleType.clipsToBounds
-                    
-                    bottomView.addSubview(imageView)
-//                    imageView.backgroundColor  = UIColor.orange
-                }
-                if let text = textModel?.text {
-                    let widht = window.bounds.width - (textModel?.x ?? 0)
-                    let tagLabel = UILabel(frame: CGRect(x: textModel?.x ?? 0, y: textModel?.y ?? 0, width: widht, height: 0))
-                    tagLabel.numberOfLines = 0
-                    if let color = textModel?.color {
-                        tagLabel.textColor = UIColor(hexString: color)
-                    }
-                    tagLabel.text = text
-                    if let font = textModel?.fontSize {
-                        tagLabel.font = UIFont.systemFont(ofSize: font)
-                    }
-                    bottomView.addSubview(tagLabel)
-                    let fittingSize = tagLabel.sizeThatFits(CGSize(width: widht, height: CGFloat.greatestFiniteMagnitude))
-                    tagLabel.frame.size.height = fittingSize.height
-                }
-                splashAd.adConfiguration.bottomView = bottomView
-                splashAd.showSplashView(in: window)
-                result(true)
-                return
-            }
-        }
         splashAd.showSplashView(in: window)
         result(true)
     }
@@ -180,6 +196,7 @@ class AMPSSplashManager: NSObject {
         splashAds[instanceId]?.delegate = nil
         splashAds[instanceId]?.remove()
         splashAds.removeValue(forKey: instanceId)
+        splashBottomParams.removeValue(forKey: instanceId)
     }
     
     private func sendMessage(_ method: String, instanceId: String, args: [String: Any]? = nil) {

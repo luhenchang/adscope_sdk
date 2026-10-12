@@ -33,7 +33,7 @@ struct FlutterUnifiedChild: Codable {
     var imagePath: String?
     var fontSize: CGFloat?
     var color: String?
-    var bttonType: String?
+    var buttonType: String?
     var fontColor: String?
     var content: String?
     
