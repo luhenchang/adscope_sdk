@@ -264,6 +264,10 @@ export class AMPSSplashManager {
         if (this.mWindow) {
           this.releaseSplashAd(instanceId)
           this.splashAds.set(instanceId, new AMPSSplashAd(adOption, this.createCallBack(instanceId), this.mWindow.getUIContext()));
+          const splashBottomModule = this.resolveBottomModule(args)
+          if (splashBottomModule) {
+            this.splashBottomModules.set(instanceId, splashBottomModule)
+          }
           result.success(true);
         } else {
           result.error('LOAD_FAILED', '获取窗口或UI上下文失败', undefined);
@@ -286,12 +290,15 @@ export class AMPSSplashManager {
       const context = AMPSEventManager.getInstance().getContext()
       const windowStage = context?.windowStage ?? this.mWindowStage
       if (splashAd && windowStage) {
-        const splashBottomModule = this.resolveBottomModule(args)
         this.currentShowingInstanceId = instanceId
-        if (splashBottomModule) {
-          this.splashBottomModules.set(instanceId, splashBottomModule)
-        } else {
-          this.splashBottomModules.delete(instanceId)
+        // 兼容旧调用；新接口的底部配置已在创建广告时按实例保存。
+        if (args?.has(SPLASH_BOTTOM) || args?.get('type') === 'parent') {
+          const splashBottomModule = this.resolveBottomModule(args)
+          if (splashBottomModule) {
+            this.splashBottomModules.set(instanceId, splashBottomModule)
+          } else {
+            this.splashBottomModules.delete(instanceId)
+          }
         }
         const showOptions = new SplashShowAdOptions(windowStage, globalSplashBottomBuilder)
         splashAd.showAd(showOptions);
