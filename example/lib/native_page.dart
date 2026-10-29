@@ -10,6 +10,19 @@ class NativePage extends StatefulWidget {
   @override
   State<NativePage> createState() => _NativePageState();
 }
+/**
+ *
+ * 不传express 显示限制宽高可以这样穿，效果：剧中留白
+ * SizedBox(
+    width: 343,
+    height: 200,
+    child: FittedBox(
+    fit: BoxFit.contain,
+    alignment: Alignment.center,
+    child: NativeWidget(nativeAd, adId: adId),
+    ),
+    )
+ */
 
 class _NativePageState extends State<NativePage> {
   final Map<String, AMPSNativeAd> _nativeAds = {};
