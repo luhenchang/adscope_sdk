@@ -9,7 +9,6 @@ import xyz.adscope.adscope_sdk.data.AMPSAdSdkMethodNames
 import xyz.adscope.adscope_sdk.data.AMPSDrawCallbackChannelMethod
 import xyz.adscope.adscope_sdk.data.AdOptionsModule
 import xyz.adscope.adscope_sdk.data.ErrorModel
-import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import xyz.adscope.amps.ad.draw.AMPSDrawAd
 import xyz.adscope.amps.ad.draw.AMPSDrawLoadEventListener
 import xyz.adscope.amps.ad.draw.adapter.AMPSDrawAdExpressListener
@@ -20,21 +19,10 @@ import xyz.adscope.common.v2.gsonlite.Gson
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
-class AMPSDrawManager private constructor() {
+class AMPSDrawManager(private val engine: AMPSEventManager) {
     private val drawAds = ConcurrentHashMap<String, AMPSDrawAd>()
     private val drawAdIdMapByInstance =
         ConcurrentHashMap<String, MutableMap<AMPSDrawAdExpressInfo, String>>()
-
-    companion object {
-        @Volatile
-        private var instance: AMPSDrawManager? = null
-
-        fun getInstance(): AMPSDrawManager {
-            return instance ?: synchronized(this) {
-                instance ?: AMPSDrawManager().also { instance = it }
-            }
-        }
-    }
 
     @Suppress("UNCHECKED_CAST")
     private fun argsMap(call: MethodCall): Map<String, Any>? =
@@ -48,6 +36,7 @@ class AMPSDrawManager private constructor() {
 
     private fun buildAdCallback(instanceId: String) = object : AMPSDrawLoadEventListener() {
         override fun onAmpsAdLoad(adItems: List<AMPSDrawAdExpressInfo?>?) {
+            if (engine.isReleased) return
             val idMap = drawIdMap(instanceId)
             idMap.clear()
             val adIdList = adItems?.filterNotNull()?.map { item ->
@@ -64,6 +53,7 @@ class AMPSDrawManager private constructor() {
                 val uniqueId = idMap[item] ?: return@forEach
                 item.setAMPSDrawAdExpressInfoListener(object : AMPSDrawAdExpressListener() {
                     override fun onAdShow() {
+                        if (engine.isReleased) return
                         sendMessage(
                             instanceId,
                             AMPSDrawCallbackChannelMethod.ON_AD_SHOW,
@@ -72,6 +62,7 @@ class AMPSDrawManager private constructor() {
                     }
 
                     override fun onAdClicked() {
+                        if (engine.isReleased) return
                         sendMessage(
                             instanceId,
                             AMPSDrawCallbackChannelMethod.ON_AD_CLICKED,
@@ -80,6 +71,7 @@ class AMPSDrawManager private constructor() {
                     }
 
                     override fun onAdClosed(view: View?) {
+                        if (engine.isReleased) return
                         idMap.remove(item)
                         adDestroy(uniqueId)
                         sendMessage(
@@ -90,6 +82,7 @@ class AMPSDrawManager private constructor() {
                     }
 
                     override fun onRenderFail(view: View?, msg: String?, code: Int) {
+                        if (engine.isReleased) return
                         sendMessage(
                             instanceId,
                             AMPSDrawCallbackChannelMethod.ON_RENDER_FAIL,
@@ -102,9 +95,10 @@ class AMPSDrawManager private constructor() {
                     }
 
                     override fun onRenderSuccess(drawView: View?, width: Float, height: Float) {
+                        if (engine.isReleased) return
                         if (drawView != null) {
-                            AdWrapperManager.getInstance().addDrawAdItem(uniqueId, item)
-                            AdWrapperManager.getInstance().addAdView(uniqueId, drawView)
+                            engine.wrappers.addDrawAdItem(uniqueId, item)
+                            engine.wrappers.addAdView(uniqueId, drawView)
                         }
                         sendMessage(
                             instanceId,
@@ -115,6 +109,7 @@ class AMPSDrawManager private constructor() {
                 })
                 item.setAMPSDrawAdVideoListener(object : AMPSDrawAdVideoListener() {
                     override fun onVideoLoad() {
+                        if (engine.isReleased) return
                         sendMessage(
                             instanceId,
                             AMPSDrawCallbackChannelMethod.ON_VIDEO_LOAD,
@@ -123,6 +118,7 @@ class AMPSDrawManager private constructor() {
                     }
 
                     override fun onVideoError(code: Int, msg: Int) {
+                        if (engine.isReleased) return
                         sendMessage(
                             instanceId,
                             AMPSDrawCallbackChannelMethod.ON_VIDEO_ERROR,
@@ -135,6 +131,7 @@ class AMPSDrawManager private constructor() {
                     }
 
                     override fun onVideoAdStartPlay() {
+                        if (engine.isReleased) return
                         sendMessage(
                             instanceId,
                             AMPSDrawCallbackChannelMethod.ON_VIDEO_PLAY_START,
@@ -143,6 +140,7 @@ class AMPSDrawManager private constructor() {
                     }
 
                     override fun onVideoAdPaused() {
+                        if (engine.isReleased) return
                         sendMessage(
                             instanceId,
                             AMPSDrawCallbackChannelMethod.ON_VIDEO_PLAY_PAUSE,
@@ -151,6 +149,7 @@ class AMPSDrawManager private constructor() {
                     }
 
                     override fun onVideoAdContinuePlay() {
+                        if (engine.isReleased) return
                         sendMessage(
                             instanceId,
                             AMPSDrawCallbackChannelMethod.ON_VIDEO_AD_CONTINUE_PLAY,
@@ -159,6 +158,7 @@ class AMPSDrawManager private constructor() {
                     }
 
                     override fun onProgressUpdate(current: Long, duration: Long) {
+                        if (engine.isReleased) return
                         sendMessage(
                             instanceId,
                             AMPSDrawCallbackChannelMethod.ON_PROGRESS_UPDATE,
@@ -171,6 +171,7 @@ class AMPSDrawManager private constructor() {
                     }
 
                     override fun onVideoAdComplete() {
+                        if (engine.isReleased) return
                         sendMessage(
                             instanceId,
                             AMPSDrawCallbackChannelMethod.ON_VIDEO_AD_COMPLETE,
@@ -183,6 +184,7 @@ class AMPSDrawManager private constructor() {
         }
 
         override fun onAmpsAdFailed(error: AMPSError?) {
+            if (engine.isReleased) return
             sendMessage(
                 instanceId,
                 AMPSDrawCallbackChannelMethod.ON_LOAD_FAILURE,
@@ -195,8 +197,8 @@ class AMPSDrawManager private constructor() {
     }
 
     private fun adDestroy(uniqueId: String) {
-        AdWrapperManager.getInstance().removeAdView(uniqueId)
-        AdWrapperManager.getInstance().removeDrawAdItem(uniqueId)
+        engine.wrappers.removeAdView(uniqueId)
+        engine.wrappers.removeDrawAdItem(uniqueId)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -253,7 +255,7 @@ class AMPSDrawManager private constructor() {
     }
 
     private fun drawAdCreate(call: MethodCall, result: Result) {
-        val activity = FlutterPluginUtil.getActivity()
+        val activity = engine.getActivity()
         if (activity == null) {
             result.error("LOAD_FAILED", "Activity not available for loading draw ad.", null)
             return
@@ -282,6 +284,12 @@ class AMPSDrawManager private constructor() {
     private fun sendMessage(instanceId: String, method: String, args: Map<String, Any?>) {
         val payload = mutableMapOf<String, Any?>(AD_INSTANCE_ID to instanceId)
         payload.putAll(args)
-        AMPSEventManager.getInstance().sendMessageToFlutter(method, payload)
+        engine.sendMessageToFlutter(method, payload)
+    }
+
+    fun release() {
+        drawAds.values.toList().forEach { runCatching { it.destroy() } }
+        drawAds.clear()
+        drawAdIdMapByInstance.clear()
     }
 }

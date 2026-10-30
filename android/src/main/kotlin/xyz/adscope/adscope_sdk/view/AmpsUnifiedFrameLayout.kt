@@ -32,7 +32,6 @@ import xyz.adscope.amps.ad.unified.view.AMPSUnifiedMediaViewStub
 import xyz.adscope.common.v2.image.loader.IImageFillResult
 import xyz.adscope.common.v2.image.loader.ImageLoader
 
-
 // 定义点击事件类型，与 Flutter 端和数据模型保持一致
 object AdClickType {
     const val NONE = -1
@@ -51,7 +50,7 @@ data class AdRenderResult(
 /**
  * 一个自定义 View，负责根据数据模型动态构建原生广告 UI
  */
-class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
+class AmpsUnifiedFrameLayout(context: Context, private val engine: AMPSEventManager) : FrameLayout(context) {
     private val TAG = "AmpsUnifiedFrameLayout"
 
     // 用来记录可点击的视图和需要上报的视图
@@ -129,7 +128,6 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
             }
         }
 
-
         //渲染操作按钮,需支持文本和图片两种情况
         module.actionButtonChild?.let { child ->
             createActionView(child, unifiedItem)?.let { actionView ->
@@ -183,7 +181,6 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
             }
         }
     }
-
 
     private fun applyRootProperties(
         module: NativeUnifiedModule,
@@ -575,7 +572,6 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
         }
     }
 
-
     private fun createCloseIconView(
         child: NativeUnifiedChild.CloseIcon,
         adId: String
@@ -643,7 +639,7 @@ class AmpsUnifiedFrameLayout(context: Context) : FrameLayout(context) {
     }
 
     private fun sendMessageToFlutter(method: String, args: Any?) {
-        AMPSEventManager.getInstance()
+        engine
             .sendMessageToFlutter(method, args)
     }
 

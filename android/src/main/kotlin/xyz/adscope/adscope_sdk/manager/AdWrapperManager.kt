@@ -5,23 +5,11 @@ import xyz.adscope.amps.ad.draw.inter.AMPSDrawAdExpressInfo
 import xyz.adscope.amps.ad.nativead.inter.AMPSNativeAdExpressInfo
 import java.util.concurrent.ConcurrentHashMap
 
-class AdWrapperManager private constructor() {
+class AdWrapperManager {
     // 使用ConcurrentHashMap保证线程安全
     private val adViewMap: MutableMap<String, View> = ConcurrentHashMap()
     private val adItemMap: MutableMap<String, AMPSNativeAdExpressInfo> = ConcurrentHashMap()
     private val adDrawItemMap: MutableMap<String, AMPSDrawAdExpressInfo> = ConcurrentHashMap()
-
-    companion object {
-        // 单例实例，使用双重校验锁保证线程安全
-        @Volatile
-        private var instance: AdWrapperManager? = null
-
-        fun getInstance(): AdWrapperManager {
-            return instance ?: synchronized(this) {
-                instance ?: AdWrapperManager().also { instance = it }
-            }
-        }
-    }
 
     /**
      * 将View添加到Map中
@@ -117,5 +105,11 @@ class AdWrapperManager private constructor() {
     fun getAdItemCount(): Int {
         return adItemMap.size
     }
+
+    fun release() {
+        adViewMap.clear()
+        adItemMap.clear()
+        adDrawItemMap.clear()
+    }
 }
-    
+

@@ -14,8 +14,6 @@ import xyz.adscope.adscope_sdk.data.ErrorModel.CODE
 import xyz.adscope.adscope_sdk.data.ErrorModel.MESSAGE
 import xyz.adscope.adscope_sdk.data.NATIVE_TYPE
 import xyz.adscope.adscope_sdk.data.NativeType
-import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
-import xyz.adscope.adscope_sdk.view.AMPSUnifiedView
 import xyz.adscope.amps.ad.nativead.AMPSNativeAd
 import xyz.adscope.amps.ad.nativead.AMPSNativeLoadEventListener
 import xyz.adscope.amps.ad.nativead.adapter.AMPSNativeAdExpressListener
@@ -32,7 +30,7 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 @Suppress("UNCHECKED_CAST")
-class AMPSNativeManager {
+class AMPSNativeManager(private val engine: AMPSEventManager) {
     private val nativeAds = ConcurrentHashMap<String, AMPSNativeAd>()
     private val unifiedAds = ConcurrentHashMap<String, AMPSUnifiedNativeAd>()
 
@@ -41,17 +39,6 @@ class AMPSNativeManager {
         ConcurrentHashMap<String, MutableMap<AMPSNativeAdExpressInfo, String>>()
     private val unifiedAdIdMapByInstance =
         ConcurrentHashMap<String, MutableMap<AMPSUnifiedNativeItem, String>>()
-
-    companion object {
-        @Volatile
-        private var instance: AMPSNativeManager? = null
-
-        fun getInstance(): AMPSNativeManager {
-            return instance ?: synchronized(this) {
-                instance ?: AMPSNativeManager().also { instance = it }
-            }
-        }
-    }
 
     private fun argsMap(call: MethodCall): Map<String, Any>? =
         call.arguments as? Map<String, Any>
@@ -70,6 +57,7 @@ class AMPSNativeManager {
 
     private fun buildNativeCallback(instanceId: String) = object : AMPSNativeLoadEventListener() {
         override fun onAmpsAdLoad(adItems: List<AMPSNativeAdExpressInfo?>?) {
+            if (engine.isReleased) return
             val idMap = nativeIdMap(instanceId)
             idMap.clear()
             val adIdList = adItems?.filterNotNull()?.map { item ->
@@ -82,20 +70,24 @@ class AMPSNativeManager {
                 val uniqueId = idMap[item] ?: return@forEach
                 item.setAMPSNativeAdExpressListener(object : AMPSNativeAdExpressListener() {
                     override fun onAdShow() {
+                        if (engine.isReleased) return
                         sendMessage(instanceId, AMPSNativeCallBackChannelMethod.ON_AD_SHOW, mapOf(AD_ID to uniqueId))
                     }
 
                     override fun onAdClicked() {
+                        if (engine.isReleased) return
                         sendMessage(instanceId, AMPSNativeCallBackChannelMethod.ON_AD_CLICKED, mapOf(AD_ID to uniqueId))
                     }
 
                     override fun onAdClosed(p0: View?) {
+                        if (engine.isReleased) return
                         idMap.remove(item)
                         adDestroy(uniqueId)
                         sendMessage(instanceId, AMPSNativeCallBackChannelMethod.ON_AD_CLOSED, mapOf(AD_ID to uniqueId))
                     }
 
                     override fun onRenderFail(p0: View?, p1: String?, p2: Int) {
+                        if (engine.isReleased) return
                         sendMessage(
                             instanceId,
                             AMPSNativeCallBackChannelMethod.RENDER_FAILED,
@@ -104,9 +96,10 @@ class AMPSNativeManager {
                     }
 
                     override fun onRenderSuccess(p0: View?, p1: Float, p2: Float) {
+                        if (engine.isReleased) return
                         if (p0 != null) {
-                            AdWrapperManager.getInstance().addAdItem(uniqueId, item)
-                            AdWrapperManager.getInstance().addAdView(uniqueId, p0)
+                            engine.wrappers.addAdItem(uniqueId, item)
+                            engine.wrappers.addAdView(uniqueId, p0)
                         }
                         sendMessage(
                             instanceId,
@@ -120,6 +113,7 @@ class AMPSNativeManager {
         }
 
         override fun onAmpsAdFailed(error: AMPSError?) {
+            if (engine.isReleased) return
             sendMessage(
                 instanceId,
                 AMPSNativeCallBackChannelMethod.LOAD_FAIL,
@@ -130,6 +124,7 @@ class AMPSNativeManager {
 
     private fun buildUnifiedCallback(instanceId: String) = object : AMPSUnifiedNativeLoadEventListener() {
         override fun onAmpsAdLoad(adItems: List<AMPSUnifiedNativeItem?>?) {
+            if (engine.isReleased) return
             val idMap = unifiedIdMap(instanceId)
             idMap.clear()
             val adIdList = adItems?.filterNotNull()?.map { item ->
@@ -151,6 +146,7 @@ class AMPSNativeManager {
                 if (item.isExpressAd) {
                     item.setNativeAdExpressListener(object : AMPSNativeAdExpressListener() {
                         override fun onAdShow() {
+                            if (engine.isReleased) return
                             sendMessage(
                                 instanceId,
                                 AMPSNativeCallBackChannelMethod.ON_AD_SHOW,
@@ -159,6 +155,7 @@ class AMPSNativeManager {
                         }
 
                         override fun onAdClicked() {
+                            if (engine.isReleased) return
                             sendMessage(
                                 instanceId,
                                 AMPSNativeCallBackChannelMethod.ON_AD_CLICKED,
@@ -167,6 +164,7 @@ class AMPSNativeManager {
                         }
 
                         override fun onAdClosed(p0: View?) {
+                            if (engine.isReleased) return
                             idMap.remove(item)
                             adDestroy(uniqueId)
                             sendMessage(
@@ -177,6 +175,7 @@ class AMPSNativeManager {
                         }
 
                         override fun onRenderFail(p0: View?, p1: String?, p2: Int) {
+                            if (engine.isReleased) return
                             sendMessage(
                                 instanceId,
                                 AMPSNativeCallBackChannelMethod.RENDER_FAILED,
@@ -185,8 +184,9 @@ class AMPSNativeManager {
                         }
 
                         override fun onRenderSuccess(p0: View?, p1: Float, p2: Float) {
+                            if (engine.isReleased) return
                             if (p0 != null) {
-                                AdWrapperManager.getInstance().addAdView(uniqueId, p0)
+                                engine.wrappers.addAdView(uniqueId, p0)
                             }
                             sendMessage(
                                 instanceId,
@@ -203,6 +203,7 @@ class AMPSNativeManager {
         }
 
         override fun onAmpsAdFailed(p0: AMPSError?) {
+            if (engine.isReleased) return
             sendMessage(
                 instanceId,
                 AMPSNativeCallBackChannelMethod.LOAD_FAIL,
@@ -218,6 +219,7 @@ class AMPSNativeManager {
     ) {
         item.setDownloadListener(object : AMPSUnifiedDownloadListener {
             override fun onDownloadPaused(position: Int) {
+                if (engine.isReleased) return
                 sendMessage(
                     instanceId,
                     DownLoadCallBackChannelMethod.ON_DOWNLOAD_PAUSED,
@@ -226,6 +228,7 @@ class AMPSNativeManager {
             }
 
             override fun onDownloadStarted() {
+                if (engine.isReleased) return
                 sendMessage(
                     instanceId,
                     DownLoadCallBackChannelMethod.ON_DOWNLOAD_STARTED,
@@ -234,6 +237,7 @@ class AMPSNativeManager {
             }
 
             override fun onDownloadProgressUpdate(position: Int) {
+                if (engine.isReleased) return
                 sendMessage(
                     instanceId,
                     DownLoadCallBackChannelMethod.ON_DOWNLOAD_PROGRESS_UPDATE,
@@ -242,6 +246,7 @@ class AMPSNativeManager {
             }
 
             override fun onDownloadFinished() {
+                if (engine.isReleased) return
                 sendMessage(
                     instanceId,
                     DownLoadCallBackChannelMethod.ON_DOWNLOAD_FINISHED,
@@ -250,6 +255,7 @@ class AMPSNativeManager {
             }
 
             override fun onDownloadFailed() {
+                if (engine.isReleased) return
                 sendMessage(
                     instanceId,
                     DownLoadCallBackChannelMethod.ON_DOWNLOAD_FAILED,
@@ -258,6 +264,7 @@ class AMPSNativeManager {
             }
 
             override fun onInstalled() {
+                if (engine.isReleased) return
                 sendMessage(
                     instanceId,
                     DownLoadCallBackChannelMethod.ON_INSTALLED,
@@ -276,6 +283,7 @@ class AMPSNativeManager {
         if (uniqueId != null) {
             item.setNativeAdEventListener(object : AMPSUnifiedAdEventListener {
                 override fun onADExposed() {
+                    if (engine.isReleased) return
                     sendMessage(
                         instanceId,
                         AMPSNativeCallBackChannelMethod.ON_AD_SHOW,
@@ -289,6 +297,7 @@ class AMPSNativeManager {
                 }
 
                 override fun onADClicked() {
+                    if (engine.isReleased) return
                     sendMessage(
                         instanceId,
                         AMPSNativeCallBackChannelMethod.ON_AD_CLICKED,
@@ -297,6 +306,7 @@ class AMPSNativeManager {
                 }
 
                 override fun onADExposeError(p0: Int, p1: String?) {
+                    if (engine.isReleased) return
                     sendMessage(
                         instanceId,
                         AMPSNativeCallBackChannelMethod.ON_AD_EXPOSURE_FAIL,
@@ -305,10 +315,11 @@ class AMPSNativeManager {
                 }
 
                 override fun onCarouselAdLoad(newItem: AMPSUnifiedNativeItem?) {
+                    if (engine.isReleased) return
                     handleCarouselAdLoad(instanceId, uniqueId, item, newItem)
                 }
             })
-            AdUnifiedWrapperManager.getInstance().addAdItem(uniqueId, item)
+            engine.unifiedWrappers.addAdItem(uniqueId, item)
             if (notifyRenderSuccess) {
                 sendMessage(
                     instanceId,
@@ -336,7 +347,7 @@ class AMPSNativeManager {
         idMap.remove(oldItem)
         idMap[newItem] = uniqueId
         bindCarouselItem(instanceId, uniqueId, newItem)
-        AMPSUnifiedView.refresh(uniqueId)
+        engine.unifiedViews[uniqueId]?.get()?.reloadAd()
         sendMessage(
             instanceId,
             AMPSNativeCallBackChannelMethod.ON_CAROUSEL_AD_LOAD,
@@ -376,10 +387,10 @@ class AMPSNativeManager {
             AMPSAdSdkMethodNames.NATIVE_GET_ECPM -> {
                 val mAdId = argsMap(call)?.get(AD_ID) as? String ?: ""
                 if (nativeTypeFrom(call) == NativeType.NATIVE.value) {
-                    val foundWrapper = AdWrapperManager.getInstance().getAdItem(mAdId)
+                    val foundWrapper = engine.wrappers.getAdItem(mAdId)
                     result.success(foundWrapper?.ecpm ?: 0)
                 } else {
-                    val foundWrapper = AdUnifiedWrapperManager.getInstance().getAdItem(mAdId)
+                    val foundWrapper = engine.unifiedWrappers.getAdItem(mAdId)
                     result.success(foundWrapper?.ecpm ?: 0)
                 }
             }
@@ -407,7 +418,7 @@ class AMPSNativeManager {
                 if (nativeTypeFrom(call) == NativeType.NATIVE.value) {
                     result.success(true)
                 } else {
-                    val foundWrapper = AdUnifiedWrapperManager.getInstance().getAdItem(adId)
+                    val foundWrapper = engine.unifiedWrappers.getAdItem(adId)
                     result.success(foundWrapper?.isExpressAd ?: false)
                 }
             }
@@ -417,7 +428,7 @@ class AMPSNativeManager {
                 if (nativeTypeFrom(call) == NativeType.NATIVE.value) {
                     result.success(null)
                 } else {
-                    val foundWrapper = AdUnifiedWrapperManager.getInstance().getAdItem(adId)
+                    val foundWrapper = engine.unifiedWrappers.getAdItem(adId)
                     result.success(foundWrapper?.imagesUrl)
                 }
             }
@@ -427,7 +438,7 @@ class AMPSNativeManager {
                 if (nativeTypeFrom(call) == NativeType.NATIVE.value) {
                     result.success(null)
                 } else {
-                    val appDetail = AdUnifiedWrapperManager.getInstance().getAdItem(adId)?.appDetail
+                    val appDetail = engine.unifiedWrappers.getAdItem(adId)?.appDetail
                     var infoMap: Map<String, String?>? = null
                     if (appDetail != null) {
                         infoMap = mapOf(
@@ -490,7 +501,7 @@ class AMPSNativeManager {
                 if (nativeTypeFrom(call) == NativeType.NATIVE.value) {
                     result.success(-1)
                 } else {
-                    val foundWrapper = AdUnifiedWrapperManager.getInstance().getAdItem(adId)
+                    val foundWrapper = engine.unifiedWrappers.getAdItem(adId)
                     val adPattern = foundWrapper?.adPattern?.ordinal ?: 0
                     result.success(adPattern)
                 }
@@ -514,7 +525,7 @@ class AMPSNativeManager {
     }
 
     private fun createAd(call: MethodCall, result: MethodChannel.Result) {
-        val activity = FlutterPluginUtil.getActivity()
+        val activity = engine.getActivity()
         if (activity == null) {
             result.error("LOAD_FAILED", "Activity not available for loading native ad.", null)
             return
@@ -553,15 +564,24 @@ class AMPSNativeManager {
     }
 
     private fun adDestroy(uniqueId: String) {
-        AdUnifiedWrapperManager.getInstance().removeAdItem(uniqueId)
-        AdUnifiedWrapperManager.getInstance().removeAdView(uniqueId)
-        AdWrapperManager.getInstance().removeAdItem(uniqueId)
-        AdWrapperManager.getInstance().removeAdView(uniqueId)
+        engine.unifiedWrappers.removeAdItem(uniqueId)
+        engine.unifiedWrappers.removeAdView(uniqueId)
+        engine.wrappers.removeAdItem(uniqueId)
+        engine.wrappers.removeAdView(uniqueId)
     }
 
     private fun sendMessage(instanceId: String, method: String, args: Map<String, Any?>) {
         val payload = mutableMapOf<String, Any?>(AD_INSTANCE_ID to instanceId)
         payload.putAll(args)
-        AMPSEventManager.getInstance().sendMessageToFlutter(method, payload)
+        engine.sendMessageToFlutter(method, payload)
+    }
+
+    fun release() {
+        nativeAds.values.toList().forEach { runCatching { it.destroy() } }
+        nativeAds.clear()
+        unifiedAds.values.toList().forEach { runCatching { it.destroy() } }
+        unifiedAds.clear()
+        nativeAdIdMapByInstance.clear()
+        unifiedAdIdMapByInstance.clear()
     }
 }

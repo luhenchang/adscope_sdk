@@ -8,8 +8,12 @@ import AMPSAdSDK
 
 class AMPSBannerManager: NSObject {
     
-    static let shared = AMPSBannerManager()
-    private override init() {super.init()}
+    private weak var eventManager: AMPSEventManager?
+
+    init(eventManager: AMPSEventManager) {
+        self.eventManager = eventManager
+        super.init()
+    }
     
     private var bannerAds: [String: AMPSBannerAd] = [:]
     
@@ -47,6 +51,10 @@ class AMPSBannerManager: NSObject {
         }
     }
     
+    func release() {
+        for id in Array(bannerAds.keys) { cleanupViewsAfterAdClosed(instanceId: id) }
+    }
+
     private func instanceId(from arguments: [String: Any]?) -> String? {
         return arguments?[ArgumentKeys.adInstanceId] as? String
     }
@@ -72,7 +80,7 @@ class AMPSBannerManager: NSObject {
             return
         }
         let config = AdOptionModule.getAdConfig(para: param)
-        config.viewController = UIViewController.current()
+        config.viewController = eventManager?.viewController
         let ad = AMPSBannerAd(spaceId: config.spaceId, adConfiguration: config)
         ad.delegate = self
         bannerAds[instanceId] = ad
@@ -100,7 +108,7 @@ class AMPSBannerManager: NSObject {
         if let args = args {
             for (k, v) in args { payload[k] = v }
         }
-        AMPSEventManager.shared.sendToFlutter(method, arg: payload)
+        eventManager?.sendToFlutter(method, arg: payload)
     }
 }
 

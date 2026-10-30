@@ -11,22 +11,21 @@ import Flutter
 class AMPSPlatformViewRegistry {
     
     
-    static let shared: AMPSPlatformViewRegistry = .init()
-    private init() {}
+    init() {}
     
     
-    func regist(_ binding: FlutterPluginRegistrar?){
+    func regist(_ binding: FlutterPluginRegistrar?, eventManager: AMPSEventManager){
         guard let binding = binding else {
             return
         }
         
-        binding.register(AMPSNAtiveViewFactory(), withId: AMPSPlatformViewIds.nativeViewId)
+        binding.register(AMPSNAtiveViewFactory(eventManager: eventManager), withId: AMPSPlatformViewIds.nativeViewId)
         
-        binding.register(AMPSUnifiedNAtiveViewFactory(), withId: AMPSPlatformViewIds.unifiedViewId)
+        binding.register(AMPSUnifiedNAtiveViewFactory(eventManager: eventManager), withId: AMPSPlatformViewIds.unifiedViewId)
         
-        binding.register(AMPSBannerViewFactory(), withId: AMPSPlatformViewIds.bannerViewId)
+        binding.register(AMPSBannerViewFactory(eventManager: eventManager), withId: AMPSPlatformViewIds.bannerViewId)
         
-        binding.register(AMPSDrawViewFactory(), withId: AMPSPlatformViewIds.drawViewId)
+        binding.register(AMPSDrawViewFactory(eventManager: eventManager), withId: AMPSPlatformViewIds.drawViewId)
         
     }
     

@@ -10,8 +10,15 @@ import Flutter
 
 
 class AMPSBannerViewFactory: NSObject, FlutterPlatformViewFactory {
+    private let eventManager: AMPSEventManager
+
+    init(eventManager: AMPSEventManager) {
+        self.eventManager = eventManager
+        super.init()
+    }
+
     func create(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?) -> any FlutterPlatformView {
-        return AMPSBannerView(frame: frame, viewId: viewId, args: args)
+        return AMPSBannerView(frame: frame, viewId: viewId, args: args, eventManager: eventManager)
     }
     
     func createArgsCodec() -> any FlutterMessageCodec & NSObjectProtocol {
@@ -23,13 +30,13 @@ class AMPSBannerView: NSObject, FlutterPlatformView {
     
     private let iosView: IOSBannerView
     
-    init(frame: CGRect, viewId: Int64, args: Any?) {
+    init(frame: CGRect, viewId: Int64, args: Any?, eventManager: AMPSEventManager) {
         self.iosView = IOSBannerView(frame: frame)
         super.init()
         
         let argsMap = args as? [String: Any]
         let instanceId = argsMap?[ArgumentKeys.adInstanceId] as? String
-        guard let adView = AMPSBannerManager.shared.getBannerView(instanceId: instanceId) else { return }
+        guard let adView = eventManager.bannerManager.getBannerView(instanceId: instanceId) else { return }
         
         iosView.clipsToBounds = true
         if adView.superview !== iosView {

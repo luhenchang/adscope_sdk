@@ -8,10 +8,12 @@ import AMPSAdSDK
 
 class AMPSDrawSlot: NSObject {
     let instanceId: String
+    private weak var eventManager: AMPSEventManager?
     var drawAd: AMPSDrawAdManager?
     var adIdMap: [AMPSDrawAdView: String] = [:]
     
-    init(instanceId: String) {
+    init(instanceId: String, eventManager: AMPSEventManager?) {
+        self.eventManager = eventManager
         self.instanceId = instanceId
         super.init()
     }
@@ -24,6 +26,11 @@ class AMPSDrawSlot: NSObject {
     }
     
     func cleanup() {
+        self.drawAd?.delegate = nil
+        for view in adIdMap.keys {
+            view.delegate = nil
+            view.removeFromSuperview()
+        }
         self.drawAd?.remove()
         self.drawAd = nil
         self.adIdMap.removeAll()
@@ -32,7 +39,7 @@ class AMPSDrawSlot: NSObject {
     private func sendMessage(_ method: String, _ args: [String: Any] = [:]) {
         var payload = args
         payload[ArgumentKeys.adInstanceId] = instanceId
-        AMPSEventManager.shared.sendToFlutter(method, arg: payload)
+        eventManager?.sendToFlutter(method, arg: payload)
     }
     
     private func sendAdIdMessage(_ method: String, _ adId: String, extra: [String: Any] = [:]) {
@@ -63,7 +70,7 @@ class AMPSDrawSlot: NSObject {
     }
     
     func handleRenderSuccess(_ view: AMPSDrawAdView) {
-        view.viewController = UIViewController.current()
+        view.viewController = eventManager?.viewController
         if let adID = self.adIdMap[view] {
             sendAdIdMessage(AmpsDrawCallbackChannelMethod.onRenderSuccess, adID)
         }
@@ -99,11 +106,20 @@ class AMPSDrawSlot: NSObject {
 
 class AMPSDrawManager: NSObject {
     
-    static let shared = AMPSDrawManager()
-    private override init() { super.init() }
+    private weak var eventManager: AMPSEventManager?
+
+    init(eventManager: AMPSEventManager) {
+        self.eventManager = eventManager
+        super.init()
+    }
     
     private var drawSlots: [String: AMPSDrawSlot] = [:]
     
+    func release() {
+        for slot in drawSlots.values { slot.cleanup() }
+        drawSlots.removeAll()
+    }
+
     private func instanceId(from arguments: [String: Any]?) -> String? {
         return arguments?[ArgumentKeys.adInstanceId] as? String
     }
@@ -175,8 +191,8 @@ class AMPSDrawManager: NSObject {
         if configAM.adSize.width == 0 {
             configAM.adSize.width = UIScreen.main.bounds.width
         }
-        configAM.viewController = UIViewController.current()
-        let slot = AMPSDrawSlot(instanceId: id)
+        configAM.viewController = eventManager?.viewController
+        let slot = AMPSDrawSlot(instanceId: id, eventManager: eventManager)
         slot.drawAd = AMPSDrawAdManager(spaceId: configAM.spaceId, adConfiguration: configAM)
         drawSlots[id] = slot
         result(true)

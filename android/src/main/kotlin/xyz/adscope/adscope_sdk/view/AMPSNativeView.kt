@@ -1,7 +1,6 @@
 package xyz.adscope.adscope_sdk.view
 
 import android.content.Context
-import android.graphics.Color
 import android.util.Log
 import android.view.Gravity
 import android.view.View
@@ -17,17 +16,16 @@ import xyz.adscope.adscope_sdk.data.AMPSAdSdkMethodNames.NATIVE_SIZE_UPDATE
 import xyz.adscope.adscope_sdk.data.NATIVE_HEIGHT
 import xyz.adscope.adscope_sdk.data.NATIVE_WIDTH
 import xyz.adscope.adscope_sdk.manager.AMPSEventManager
-import xyz.adscope.adscope_sdk.manager.AdWrapperManager
 import xyz.adscope.adscope_sdk.utils.dpToPx
 import xyz.adscope.adscope_sdk.utils.pxToDp
 import xyz.adscope.common.v2.dev.info.ScreenUtil
-
 
 class AMPSNativeView(
     private val context: Context,
     viewId: Int,
     binaryMessenger: BinaryMessenger,
-    args: Any?
+    args: Any?,
+    private val engine: AMPSEventManager
 ) : PlatformView, MethodChannel.MethodCallHandler {
     private var rootView: FrameLayout
     private val adId: String?
@@ -88,7 +86,7 @@ class AMPSNativeView(
     private fun addAdViewToRoot() {
         val adId = this.adId ?: return
         runCatching {
-            val nativeView = AdWrapperManager.getInstance().getAdView(adId)
+            val nativeView = engine.wrappers.getAdView(adId)
             val params = rootView.tag as? FrameLayout.LayoutParams
             if (nativeView != null && params != null) {
                 (nativeView.parent as? FrameLayout)?.removeView(nativeView)
@@ -111,7 +109,7 @@ class AMPSNativeView(
                 val width = nativeView.width
                 val height = nativeView.height
                 if (width > 0 && height > 0) {
-                    AMPSEventManager.getInstance().sendMessageToFlutter(NATIVE_SIZE_UPDATE,mapOf(
+                    engine.sendMessageToFlutter(NATIVE_SIZE_UPDATE,mapOf(
                         NATIVE_WIDTH to width.pxToDp(context),
                         NATIVE_HEIGHT to height.pxToDp(context),
                         AD_ID to adId,

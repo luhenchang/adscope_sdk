@@ -7,19 +7,18 @@ import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.platform.PlatformView
-import xyz.adscope.adscope_sdk.data.AMPSAdCallBackChannelMethod
 import xyz.adscope.adscope_sdk.data.SPLASH_BOTTOM
 import xyz.adscope.adscope_sdk.data.SPLASH_INSTANCE_ID
 import xyz.adscope.adscope_sdk.data.SplashBottomModule
 import xyz.adscope.adscope_sdk.manager.AMPSEventManager
-import xyz.adscope.adscope_sdk.manager.AMPSSplashManager
 import xyz.adscope.amps.ad.splash.AMPSSplashAd
 
 class AMPSSplashView(
     private val context: Context,
     viewId: Int,
     binaryMessenger: BinaryMessenger,
-    args: Any?
+    args: Any?,
+    private val engine: AMPSEventManager
 ) : PlatformView {
 
     private var mSplashAd: AMPSSplashAd? = null
@@ -31,12 +30,11 @@ class AMPSSplashView(
     // 广告容器
     private val adContainerInPlatformView: FrameLayout = FrameLayout(context)
 
-
     init {
         val creationArgsMap = args as? Map<*, *>?
         val instanceId = creationArgsMap?.get(SPLASH_INSTANCE_ID) as? String
         //1. 首先，从 Manager 获取已经加载好的广告实例
-        mSplashAd = AMPSSplashManager.getInstance().getSplashAd(instanceId)
+        mSplashAd = engine.splash.getSplashAd(instanceId)
         if (mSplashAd?.isReady == true) {
             // 2. 解析底部视图数据
             val splashBottomData =

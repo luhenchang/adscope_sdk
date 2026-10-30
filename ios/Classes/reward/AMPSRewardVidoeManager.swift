@@ -8,8 +8,12 @@ import AMPSAdSDK
 
 class AMPSRewardVideoManager: NSObject {
     
-    static let shared = AMPSRewardVideoManager()
-    private override init() {super.init()}
+    private weak var eventManager: AMPSEventManager?
+
+    init(eventManager: AMPSEventManager) {
+        self.eventManager = eventManager
+        super.init()
+    }
     
     private var rewardVideoAds: [String: AMPSRewardedVideoAd] = [:]
     private var rewardVideoAdConfigs: [String: AMPSAdConfiguration] = [:]
@@ -59,6 +63,10 @@ class AMPSRewardVideoManager: NSObject {
         }
     }
     
+    func release() {
+        for id in Array(rewardVideoAds.keys) { cleanupViewsAfterAdClosed(instanceId: id) }
+    }
+
     private func instanceId(from arguments: [String: Any]?) -> String? {
         return arguments?[ArgumentKeys.adInstanceId] as? String
     }
@@ -128,7 +136,7 @@ class AMPSRewardVideoManager: NSObject {
             result(false)
             return
         }
-        guard let vc = getKeyWindow()?.rootViewController else {
+        guard let vc = eventManager?.viewController else {
             result(false)
             return
         }
@@ -148,7 +156,7 @@ class AMPSRewardVideoManager: NSObject {
         if let args = args {
             for (k, v) in args { payload[k] = v }
         }
-        AMPSEventManager.shared.sendToFlutter(method, arg: payload)
+        eventManager?.sendToFlutter(method, arg: payload)
     }
 }
 

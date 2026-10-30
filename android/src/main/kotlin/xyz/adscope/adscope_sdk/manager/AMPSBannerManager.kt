@@ -7,45 +7,38 @@ import xyz.adscope.adscope_sdk.data.AMPSAdSdkMethodNames
 import xyz.adscope.adscope_sdk.data.AMPSBannerCallbackChannelMethod
 import xyz.adscope.adscope_sdk.data.AdOptionsModule
 import xyz.adscope.adscope_sdk.data.ErrorModel
-import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import xyz.adscope.amps.ad.banner.AMPSBannerAd
 import xyz.adscope.amps.ad.banner.AMPSBannerLoadEventListener
 import xyz.adscope.amps.common.AMPSError
 import xyz.adscope.common.v2.gsonlite.Gson
 import java.util.concurrent.ConcurrentHashMap
 
-class AMPSBannerManager private constructor() {
+class AMPSBannerManager(private val engine: AMPSEventManager) {
     private val bannerAds = ConcurrentHashMap<String, AMPSBannerAd>()
-
-    companion object {
-        @Volatile
-        private var instance: AMPSBannerManager? = null
-
-        fun getInstance(): AMPSBannerManager {
-            return instance ?: synchronized(this) {
-                instance ?: AMPSBannerManager().also { instance = it }
-            }
-        }
-    }
 
     private fun createAdCallback(instanceId: String) = object : AMPSBannerLoadEventListener {
         override fun onAmpsAdLoaded() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSBannerCallbackChannelMethod.ON_LOAD_SUCCESS)
         }
 
         override fun onAmpsAdShow() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSBannerCallbackChannelMethod.ON_AD_SHOW)
         }
 
         override fun onAmpsAdClicked() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSBannerCallbackChannelMethod.ON_AD_CLICKED)
         }
 
         override fun onAmpsAdDismiss() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSBannerCallbackChannelMethod.ON_AD_CLOSED)
         }
 
         override fun onAmpsAdFailed(error: AMPSError?) {
+            if (engine.isReleased) return
             sendMessage(
                 instanceId,
                 AMPSBannerCallbackChannelMethod.ON_LOAD_FAILURE,
@@ -62,14 +55,12 @@ class AMPSBannerManager private constructor() {
     private fun argsAsMap(call: MethodCall): Map<String, Any>? = call.arguments as? Map<String, Any>
     private fun instanceIdFrom(call: MethodCall): String? = argsAsMap(call)?.get(AD_INSTANCE_ID) as? String
 
-
     fun getBannerAd(instanceId: String? = null): AMPSBannerAd? {
         if (!instanceId.isNullOrEmpty()) {
             return bannerAds[instanceId]
         }
         return bannerAds.values.lastOrNull()
     }
-
 
     @Suppress("UNCHECKED_CAST")
     fun handleMethodCall(call: MethodCall, result: Result) {
@@ -113,7 +104,7 @@ class AMPSBannerManager private constructor() {
     }
 
     private fun splashAdCreate(call: MethodCall, result: Result) {
-        val activity = FlutterPluginUtil.getActivity()
+        val activity = engine.getActivity()
         if (activity == null) {
             result.error("LOAD_FAILED", "Activity not available for loading banner ad.", null)
             return
@@ -146,6 +137,11 @@ class AMPSBannerManager private constructor() {
         } else if (args != null) {
             payload["data"] = args
         }
-        AMPSEventManager.getInstance().sendMessageToFlutter(method, payload)
+        engine.sendMessageToFlutter(method, payload)
+    }
+
+    fun release() {
+        bannerAds.values.toList().forEach { runCatching { it.destroy() } }
+        bannerAds.clear()
     }
 }

@@ -8,10 +8,12 @@ import AMPSAdSDK
 
 class AMPSNativeExpressSlot: NSObject {
     let instanceId: String
+    private weak var eventManager: AMPSEventManager?
     var nativeAd: AMPSNativeExpressManager?
     var adIdMap: [AMPSNativeExpressView: String] = [:]
     
-    init(instanceId: String) {
+    init(instanceId: String, eventManager: AMPSEventManager?) {
+        self.eventManager = eventManager
         self.instanceId = instanceId
         super.init()
     }
@@ -24,6 +26,11 @@ class AMPSNativeExpressSlot: NSObject {
     }
     
     func cleanup() {
+        self.nativeAd?.delegate = nil
+        for view in adIdMap.keys {
+            view.delegate = nil
+            view.removeFromSuperview()
+        }
         self.nativeAd?.remove()
         self.nativeAd = nil
         self.adIdMap.removeAll()
@@ -32,7 +39,7 @@ class AMPSNativeExpressSlot: NSObject {
     private func sendMessage(_ method: String, _ args: [String: Any] = [:]) {
         var payload = args
         payload[ArgumentKeys.adInstanceId] = instanceId
-        AMPSEventManager.shared.sendToFlutter(method, arg: payload)
+        eventManager?.sendToFlutter(method, arg: payload)
     }
     
     private func sendAdIdMessage(_ method: String, _ adId: String, extra: [String: Any] = [:]) {
@@ -48,7 +55,7 @@ class AMPSNativeExpressSlot: NSObject {
         self.adIdMap.removeAll()
         let ids: [String] = nativeAd.viewsArray.map { view in
             let id = UUID().uuidString
-            view.viewController = UIViewController.current()
+            view.viewController = eventManager?.viewController
             self.adIdMap[view] = id
             return id
         }
@@ -104,12 +111,26 @@ class AMPSNativeExpressSlot: NSObject {
 
 class AMPSNativeManager: NSObject {
     
-    static let shared = AMPSNativeManager()
-    private override init() { super.init() }
+    private weak var eventManager: AMPSEventManager?
+
+    init(eventManager: AMPSEventManager) {
+        self.eventManager = eventManager
+        super.init()
+    }
     
     private var expressSlots: [String: AMPSNativeExpressSlot] = [:]
     private var unifiedSlots: [String: AmpsIosUnifiedNativeManager] = [:]
     
+    func release() {
+        for slot in expressSlots.values { slot.cleanup() }
+        for slot in unifiedSlots.values { slot.cleanup() }
+        expressSlots.removeAll()
+        unifiedSlots.removeAll()
+        selfRenderViews.removeAllObjects()
+    }
+
+    let selfRenderViews = NSMapTable<NSString, AMPSSelfRenderView>(keyOptions: .strongMemory, valueOptions: .weakMemory)
+
     private func instanceId(from arguments: [String: Any]?) -> String? {
         return arguments?[ArgumentKeys.adInstanceId] as? String
     }
@@ -128,7 +149,7 @@ class AMPSNativeManager: NSObject {
         if nativeType == 1 {
             if call.method == AMPSAdSdkMethodNames.nativeCreate {
                 if let id = instanceId(from: arguments) {
-                    let slot = AmpsIosUnifiedNativeManager(instanceId: id)
+                    let slot = AmpsIosUnifiedNativeManager(instanceId: id, eventManager: eventManager)
                     unifiedSlots[id] = slot
                     slot.handleMethodCall(call, result: result)
                 } else {
@@ -215,8 +236,8 @@ class AMPSNativeManager: NSObject {
         if configAM.adSize.width == 0 {
             configAM.adSize.width = UIScreen.main.bounds.width
         }
-        configAM.viewController = UIViewController.current()
-        let slot = AMPSNativeExpressSlot(instanceId: id)
+        configAM.viewController = eventManager?.viewController
+        let slot = AMPSNativeExpressSlot(instanceId: id, eventManager: eventManager)
         slot.nativeAd = AMPSNativeExpressManager(spaceId: configAM.spaceId, adConfiguration: configAM)
         expressSlots[id] = slot
         result(true)

@@ -16,17 +16,16 @@ import xyz.adscope.adscope_sdk.data.AMPSAdSdkMethodNames.DRAW_SIZE_UPDATE
 import xyz.adscope.adscope_sdk.data.NATIVE_HEIGHT
 import xyz.adscope.adscope_sdk.data.NATIVE_WIDTH
 import xyz.adscope.adscope_sdk.manager.AMPSEventManager
-import xyz.adscope.adscope_sdk.manager.AdWrapperManager
 import xyz.adscope.adscope_sdk.utils.dpToPx
 import xyz.adscope.adscope_sdk.utils.pxToDp
 import xyz.adscope.common.v2.dev.info.ScreenUtil
-
 
 class AMPSDrawView(
     private val context: Context,
     viewId: Int,
     binaryMessenger: BinaryMessenger,
-    args: Any?
+    args: Any?,
+    private val engine: AMPSEventManager
 ) : PlatformView, MethodChannel.MethodCallHandler {
     private var rootView: FrameLayout
     private val adId: String?
@@ -87,7 +86,7 @@ class AMPSDrawView(
     private fun addAdViewToRoot() {
         val adId = this.adId ?: return
         runCatching {
-            val drawView = AdWrapperManager.getInstance().getAdView(adId)
+            val drawView = engine.wrappers.getAdView(adId)
             val params = rootView.tag as? FrameLayout.LayoutParams
             if (drawView != null && params != null) {
                 (drawView.parent as? FrameLayout)?.removeView(drawView)
@@ -110,7 +109,7 @@ class AMPSDrawView(
                 val width = drawView.width
                 val height = drawView.height
                 if (width > 0 && height > 0) {
-                    AMPSEventManager.getInstance().sendMessageToFlutter(DRAW_SIZE_UPDATE,mapOf(
+                    engine.sendMessageToFlutter(DRAW_SIZE_UPDATE,mapOf(
                         NATIVE_WIDTH to width.pxToDp(context),
                         NATIVE_HEIGHT to height.pxToDp(context),
                         AD_ID to adId,

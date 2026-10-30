@@ -9,8 +9,15 @@ import Foundation
 import Flutter
 
 class AMPSNAtiveViewFactory: NSObject, FlutterPlatformViewFactory {
+    private let eventManager: AMPSEventManager
+
+    init(eventManager: AMPSEventManager) {
+        self.eventManager = eventManager
+        super.init()
+    }
+
     func create(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?) -> any FlutterPlatformView {
-        return AMPSNativeView(frame: frame, viewId: viewId, args: args)
+        return AMPSNativeView(frame: frame, viewId: viewId, args: args, eventManager: eventManager)
     }
     
     func createArgsCodec() -> any FlutterMessageCodec & NSObjectProtocol {
@@ -22,14 +29,15 @@ class AMPSNativeView: NSObject, FlutterPlatformView {
     
     private let iosView: IOSView
     
-    init(frame: CGRect, viewId: Int64, args: Any?) {
+    init(frame: CGRect, viewId: Int64, args: Any?, eventManager: AMPSEventManager) {
         self.iosView = IOSView(frame: frame)
         super.init()
         
         guard let param = args as? [String: Any?],
               let adId = param["adId"] as? String,
-              let adView = AMPSNativeManager.shared.getAdView(adId: adId) else { return }
+              let adView = eventManager.nativeManager.getAdView(adId: adId) else { return }
 
+        iosView.eventManager = eventManager
         iosView.adId = adId
         iosView.adInstanceId = param[ArgumentKeys.adInstanceId] as? String
         iosView.clipsToBounds = true
@@ -47,6 +55,7 @@ class AMPSNativeView: NSObject, FlutterPlatformView {
 
 class IOSView: UIView {
     
+    weak var eventManager: AMPSEventManager?
     weak var adView: UIView?   // 弱引用，避免循环持有（adView 已被外部管理器持有）
     var adId: String?
     var adInstanceId: String?
@@ -68,7 +77,7 @@ class IOSView: UIView {
         
         adView.frame = targetFrame
         
-        AMPSEventManager.shared.sendToFlutter(
+        eventManager?.sendToFlutter(
             AMPSNativeCallBackChannelMethod.nativeSizeUpdate,
             arg: [
                 "adId":   adId ?? "",

@@ -11,8 +11,15 @@ import AMPSAdSDK
 
 
 class AMPSUnifiedNAtiveViewFactory: NSObject, FlutterPlatformViewFactory {
+    private let eventManager: AMPSEventManager
+
+    init(eventManager: AMPSEventManager) {
+        self.eventManager = eventManager
+        super.init()
+    }
+
     func create(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?) -> any FlutterPlatformView {
-        return AMPSSelfRenderView(frame: frame, viewId: viewId, args: args)
+        return AMPSSelfRenderView(frame: frame, viewId: viewId, args: args, eventManager: eventManager)
     }
     
     func createArgsCodec() -> any FlutterMessageCodec & NSObjectProtocol {
@@ -24,19 +31,17 @@ class AMPSUnifiedNAtiveViewFactory: NSObject, FlutterPlatformViewFactory {
       
 class AMPSSelfRenderView : NSObject, FlutterPlatformView {
     
-    private static let views = NSMapTable<NSString, AMPSSelfRenderView>(keyOptions: .strongMemory, valueOptions: .weakMemory)
     private static let selfRenderTag = 0xAD5C0DE
     
-    static func refresh(_ adId: String) {
-        views.object(forKey: adId as NSString)?.reloadAd()
-    }
     
+    private weak var eventManager: AMPSEventManager?
     private var iosView: UIView
     private var adId: String?
     private var layoutModel: FlutterUnifiedParam?
     private weak var unifiedAdView: AMPSUnifiedNativeView?
     
-    init(frame: CGRect,viewId: Int64,args:Any?) {
+    init(frame: CGRect,viewId: Int64,args:Any?, eventManager: AMPSEventManager) {
+        self.eventManager = eventManager
         self.iosView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 300))
         super.init()
 //        self.iosView.backgroundColor = UIColor.orange
@@ -44,11 +49,11 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
         if let param = args as? [String: Any?]{
             let model: FlutterUnifiedParam? = Tools.convertToModel(from: param as [String : Any])
             if let adId = model?.adId {
-               if let adView = AMPSNativeManager.shared.getUnifiedNativeView(adId) {
+               if let adView = eventManager.nativeManager.getUnifiedNativeView(adId) {
                    self.adId = adId
                    self.layoutModel = model
                    self.unifiedAdView = adView
-                   AMPSSelfRenderView.views.setObject(self, forKey: adId as NSString)
+                   eventManager.nativeManager.selfRenderViews.setObject(self, forKey: adId as NSString)
                    if adView.nativeAd.nativeMode == .nativeExpress {
                        adView.removeFromSuperview()
                        self.iosView.addSubview(adView)
@@ -72,7 +77,7 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
     
     /// 轮播换素材后，同一套 Flutter 布局模型重新填充新的 nativeAd。
     func reloadAd() {
-        guard let adView = unifiedAdView ?? (adId.flatMap { AMPSNativeManager.shared.getUnifiedNativeView($0) }),
+        guard let adView = unifiedAdView ?? (adId.flatMap { eventManager?.nativeManager.getUnifiedNativeView($0) }),
               let model = layoutModel else { return }
         unifiedAdView = adView
         layoutItems(adView, model)
@@ -95,7 +100,7 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
         let ad = adView.nativeAd
         
         if ad.nativeMode == .unifiedVideo {
-            adView.mediaView?.delegate = AMPSNativeManager.shared.unifiedSlot(owning: adView)
+            adView.mediaView?.delegate = eventManager?.nativeManager.unifiedSlot(owning: adView)
             if let videoModel = model.unifiedWidget?.children?.first(where: { child in
                 child.type == .video
             }){

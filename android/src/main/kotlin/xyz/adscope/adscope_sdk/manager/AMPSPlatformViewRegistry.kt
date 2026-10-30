@@ -9,17 +9,7 @@ import xyz.adscope.adscope_sdk.view.NativeFactory
 import xyz.adscope.adscope_sdk.view.SplashFactory
 import xyz.adscope.adscope_sdk.view.UnifiedFactory
 
-class AMPSPlatformViewManager private constructor() {
-    companion object {
-        @Volatile
-        private var sInstance: AMPSPlatformViewManager? = null
-
-        fun getInstance(): AMPSPlatformViewManager {
-            return sInstance ?: synchronized(this) {
-                sInstance ?: AMPSPlatformViewManager().also { sInstance = it }
-            }
-        }
-    }
+class AMPSPlatformViewManager(private val engine: AMPSEventManager) {
 
     /**
      * 初始化并注册平台视图工厂。
@@ -34,31 +24,31 @@ class AMPSPlatformViewManager private constructor() {
         // 注册 Splash 视图工厂
         platformViewRegistry.registerViewFactory(
             AMPSPlatformViewRegistry.AMPS_SDK_SPLASH_VIEW_ID,
-            SplashFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
+            SplashFactory(binaryMessenger, StandardMessageCodec.INSTANCE, engine)
         )
 
         // 注册 Native 视图工厂
         platformViewRegistry.registerViewFactory(
             AMPSPlatformViewRegistry.AMPS_SDK_NATIVE_VIEW_ID,
-            NativeFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
+            NativeFactory(binaryMessenger, StandardMessageCodec.INSTANCE, engine)
         )
 
         // 注册 Draw 视图工厂
         platformViewRegistry.registerViewFactory(
             AMPSPlatformViewRegistry.AMPS_SDK_DRAW_VIEW_ID,
-            DrawFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
+            DrawFactory(binaryMessenger, StandardMessageCodec.INSTANCE, engine)
         )
 
         // 注册 Unified 视图工厂
         platformViewRegistry.registerViewFactory(
             AMPSPlatformViewRegistry.AMPS_SDK_UNIFIED_VIEW_ID,
-            UnifiedFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
+            UnifiedFactory(binaryMessenger, StandardMessageCodec.INSTANCE, engine)
         )
 
         // 注册 Banner 视图工厂
         platformViewRegistry.registerViewFactory(
             AMPSPlatformViewRegistry.AMPS_SDK_BANNER_VIEW_ID,
-            BannerFactory(binaryMessenger, StandardMessageCodec.INSTANCE)
+            BannerFactory(binaryMessenger, StandardMessageCodec.INSTANCE, engine)
         )
     }
 }

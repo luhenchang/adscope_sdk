@@ -1,55 +1,103 @@
-//
-//  AMPSEventManager.swift
-//  amps_sdk
-//
-//  Created by 王飞 on 2025/10/21.
-//
-
 import Foundation
 import Flutter
+import UIKit
 
+/// One event channel and one set of ad stores per FlutterEngine registration.
+final class AMPSEventManager: NSObject {
+    private var channel: FlutterMethodChannel?
+    private var messenger: FlutterBinaryMessenger?
+    private(set) var isActive = false
 
-class AMPSEventManager : NSObject{
-   
-    static let shared = AMPSEventManager()
-    private override init(){super.init()}
-    
-    var channel: FlutterMethodChannel?
-    var registrar: FlutterPluginRegistrar?
-    func regist(_ registrar: FlutterPluginRegistrar?) {
-        guard let registrar = registrar else {
-            return
-        }
-        self.registrar = registrar
-        channel = FlutterMethodChannel(name: "adscope_sdk", binaryMessenger:  registrar.messenger())
-        channel?.setMethodCallHandler { methodCall, result in
-            switch methodCall.method {
-            case let name where  initMethodNames.contains(name):
-                AMPSSDKInitManager.shared.handleMethodCall(methodCall, result: result)
+    lazy var initManager = AMPSSDKInitManager(eventManager: self)
+    lazy var splashManager = AMPSSplashManager(eventManager: self)
+    lazy var interstitialManager = AMPSInterstitialManager(eventManager: self)
+    lazy var nativeManager = AMPSNativeManager(eventManager: self)
+    lazy var rewardManager = AMPSRewardVideoManager(eventManager: self)
+    lazy var bannerManager = AMPSBannerManager(eventManager: self)
+    lazy var drawManager = AMPSDrawManager(eventManager: self)
+
+    func regist(_ registrar: FlutterPluginRegistrar) {
+        messenger = registrar.messenger()
+        isActive = true
+        let channel = FlutterMethodChannel(name: "adscope_sdk", binaryMessenger: registrar.messenger())
+        self.channel = channel
+        channel.setMethodCallHandler { [weak self] call, result in
+            guard let self = self, self.isActive else {
+                result(FlutterError(code: "ENGINE_DETACHED", message: "Flutter engine is detached", details: nil))
+                return
+            }
+            switch call.method {
+            case let name where initMethodNames.contains(name):
+                self.initManager.handleMethodCall(call, result: result)
             case let name where splashMethodNames.contains(name):
-                AMPSSplashManager.shared.handleMethodCall(methodCall, result:result)
+                self.splashManager.handleMethodCall(call, result: result)
             case let name where interstitialMethodNames.contains(name):
-                AMPSInterstitialManager.shared.handleMethodCall(methodCall, result: result)
-            case let name where  nativeMethodNames.contains(name):
-                AMPSNativeManager.shared.handleMethodCall(methodCall, result: result)
-            case let name where  rewardVideoMethodNames.contains(name):
-                AMPSRewardVideoManager.shared.handleMethodCall(methodCall, result: result)
-            case let name where  bannerMethodNames.contains(name):
-                AMPSBannerManager.shared.handleMethodCall(methodCall, result: result)
-            case let name where  drawMethodNames.contains(name):
-                AMPSDrawManager.shared.handleMethodCall(methodCall, result: result)
+                self.interstitialManager.handleMethodCall(call, result: result)
+            case let name where nativeMethodNames.contains(name):
+                self.nativeManager.handleMethodCall(call, result: result)
+            case let name where rewardVideoMethodNames.contains(name):
+                self.rewardManager.handleMethodCall(call, result: result)
+            case let name where bannerMethodNames.contains(name):
+                self.bannerManager.handleMethodCall(call, result: result)
+            case let name where drawMethodNames.contains(name):
+                self.drawManager.handleMethodCall(call, result: result)
             default:
                 result(FlutterMethodNotImplemented)
             }
         }
-        
     }
-    func sendToFlutter(_ method:String,arg:Any? = nil){
+
+    func sendToFlutter(_ method: String, arg: Any? = nil) {
         DispatchQueue.main.async { [weak self] in
-            self?.channel?.invokeMethod(method, arguments: arg)
+            guard let self = self, self.isActive else { return }
+            self.channel?.invokeMethod(method, arguments: arg)
         }
     }
-    
+
+    func release() {
+        // Invalidate first: native remove() may synchronously trigger a delegate callback.
+        isActive = false
+        channel?.setMethodCallHandler(nil)
+        channel = nil
+        messenger = nil
+        initManager.release()
+        splashManager.release()
+        interstitialManager.release()
+        nativeManager.release()
+        rewardManager.release()
+        bannerManager.release()
+        drawManager.release()
+    }
+
+    /// Find the view controller belonging to this messenger, including pages below the top page.
+    /// A headless engine has no presenter; never borrow another engine's page.
+    var viewController: UIViewController? {
+        guard isActive, let messenger = messenger else { return nil }
+        let identity = ObjectIdentifier(messenger)
+        func find(in controller: UIViewController) -> UIViewController? {
+            if let flutter = controller as? FlutterViewController,
+               ObjectIdentifier(flutter.binaryMessenger) == identity { return flutter }
+            if let presented = controller.presentedViewController, let found = find(in: presented) { return found }
+            let children = (controller as? UINavigationController)?.viewControllers
+                ?? (controller as? UITabBarController)?.viewControllers ?? controller.children
+            for child in children {
+                if let found = find(in: child) { return found }
+            }
+            return nil
+        }
+        let windows: [UIWindow]
+        if #available(iOS 13.0, *) {
+            windows = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.flatMap { $0.windows }
+                + UIApplication.shared.windows
+        } else {
+            windows = UIApplication.shared.windows
+        }
+        for window in windows {
+            if let root = window.rootViewController, let found = find(in: root) { return found }
+        }
+        return nil
+    }
+
     func getImage(_ name:String) -> UIImage?  {
         let imageName = name.components(separatedBy: "/").last
         let source = imageName?.components(separatedBy: ".").first
