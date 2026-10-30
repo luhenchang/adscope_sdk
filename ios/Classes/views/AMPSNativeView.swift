@@ -36,6 +36,7 @@ class AMPSNativeView: NSObject, FlutterPlatformView {
         guard let param = args as? [String: Any?],
               let adId = param["adId"] as? String,
               let adView = eventManager.nativeManager.getAdView(adId: adId) else { return }
+        eventManager.nativeManager.refreshExpressPresenter(adId: adId)
 
         iosView.eventManager = eventManager
         iosView.adId = adId

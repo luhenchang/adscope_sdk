@@ -36,6 +36,7 @@ class AMPSBannerView: NSObject, FlutterPlatformView {
         
         let argsMap = args as? [String: Any]
         let instanceId = argsMap?[ArgumentKeys.adInstanceId] as? String
+        eventManager.bannerManager.refreshPresenter(instanceId: instanceId)
         guard let adView = eventManager.bannerManager.getBannerView(instanceId: instanceId) else { return }
         
         iosView.clipsToBounds = true

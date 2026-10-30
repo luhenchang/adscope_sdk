@@ -69,6 +69,12 @@ final class AMPSEventManager: NSObject {
         drawManager.release()
     }
 
+    /// Write the owning page only when it is currently attached. A nil lookup keeps the previous controller.
+    func bindPresenter(_ apply: (UIViewController) -> Void) {
+        guard let controller = viewController else { return }
+        apply(controller)
+    }
+
     /// Find the view controller belonging to this messenger, including pages below the top page.
     /// A headless engine has no presenter; never borrow another engine's page.
     var viewController: UIViewController? {

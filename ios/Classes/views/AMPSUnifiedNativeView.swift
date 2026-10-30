@@ -53,6 +53,7 @@ class AMPSSelfRenderView : NSObject, FlutterPlatformView {
                    self.adId = adId
                    self.layoutModel = model
                    self.unifiedAdView = adView
+                   eventManager.nativeManager.refreshUnifiedPresenter(adId: adId)
                    eventManager.nativeManager.selfRenderViews.setObject(self, forKey: adId as NSString)
                    if adView.nativeAd.nativeMode == .nativeExpress {
                        adView.removeFromSuperview()

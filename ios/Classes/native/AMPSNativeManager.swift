@@ -10,6 +10,7 @@ class AMPSNativeExpressSlot: NSObject {
     let instanceId: String
     private weak var eventManager: AMPSEventManager?
     var nativeAd: AMPSNativeExpressManager?
+    var configuration: AMPSAdConfiguration?
     var adIdMap: [AMPSNativeExpressView: String] = [:]
     
     init(instanceId: String, eventManager: AMPSEventManager?) {
@@ -33,7 +34,18 @@ class AMPSNativeExpressSlot: NSObject {
         }
         self.nativeAd?.remove()
         self.nativeAd = nil
+        self.configuration = nil
         self.adIdMap.removeAll()
+    }
+
+    /// Rebind the owning page onto the shared configuration and every express view created so far.
+    func refreshPresenter() {
+        eventManager?.bindPresenter { controller in
+            self.configuration?.viewController = controller
+            for view in self.adIdMap.keys {
+                view.viewController = controller
+            }
+        }
     }
     
     private func sendMessage(_ method: String, _ args: [String: Any] = [:]) {
@@ -55,10 +67,10 @@ class AMPSNativeExpressSlot: NSObject {
         self.adIdMap.removeAll()
         let ids: [String] = nativeAd.viewsArray.map { view in
             let id = UUID().uuidString
-            view.viewController = eventManager?.viewController
             self.adIdMap[view] = id
             return id
         }
+        refreshPresenter()
         sendMessage(AMPSNativeCallBackChannelMethod.loadOk, ["adIds": ids])
         return nativeAd.viewsArray
     }
@@ -236,8 +248,9 @@ class AMPSNativeManager: NSObject {
         if configAM.adSize.width == 0 {
             configAM.adSize.width = UIScreen.main.bounds.width
         }
-        configAM.viewController = eventManager?.viewController
         let slot = AMPSNativeExpressSlot(instanceId: id, eventManager: eventManager)
+        slot.configuration = configAM
+        slot.refreshPresenter()
         slot.nativeAd = AMPSNativeExpressManager(spaceId: configAM.spaceId, adConfiguration: configAM)
         expressSlots[id] = slot
         result(true)
@@ -248,12 +261,25 @@ class AMPSNativeManager: NSObject {
             result(false)
             return
         }
+        slot.refreshPresenter()
         slot.nativeAd?.delegate = self
         slot.nativeAd?.load()
         result(true)
     }
+
+    func refreshExpressPresenter(adId: String) {
+        for slot in expressSlots.values where slot.getAdView(adId: adId) != nil {
+            slot.refreshPresenter()
+            return
+        }
+    }
+
+    func refreshUnifiedPresenter(adId: String) {
+        guard let view = getUnifiedNativeView(adId) else { return }
+        unifiedSlot(owning: view)?.refreshPresenter(on: view)
+    }
     
-    // 视图工厂按 adId 全局查找（UUID 不冲突）
+    // 视图工厂按 adId 在本引擎内查找（UUID 不冲突）
     func getAdView(adId: String) -> AMPSNativeExpressView? {
         for slot in expressSlots.values {
             if let v = slot.getAdView(adId: adId) { return v }

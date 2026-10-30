@@ -36,6 +36,7 @@ class AMPSDrawView: NSObject, FlutterPlatformView {
         guard let param = args as? [String: Any?],
               let adId = param["adId"] as? String,
               let adView = eventManager.drawManager.getAdView(adId: adId) else { return }
+        eventManager.drawManager.refreshPresenter(adId: adId)
         
         iosView.eventManager = eventManager
         iosView.adId = adId

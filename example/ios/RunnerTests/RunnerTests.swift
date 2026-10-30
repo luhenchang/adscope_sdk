@@ -175,14 +175,36 @@ private final class ProbeRegistrar: NSObject, FlutterPluginRegistrar {
 }
 
 final class InitializationCoordinatorTests: XCTestCase {
-  func testOldCompletionCannotFinishANewInitializationAfterAllWaitersDetach() {
+  func testNextEngineJoinsTheInFlightInitializationAfterTheLastWaiterDetaches() {
+    let coordinator = AMPSInitializationCoordinator()
+    var starts = 0
+    var finish: ((Int) -> Void)?
+    var first = [Int]()
+    var second = [Int]()
+    let firstId = UUID()
+    coordinator.initialize(requester: firstId, currentStatus: { 0 }, start: { callback in
+      starts += 1
+      finish = callback
+    }) { first.append($0) }
+    coordinator.cancel(requester: firstId)
+    coordinator.initialize(requester: UUID(), currentStatus: { 0 }, start: { _ in
+      starts += 1
+    }) { second.append($0) }
+    XCTAssertEqual(starts, 1)
+    finish?(2)
+    XCTAssertEqual(first, [])
+    XCTAssertEqual(second, [1, 2])
+  }
+
+  func testCompletedInitializationIgnoresThePreviousCallback() {
     let coordinator = AMPSInitializationCoordinator()
     let id = UUID()
     var oldFinish: ((Int) -> Void)?
     var newFinish: ((Int) -> Void)?
     var results = [Int]()
-    coordinator.initialize(requester: id, currentStatus: { 0 }, start: { oldFinish = $0 }) { results.append($0) }
+    coordinator.initialize(requester: id, currentStatus: { 0 }, start: { oldFinish = $0 }) { _ in }
     coordinator.cancel(requester: id)
+    oldFinish?(2)
     coordinator.initialize(requester: id, currentStatus: { 0 }, start: { newFinish = $0 }) { results.append($0) }
     oldFinish?(2)
     XCTAssertTrue(results.isEmpty)

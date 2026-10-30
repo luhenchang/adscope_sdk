@@ -16,6 +16,7 @@ class AMPSBannerManager: NSObject {
     }
     
     private var bannerAds: [String: AMPSBannerAd] = [:]
+    private var bannerConfigs: [String: AMPSAdConfiguration] = [:]
     
     func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as? [String: Any]
@@ -55,6 +56,12 @@ class AMPSBannerManager: NSObject {
         for id in Array(bannerAds.keys) { cleanupViewsAfterAdClosed(instanceId: id) }
     }
 
+    /// The banner ad keeps this configuration and reads its controller when the user taps.
+    func refreshPresenter(instanceId: String?) {
+        guard let instanceId = instanceId, let config = bannerConfigs[instanceId] else { return }
+        eventManager?.bindPresenter { config.viewController = $0 }
+    }
+
     private func instanceId(from arguments: [String: Any]?) -> String? {
         return arguments?[ArgumentKeys.adInstanceId] as? String
     }
@@ -80,7 +87,8 @@ class AMPSBannerManager: NSObject {
             return
         }
         let config = AdOptionModule.getAdConfig(para: param)
-        config.viewController = eventManager?.viewController
+        bannerConfigs[instanceId] = config
+        eventManager?.bindPresenter { config.viewController = $0 }
         let ad = AMPSBannerAd(spaceId: config.spaceId, adConfiguration: config)
         ad.delegate = self
         bannerAds[instanceId] = ad
@@ -92,6 +100,7 @@ class AMPSBannerManager: NSObject {
             result(false)
             return
         }
+        refreshPresenter(instanceId: instanceId)
         bannerAd.delegate = self
         bannerAd.load()
         result(true)
@@ -101,6 +110,7 @@ class AMPSBannerManager: NSObject {
         bannerAds[instanceId]?.delegate = nil
         bannerAds[instanceId]?.remove()
         bannerAds.removeValue(forKey: instanceId)
+        bannerConfigs.removeValue(forKey: instanceId)
     }
     
     private func sendMessage(_ method: String, instanceId: String, args: [String: Any]? = nil) {

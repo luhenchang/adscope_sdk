@@ -10,6 +10,7 @@ class AMPSDrawSlot: NSObject {
     let instanceId: String
     private weak var eventManager: AMPSEventManager?
     var drawAd: AMPSDrawAdManager?
+    var configuration: AMPSAdConfiguration?
     var adIdMap: [AMPSDrawAdView: String] = [:]
     
     init(instanceId: String, eventManager: AMPSEventManager?) {
@@ -33,7 +34,17 @@ class AMPSDrawSlot: NSObject {
         }
         self.drawAd?.remove()
         self.drawAd = nil
+        self.configuration = nil
         self.adIdMap.removeAll()
+    }
+
+    func refreshPresenter() {
+        eventManager?.bindPresenter { controller in
+            self.configuration?.viewController = controller
+            for view in self.adIdMap.keys {
+                view.viewController = controller
+            }
+        }
     }
     
     private func sendMessage(_ method: String, _ args: [String: Any] = [:]) {
@@ -58,6 +69,7 @@ class AMPSDrawSlot: NSObject {
             self.adIdMap[view] = id
             return id
         }
+        refreshPresenter()
         sendMessage(AmpsDrawCallbackChannelMethod.onLoadSuccess, ["adIds": ids])
         return drawAd.drawAdsArray
     }
@@ -70,7 +82,10 @@ class AMPSDrawSlot: NSObject {
     }
     
     func handleRenderSuccess(_ view: AMPSDrawAdView) {
-        view.viewController = eventManager?.viewController
+        eventManager?.bindPresenter { controller in
+            self.configuration?.viewController = controller
+            view.viewController = controller
+        }
         if let adID = self.adIdMap[view] {
             sendAdIdMessage(AmpsDrawCallbackChannelMethod.onRenderSuccess, adID)
         }
@@ -191,8 +206,9 @@ class AMPSDrawManager: NSObject {
         if configAM.adSize.width == 0 {
             configAM.adSize.width = UIScreen.main.bounds.width
         }
-        configAM.viewController = eventManager?.viewController
         let slot = AMPSDrawSlot(instanceId: id, eventManager: eventManager)
+        slot.configuration = configAM
+        slot.refreshPresenter()
         slot.drawAd = AMPSDrawAdManager(spaceId: configAM.spaceId, adConfiguration: configAM)
         drawSlots[id] = slot
         result(true)
@@ -203,12 +219,19 @@ class AMPSDrawManager: NSObject {
             result(false)
             return
         }
+        slot.refreshPresenter()
         slot.drawAd?.delegate = self
         slot.drawAd?.load()
         result(true)
     }
+
+    func refreshPresenter(adId: String) {
+        for slot in drawSlots.values where slot.getAdView(adId: adId) != nil {
+            slot.refreshPresenter()
+            return
+        }
+    }
     
-    // 视图工厂按 adId 全局查找（UUID 不冲突）
     func getAdView(adId: String) -> AMPSDrawAdView? {
         for slot in drawSlots.values {
             if let v = slot.getAdView(adId: adId) { return v }

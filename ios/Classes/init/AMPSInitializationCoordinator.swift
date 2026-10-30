@@ -7,6 +7,7 @@ final class AMPSInitializationCoordinator {
     private var waiters: [UUID: (Int) -> Void] = [:]
     private var generation: UUID?
     private var poll: Timer?
+    private var statusProvider: (() -> Int)?
 
     func initialize(
         requester: UUID,
@@ -19,8 +20,10 @@ final class AMPSInitializationCoordinator {
             return
         }
         waiters[requester] = completion
-        if generation != nil {
+        statusProvider = currentStatus
+        if let token = generation {
             completion(1) // still waiting for the same native initialization
+            ensurePoll(token: token)
             return
         }
         let token = UUID()
@@ -31,23 +34,26 @@ final class AMPSInitializationCoordinator {
             }
         }
         // Also handles initialization started by a native host outside this plugin.
-        if generation == token {
-            poll = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-                guard let self = self else { return }
-                let status = currentStatus()
-                if status == 2 || status == 3 {
-                    self.receive(status, token: token, currentStatus: currentStatus)
-                }
-            }
-        }
+        ensurePoll(token: token)
     }
 
     func cancel(requester: UUID) {
         waiters.removeValue(forKey: requester)
+        // Keep generation: a later engine joins this in-flight start instead of calling start again.
         if waiters.isEmpty {
             poll?.invalidate()
             poll = nil
-            generation = nil
+        }
+    }
+
+    private func ensurePoll(token: UUID) {
+        guard generation == token, poll == nil, let currentStatus = statusProvider else { return }
+        poll = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            let status = currentStatus()
+            if status == 2 || status == 3 {
+                self.receive(status, token: token, currentStatus: currentStatus)
+            }
         }
     }
 
@@ -63,6 +69,7 @@ final class AMPSInitializationCoordinator {
         generation = nil
         poll?.invalidate()
         poll = nil
+        statusProvider = nil
         let callbacks = Array(waiters.values)
         waiters.removeAll()
         callbacks.forEach { $0(status) }

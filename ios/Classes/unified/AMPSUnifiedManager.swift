@@ -10,6 +10,7 @@ class AmpsIosUnifiedNativeManager: NSObject, AMPSUnifiedNativeManagerDelegate {
     let instanceId: String
     private weak var eventManager: AMPSEventManager?
     var unifiedNative: AMPSUnifiedNativeManager?
+    var configuration: AMPSAdConfiguration?
     var adIdMap: [String: AMPSUnifiedNativeView] = [:]
     /// 轮播 refreshData 可能再次触发 renderSuccess，这些 adId 不应通知 Dart 插入新广告。
     private var carouselRefreshingAdIds: Set<String> = []
@@ -97,15 +98,31 @@ class AmpsIosUnifiedNativeManager: NSObject, AMPSUnifiedNativeManagerDelegate {
     private func handleNativeCreate(arguments: [String: Any], result: FlutterResult) {
         let config = AdOptionModule.getAdConfig(para: arguments)
         config.adCount = 1
-        config.viewController = eventManager?.viewController
+        configuration = config
+        refreshPresenter()
         unifiedNative = AMPSUnifiedNativeManager(spaceId: config.spaceId, adConfiguration: config)
         result(true)
     }
     
     private func handleNativeLoad(result: FlutterResult) {
+        refreshPresenter()
         unifiedNative?.delegate = self
         unifiedNative?.load()
         result(true)
+    }
+
+    /// Rebind the owning page. Pass a view to update that view only; otherwise update every loaded view.
+    func refreshPresenter(on view: AMPSUnifiedNativeView? = nil) {
+        eventManager?.bindPresenter { controller in
+            self.configuration?.viewController = controller
+            if let view = view {
+                view.viewController = controller
+            } else {
+                for loaded in self.adIdMap.values {
+                    loaded.viewController = controller
+                }
+            }
+        }
     }
     
     func cleanup() {
@@ -117,6 +134,7 @@ class AmpsIosUnifiedNativeManager: NSObject, AMPSUnifiedNativeManagerDelegate {
         self.unifiedNative?.remove()
         self.unifiedNative?.delegate = nil
         self.unifiedNative = nil
+        self.configuration = nil
         self.adIdMap.removeAll()
         self.carouselRefreshingAdIds.removeAll()
     }
@@ -138,10 +156,10 @@ class AmpsIosUnifiedNativeManager: NSObject, AMPSUnifiedNativeManagerDelegate {
         let ids: [String] = nativeAd.adArray.map { ad in
             let id = UUID().uuidString
             let view = AMPSUnifiedNativeView(frame: CGRect(x: 0, y: 0, width: 300, height: 100))
-            view.viewController = eventManager?.viewController
+            self.adIdMap[id] = view
+            refreshPresenter(on: view)
             view.refreshData(ad)
             view.delegate = self
-            self.adIdMap[id] = view
             return id
         }
         sendMessage(AMPSNativeCallBackChannelMethod.loadOk, ["adIds": ids])
@@ -203,7 +221,7 @@ extension AmpsIosUnifiedNativeManager: AMPSUnifiedNativeViewDelegate, AMPSMediaV
     func ampsNativeAdCarouselRefresh(_ nativeView: AMPSUnifiedNativeView, ad nativeAd: AMPSUnifiedNativeAd) {
         guard let adId = getadId(unifiedAd: nativeView) else { return }
         carouselRefreshingAdIds.insert(adId)
-        nativeView.viewController = eventManager?.viewController
+        refreshPresenter(on: nativeView)
         nativeView.delegate = self
         nativeView.refreshData(nativeAd)
         eventManager?.nativeManager.selfRenderViews.object(forKey: adId as NSString)?.reloadAd()
