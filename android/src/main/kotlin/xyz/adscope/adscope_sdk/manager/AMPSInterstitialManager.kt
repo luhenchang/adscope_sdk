@@ -7,7 +7,6 @@ import xyz.adscope.adscope_sdk.data.AMPSInterAdCallBackChannelMethod
 import xyz.adscope.adscope_sdk.data.AMPSAdSdkMethodNames
 import xyz.adscope.adscope_sdk.data.AdOptionsModule
 import xyz.adscope.adscope_sdk.data.ErrorModel
-import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import xyz.adscope.amps.ad.interstitial.AMPSInterstitialAd
 import xyz.adscope.amps.ad.interstitial.AMPSInterstitialLoadEventListener
 import xyz.adscope.amps.common.AMPSError
@@ -16,43 +15,36 @@ import xyz.adscope.common.v2.gsonlite.Gson
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * 插屏广告管理器 (单例)
+ * 插屏广告管理器（每个 FlutterEngine 独立持有）
  * 负责处理来自 Flutter 的方法调用
  */
-class AMPSInterstitialManager private constructor() {
+class AMPSInterstitialManager(private val engine: AMPSEventManager) {
     private val interstitialAds = ConcurrentHashMap<String, AMPSInterstitialAd>()
-
-    companion object {
-        @Volatile
-        private var instance: AMPSInterstitialManager? = null
-
-        fun getInstance(): AMPSInterstitialManager {
-            return instance ?: synchronized(this) {
-                instance ?: AMPSInterstitialManager().also { instance = it }
-            }
-        }
-    }
-
 
     private fun createAdCallback(instanceId: String) = object : AMPSInterstitialLoadEventListener {
         override fun onAmpsAdLoaded() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSInterAdCallBackChannelMethod.ON_LOAD_SUCCESS)
             sendMessage(instanceId, AMPSInterAdCallBackChannelMethod.ON_RENDER_OK)
         }
 
         override fun onAmpsAdShow() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSInterAdCallBackChannelMethod.ON_AD_SHOW)
         }
 
         override fun onAmpsAdClicked() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSInterAdCallBackChannelMethod.ON_AD_CLICKED)
         }
 
         override fun onAmpsAdDismiss() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSInterAdCallBackChannelMethod.ON_AD_CLOSED)
         }
 
         override fun onAmpsAdFailed(error: AMPSError?) {
+            if (engine.isReleased) return
             sendMessage(
                 instanceId,
                 AMPSInterAdCallBackChannelMethod.ON_LOAD_FAILURE,
@@ -64,14 +56,17 @@ class AMPSInterstitialManager private constructor() {
         }
 
         override fun onAmpsSkippedAd() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSInterAdCallBackChannelMethod.ON_VIDEO_SKIP_TO_END)
         }
 
         override fun onAmpsVideoPlayStart() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSInterAdCallBackChannelMethod.ON_VIDEO_PLAY_START)
         }
 
         override fun onAmpsVideoPlayEnd() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSInterAdCallBackChannelMethod.ON_VIDEO_PLAY_END)
         }
 
@@ -129,7 +124,7 @@ class AMPSInterstitialManager private constructor() {
     }
     
     private fun interstitialAdCreate(call: MethodCall, result: Result) {
-        val activity = FlutterPluginUtil.getActivity()
+        val activity = engine.getActivity()
         if (activity == null) {
             result.error("LOAD_FAILED", "Activity not available for loading Interstitial ad.", null)
             return
@@ -156,14 +151,18 @@ class AMPSInterstitialManager private constructor() {
 
     // handleInterstitialShowAd 现在也接收 MethodCall 和 Result，以便统一错误处理和参数获取
     private fun handleInterstitialShowAd(call: MethodCall, result: Result) {
-        val activity = FlutterPluginUtil.getActivity()
+        val activity = engine.getActivity()
         val ad = interstitialAds[instanceIdFrom(call)]
         if (ad == null) {
             result.error("SHOW_FAILED", "InterstitiaAd ad not loaded.", null)
             return
         }
-       ad.show(activity)
-       result.success(null)
+        if (activity == null) {
+            result.error("SHOW_FAILED", "Activity not available for showing interstitial ad.", null)
+            return
+        }
+        ad.show(activity)
+        result.success(null)
     }
 
     private fun sendMessage(instanceId: String, method: String, args: Any? = null) {
@@ -174,6 +173,11 @@ class AMPSInterstitialManager private constructor() {
         } else if (args != null) {
             payload["data"] = args
         }
-        AMPSEventManager.getInstance().sendMessageToFlutter(method, payload)
+        engine.sendMessageToFlutter(method, payload)
+    }
+
+    fun release() {
+        interstitialAds.values.toList().forEach { runCatching { it.destroy() } }
+        interstitialAds.clear()
     }
 }

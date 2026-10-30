@@ -1,6 +1,5 @@
 package xyz.adscope.adscope_sdk.manager
 
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -14,7 +13,6 @@ import xyz.adscope.adscope_sdk.data.ErrorModel
 import xyz.adscope.adscope_sdk.data.SPLASH_BOTTOM
 import xyz.adscope.adscope_sdk.data.SPLASH_INSTANCE_ID
 import xyz.adscope.adscope_sdk.data.SplashBottomModule
-import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import xyz.adscope.adscope_sdk.utils.dpToPx
 import xyz.adscope.adscope_sdk.view.SplashBottomViewFactory
 import xyz.adscope.amps.ad.splash.AMPSSplashAd
@@ -23,44 +21,39 @@ import xyz.adscope.amps.common.AMPSError
 import xyz.adscope.common.v2.gsonlite.Gson
 import java.util.concurrent.ConcurrentHashMap
 
-class AMPSSplashManager private constructor() {
+class AMPSSplashManager(private val engine: AMPSEventManager) {
     private val splashAds = ConcurrentHashMap<String, AMPSSplashAd>()
     private val splashBottomModules = ConcurrentHashMap<String, SplashBottomModule>()
 
-    companion object {
-        @Volatile
-        private var instance: AMPSSplashManager? = null
-
-        fun getInstance(): AMPSSplashManager {
-            return instance ?: synchronized(this) {
-                instance ?: AMPSSplashManager().also { instance = it }
-            }
-        }
-    }
-
-    private fun containerTag(instanceId: String) = "splash_main_container_tag_$instanceId"
+    // Keep exact owned overlays: Dart IDs may repeat in sibling engines sharing an Activity.
+    private val splashContainers = ConcurrentHashMap<String, ViewGroup>()
 
     private fun createAdCallback(instanceId: String) = object : AMPSSplashLoadEventListener {
         override fun onAmpsAdLoaded() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSAdCallBackChannelMethod.ON_LOAD_SUCCESS)
             sendMessage(instanceId, AMPSAdCallBackChannelMethod.ON_RENDER_OK)
         }
 
         override fun onAmpsAdShow() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSAdCallBackChannelMethod.ON_AD_SHOW)
         }
 
         override fun onAmpsAdClicked() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSAdCallBackChannelMethod.ON_AD_CLICKED)
         }
 
         override fun onAmpsAdDismiss() {
+            if (engine.isReleased) return
             cleanupViewsAfterAdClosed(instanceId)
             splashBottomModules.remove(instanceId)
             sendMessage(instanceId, AMPSAdCallBackChannelMethod.ON_AD_CLOSED)
         }
 
         override fun onAmpsAdFailed(error: AMPSError?) {
+            if (engine.isReleased) return
             cleanupViewsAfterAdClosed(instanceId)
             sendMessage(
                 instanceId,
@@ -97,11 +90,8 @@ class AMPSSplashManager private constructor() {
     }
 
     private fun cleanupViewsAfterAdClosed(instanceId: String) {
-        val activity = FlutterPluginUtil.getActivity()
-        val contentView = activity?.findViewById<ViewGroup>(android.R.id.content)
-        contentView?.findViewWithTag<View>(containerTag(instanceId))?.let { viewToRemove ->
-            contentView.removeView(viewToRemove)
-        }
+        val container = splashContainers.remove(instanceId) ?: return
+        (container.parent as? ViewGroup)?.removeView(container)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -174,7 +164,7 @@ class AMPSSplashManager private constructor() {
     }
 
     private fun splashAdCreate(call: MethodCall, result: Result) {
-        val activity = FlutterPluginUtil.getActivity()
+        val activity = engine.getActivity()
         if (activity == null) {
             result.error("LOAD_FAILED", "Activity not available for loading splash ad.", null)
             return
@@ -213,7 +203,7 @@ class AMPSSplashManager private constructor() {
 
     private fun handleSplashShowAd(instanceId: String, call: MethodCall, result: Result) {
         val mSplashAd = splashAds[instanceId]
-        val activity = FlutterPluginUtil.getActivity()
+        val activity = engine.getActivity()
         if (mSplashAd == null) {
             result.error("SHOW_FAILED", "Splash ad not loaded.", null)
             return
@@ -229,13 +219,10 @@ class AMPSSplashManager private constructor() {
             return
         }
 
-        val tag = containerTag(instanceId)
         try {
-            contentView.findViewWithTag<View>(tag)?.let {
-                contentView.removeView(it)
-            }
+            cleanupViewsAfterAdClosed(instanceId)
             val mainContainerLocal = RelativeLayout(activity)
-            mainContainerLocal.tag = tag
+            splashContainers[instanceId] = mainContainerLocal
             mainContainerLocal.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -280,13 +267,11 @@ class AMPSSplashManager private constructor() {
                 mSplashAd.show(adContainerLocal)
                 result.success(true)
             } else {
-                contentView.removeView(mainContainerLocal)
+                cleanupViewsAfterAdClosed(instanceId)
                 result.error("SHOW_FAILED", "Splash ad not ready to be shown.", null)
             }
         } catch (e: Exception) {
-            contentView.findViewWithTag<View>(tag)?.let {
-                contentView.removeView(it)
-            }
+            cleanupViewsAfterAdClosed(instanceId)
             result.error("SHOW_EXCEPTION", "Error showing splash ad: ${e.message}", e.toString())
         }
     }
@@ -301,6 +286,13 @@ class AMPSSplashManager private constructor() {
             }
             else -> payload["data"] = args
         }
-        AMPSEventManager.getInstance().sendMessageToFlutter(method, payload)
+        engine.sendMessageToFlutter(method, payload)
+    }
+
+    fun release() {
+        splashContainers.keys.toList().forEach { cleanupViewsAfterAdClosed(it) }
+        splashAds.values.toList().forEach { runCatching { it.destroy() } }
+        splashAds.clear()
+        splashBottomModules.clear()
     }
 }

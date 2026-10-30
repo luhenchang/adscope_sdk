@@ -9,7 +9,6 @@ import {
 } from 'xyz.adscope.amps';
 import { AdClickIdType, AdClickType, NativeUnifiedBaseChild, NativeUnifiedModule, UnifiedImageItemChild } from '../native/UnifiedNativeModule';
 import { OhosPlatformUnifiedView } from './OhosPlatformUnifiedView';
-import { AdWrapperManager } from '../native/AdWrapperManager';
 import util from '@ohos.util';
 
 @Component
@@ -27,20 +26,20 @@ export struct AMPSUnifiedAdComponent {
   iamgeUrls:string[] =[]
   aboutToAppear(): void {
     this.reloadWrapper()
-    OhosPlatformUnifiedView.register(this.adId, () => {
+    this.customView.engine.native.registerReloader(this.adId, () => {
       this.reloadWrapper()
     })
   }
 
   aboutToDisappear(): void {
-    OhosPlatformUnifiedView.unregister(this.adId)
+    this.customView.engine.native.unregisterReloader(this.adId)
   }
 
   private reloadWrapper(): void {
     this.iamgeUrls = this.wrapper?.getImgList().map((it => it.imageUrl)) ?? []
     this.creativeViewIds.clear()
     this.clickIds.clear()
-    this.wrapper = AdWrapperManager.getInstance().getAd(this.adId)
+    this.wrapper = this.customView.engine.native.getWrapper(this.adId)
     this.refreshToken += 1
   }
 

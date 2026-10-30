@@ -3,14 +3,18 @@ import common from '@ohos.app.ability.common';
 import { BinaryMessenger } from '@ohos/flutter_ohos/src/main/ets/plugin/common/BinaryMessenger';
 import { AD_ID, AD_INSTANCE_ID } from '../common/common';
 import { AMPSNativeAdComponent } from './AMPSNativeAdComponent';
+import { AMPSEventManager } from '../common/AMPSEventManager';
 
 @Observed
 export class OhosPlatformNativeView extends PlatformView {
   adId: string = ''
   instanceId: string = ''
+  engine: AMPSEventManager
 
-  constructor(context: common.Context, viewId: number, args: ESObject, message: BinaryMessenger) {
+  constructor(context: common.Context, viewId: number, args: ESObject, message: BinaryMessenger,
+    engine: AMPSEventManager) {
     super();
+    this.engine = engine
     this.adId = (args.get(AD_ID) as string | undefined) ?? ''
     this.instanceId = (args.get(AD_INSTANCE_ID) as string | undefined) ?? ''
   }

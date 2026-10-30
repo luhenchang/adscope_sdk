@@ -27,14 +27,21 @@ class InterstitialShowAdOptions {
 }
 
 export class AMPSInterstitialManager {
-  private static instance: AMPSInterstitialManager;
+  private engine: AMPSEventManager
   private interstitialAds: Map<string, AMPSInterstitialAd> = new Map<string, AMPSInterstitialAd>()
 
-  public static getInstance(): AMPSInterstitialManager {
-    if (!AMPSInterstitialManager.instance) {
-      AMPSInterstitialManager.instance = new AMPSInterstitialManager();
-    }
-    return AMPSInterstitialManager.instance;
+  constructor(engine: AMPSEventManager) {
+    this.engine = engine
+  }
+
+  release(): void {
+    const ids: Array<string> = []
+    this.interstitialAds.forEach((_ad: AMPSInterstitialAd, id: string) => {
+      ids.push(id)
+    })
+    ids.forEach((id: string) => {
+      this.releaseInterstitialAd(id)
+    })
   }
 
   getInterstitialAd(instanceId?: string): AMPSInterstitialAd | undefined {
@@ -230,7 +237,7 @@ export class AMPSInterstitialManager {
   // 处理开屏广告显示
   private handleShowAd(instanceId: string, result: MethodResult): void {
     try {
-      let context = AMPSEventManager.getInstance().getContext()
+      let context = this.engine.getContext()
       const interstitialAd = this.interstitialAds.get(instanceId)
       if (interstitialAd && context) {
         const showOptions = new InterstitialShowAdOptions(context.windowStage, context.windowStage.getMainWindowSync().getUIContext())
@@ -247,7 +254,7 @@ export class AMPSInterstitialManager {
   }
 
   private sendPayload(method: string, payload: InterstitialCallbackPayload): void {
-    AMPSEventManager.getInstance().sendMessageToFlutter(method, payload as ESObject)
+    this.engine.sendMessageToFlutter(method, payload as ESObject)
   }
 
   private sendMessage(instanceId: string, method: string): void {

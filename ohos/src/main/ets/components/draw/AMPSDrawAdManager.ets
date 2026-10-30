@@ -28,18 +28,25 @@ class DrawCallbackPayload {
 }
 
 export class AMPSDrawAdManager {
-  private static instance: AMPSDrawAdManager;
   private static adIdCounter: number = 0
+  private engine: AMPSEventManager
   private mWindowStage?: window.WindowStage;
   private drawAds: Map<string, AMPSDrawAd> = new Map<string, AMPSDrawAd>()
   private drawItems: Map<string, AMPSDrawAdWrapper> = new Map<string, AMPSDrawAdWrapper>()
   private adIdsByInstance: Map<string, Array<string>> = new Map<string, Array<string>>()
 
-  public static getInstance(): AMPSDrawAdManager {
-    if (!AMPSDrawAdManager.instance) {
-      AMPSDrawAdManager.instance = new AMPSDrawAdManager();
-    }
-    return AMPSDrawAdManager.instance;
+  constructor(engine: AMPSEventManager) {
+    this.engine = engine
+  }
+
+  release(): void {
+    const ids: Array<string> = []
+    this.drawAds.forEach((_ad: AMPSDrawAd, id: string) => {
+      ids.push(id)
+    })
+    ids.forEach((id: string) => {
+      this.releaseDrawAd(id)
+    })
   }
 
   getAdItem(adId: string): AMPSDrawAdWrapper | undefined {
@@ -282,7 +289,7 @@ export class AMPSDrawAdManager {
         return
       }
       const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(args)
-      const context = AMPSEventManager.getInstance().getContext()
+      const context = this.engine.getContext()
       this.mWindowStage = context?.windowStage
       if (!this.mWindowStage) {
         result.error('LOAD_FAILED', 'WindowStage未初始化', undefined)
@@ -314,6 +321,6 @@ export class AMPSDrawAdManager {
   }
 
   private sendPayload(method: string, payload: DrawCallbackPayload): void {
-    AMPSEventManager.getInstance().sendMessageToFlutter(method, payload as ESObject)
+    this.engine.sendMessageToFlutter(method, payload as ESObject)
   }
 }

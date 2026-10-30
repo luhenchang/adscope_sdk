@@ -4,22 +4,10 @@ import android.view.View
 import xyz.adscope.amps.ad.unified.inter.AMPSUnifiedNativeItem
 import java.util.concurrent.ConcurrentHashMap
 
-class AdUnifiedWrapperManager private constructor() {
+class AdUnifiedWrapperManager {
     // 使用ConcurrentHashMap保证线程安全
     private val adViewMap: MutableMap<String, View> = ConcurrentHashMap()
     private val adItemMap: MutableMap<String, AMPSUnifiedNativeItem> = ConcurrentHashMap()
-
-    companion object {
-        // 单例实例，使用双重校验锁保证线程安全
-        @Volatile
-        private var instance: AdUnifiedWrapperManager? = null
-
-        fun getInstance(): AdUnifiedWrapperManager {
-            return instance ?: synchronized(this) {
-                instance ?: AdUnifiedWrapperManager().also { instance = it }
-            }
-        }
-    }
 
     /**
      * 将View添加到Map中
@@ -99,5 +87,10 @@ class AdUnifiedWrapperManager private constructor() {
     fun getAdItemCount(): Int {
         return adItemMap.size
     }
+
+    fun release() {
+        adViewMap.clear()
+        adItemMap.clear()
+    }
 }
-    
+

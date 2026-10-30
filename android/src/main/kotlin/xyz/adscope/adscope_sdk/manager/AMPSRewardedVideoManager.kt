@@ -8,7 +8,6 @@ import xyz.adscope.adscope_sdk.data.AMPSRewardedVideoCallBackChannelMethod
 import xyz.adscope.adscope_sdk.data.AdOptionKeys
 import xyz.adscope.adscope_sdk.data.AdOptionsModule
 import xyz.adscope.adscope_sdk.data.ErrorModel
-import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import xyz.adscope.amps.ad.reward.AMPSRewardVideoAd
 import xyz.adscope.amps.ad.reward.AMPSRewardVideoLoadEventListener
 import xyz.adscope.amps.common.AMPSError
@@ -17,44 +16,37 @@ import xyz.adscope.common.v2.gsonlite.Gson
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * 插屏广告管理器 (单例)
+ * 激励视频广告管理器（每个 FlutterEngine 独立持有）
  * 负责处理来自 Flutter 的方法调用
  */
-class AMPSRewardedVideoManager private constructor() {
+class AMPSRewardedVideoManager(private val engine: AMPSEventManager) {
     private val rewardedVideoAds = ConcurrentHashMap<String, AMPSRewardVideoAd>()
     private val rewardedVideoAdOptions = ConcurrentHashMap<String, AMPSRequestParameters>()
-
-    companion object {
-        @Volatile
-        private var instance: AMPSRewardedVideoManager? = null
-
-        fun getInstance(): AMPSRewardedVideoManager {
-            return instance ?: synchronized(this) {
-                instance ?: AMPSRewardedVideoManager().also { instance = it }
-            }
-        }
-    }
-
 
     private fun createAdCallback(instanceId: String) = object : AMPSRewardVideoLoadEventListener {
 
         override fun onAmpsAdLoad() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSRewardedVideoCallBackChannelMethod.ON_LOAD_SUCCESS)
         }
 
         override fun onAmpsAdCached() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSRewardedVideoCallBackChannelMethod.ON_AD_CACHED)
         }
 
         override fun onAmpsAdVideoClick() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSRewardedVideoCallBackChannelMethod.ON_AD_CLICKED)
         }
 
         override fun onAmpsAdVideoComplete() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSRewardedVideoCallBackChannelMethod.ON_VIDEO_PLAY_END)
         }
 
         override fun onAmpsAdVideoError() {
+            if (engine.isReleased) return
             sendMessage(
                 instanceId,
                 AMPSRewardedVideoCallBackChannelMethod.ON_VIDEO_PLAY_ERROR,
@@ -77,6 +69,7 @@ class AMPSRewardedVideoManager private constructor() {
             rewardType: Int,
             extraInfo: Map<String?, Any?>?
         ) {
+            if (engine.isReleased) return
             sendMessage(
                 instanceId,
                 AMPSRewardedVideoCallBackChannelMethod.ON_AD_REWARD,
@@ -89,14 +82,17 @@ class AMPSRewardedVideoManager private constructor() {
         }
 
         override fun onAmpsAdShow() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSRewardedVideoCallBackChannelMethod.ON_AD_SHOW)
         }
 
         override fun onAmpsAdDismiss() {
+            if (engine.isReleased) return
             sendMessage(instanceId, AMPSRewardedVideoCallBackChannelMethod.ON_AD_CLOSED)
         }
 
         override fun onAmpsAdFailed(p0: AMPSError?) {
+            if (engine.isReleased) return
             sendMessage(
                 instanceId,
                 AMPSRewardedVideoCallBackChannelMethod.ON_LOAD_FAILURE,
@@ -169,7 +165,7 @@ class AMPSRewardedVideoManager private constructor() {
         call: MethodCall,
         result: Result
     ) {
-        val activity = FlutterPluginUtil.getActivity()
+        val activity = engine.getActivity()
         if (activity == null) {
             result.error("LOAD_FAILED", "Activity not available for loading splash ad.", null)
             return
@@ -223,21 +219,21 @@ class AMPSRewardedVideoManager private constructor() {
     }
 
     private fun handleRewardedVideoShowAd(call: MethodCall, result: Result) {
-        val activity = FlutterPluginUtil.getActivity()
+        val activity = engine.getActivity()
         val rewardedVideoAd = rewardedVideoAds[instanceIdFrom(call)]
         if (rewardedVideoAd == null) {
             result.error("SHOW_FAILED", "Rewarded ad not loaded.", null)
             return
         }
-        activity?.let { activity ->
-            rewardedVideoAd.apply {
-                if (isReady) {
-                    show(activity)
-                    result.success(null)
-                } else {
-                    result.error("-1000", "ad not isLoaded", "Rewarded not loaded")
-                }
-            }
+        if (activity == null) {
+            result.error("SHOW_FAILED", "Activity not available for showing rewarded ad.", null)
+            return
+        }
+        if (rewardedVideoAd.isReady) {
+            rewardedVideoAd.show(activity)
+            result.success(null)
+        } else {
+            result.error("-1000", "ad not isLoaded", "Rewarded not loaded")
         }
     }
 
@@ -249,6 +245,12 @@ class AMPSRewardedVideoManager private constructor() {
         } else if (args != null) {
             payload["data"] = args
         }
-        AMPSEventManager.getInstance().sendMessageToFlutter(method, payload)
+        engine.sendMessageToFlutter(method, payload)
+    }
+
+    fun release() {
+        rewardedVideoAds.values.toList().forEach { runCatching { it.destroy() } }
+        rewardedVideoAds.clear()
+        rewardedVideoAdOptions.clear()
     }
 }

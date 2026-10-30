@@ -3,21 +3,25 @@ import { AMPSSplashComponent } from './AMPSSplashComponent';
 import { SPLASH_BOTTOM, SPLASH_INSTANCE_ID } from '../common/common';
 import { SplashBottomImageChild, SplashBottomModule, SplashBottomTextChild } from '../splash/SplashBottomModule';
 import { SplashBottomImageComponent } from '../splash/SplashBottomImageComponent';
+import { AMPSEventManager } from '../common/AMPSEventManager';
 
-//底部自定义组件全局WrappedBuilder
+// 底部自定义组件只能使用无参 WrappedBuilder，绘制前由当前开屏视图写入。
 export let globalSplashBottomBuilder: WrappedBuilder<[]> | undefined  = wrapBuilder(MyBuilder);
+
 @Observed
 export class OhosPlatformSplashView extends PlatformView {
-  static splashInstanceId?: string
-  static splashBottomModule?: SplashBottomModule
-  constructor(args: ESObject) {
+  static activeBottom?: SplashBottomModule
+  engine: AMPSEventManager
+  instanceId: string = ''
+  splashBottomModule?: SplashBottomModule
+
+  constructor(args: ESObject, engine: AMPSEventManager) {
     super();
-    OhosPlatformSplashView.splashInstanceId = args.get(SPLASH_INSTANCE_ID) as string | undefined
+    this.engine = engine
+    this.instanceId = (args.get(SPLASH_INSTANCE_ID) as string | undefined) ?? ''
     const bottomMap = args.get(SPLASH_BOTTOM) as Map<string, Object> | undefined
     if (bottomMap) {
-      OhosPlatformSplashView.splashBottomModule = new SplashBottomModule(bottomMap)
-    } else {
-      OhosPlatformSplashView.splashBottomModule = undefined
+      this.splashBottomModule = new SplashBottomModule(bottomMap)
     }
   }
 
@@ -26,17 +30,17 @@ export class OhosPlatformSplashView extends PlatformView {
   }
 
   dispose(): void {
-    OhosPlatformSplashView.splashInstanceId = undefined
-    OhosPlatformSplashView.splashBottomModule = undefined
+    if (OhosPlatformSplashView.activeBottom === this.splashBottomModule) {
+      OhosPlatformSplashView.activeBottom = undefined
+    }
   }
 }
 
-
 @Builder
 export function MyBuilder() {
-  if (OhosPlatformSplashView.splashBottomModule?.initialized) {
+  if (OhosPlatformSplashView.activeBottom?.initialized) {
     Stack() {
-      ForEach(OhosPlatformSplashView.splashBottomModule?.textChildrens ?? [], (item: SplashBottomTextChild) => {
+      ForEach(OhosPlatformSplashView.activeBottom?.textChildrens ?? [], (item: SplashBottomTextChild) => {
         Text(item?.text)
           .fontColor(item?.color)
           .fontSize(item?.fontSize)
@@ -45,19 +49,18 @@ export function MyBuilder() {
             y: item?.y
           })
       })
-      ForEach(OhosPlatformSplashView.splashBottomModule?.imgChildrens ?? [], (imgItem: SplashBottomImageChild) => {
+      ForEach(OhosPlatformSplashView.activeBottom?.imgChildrens ?? [], (imgItem: SplashBottomImageChild) => {
         SplashBottomImageComponent({ imgItem: imgItem })
       })
     }
-    .backgroundColor(OhosPlatformSplashView.splashBottomModule?.backgroundColor)
-    .height(OhosPlatformSplashView.splashBottomModule?.height)
+    .backgroundColor(OhosPlatformSplashView.activeBottom?.backgroundColor)
+    .height(OhosPlatformSplashView.activeBottom?.height)
     .width('100%')
     .alignContent(Alignment.TopStart)
   }
 }
 
-
 @Builder
 export function AMPSSplashWrappedBuilder(params: Params) {
-  AMPSSplashComponent()
+  AMPSSplashComponent({ platformView: params.platformView as OhosPlatformSplashView })
 }

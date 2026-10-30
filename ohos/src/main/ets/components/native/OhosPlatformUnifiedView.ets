@@ -4,16 +4,19 @@ import { BinaryMessenger } from '@ohos/flutter_ohos/src/main/ets/plugin/common/B
 import { AD_ID, AD_INSTANCE_ID } from '../common/common';
 import { AMPSUnifiedAdComponent } from './AMPSUnifiedAdComponent';
 import { NativeUnifiedModule } from '../native/UnifiedNativeModule';
+import { AMPSEventManager } from '../common/AMPSEventManager';
 
 @Observed
 export class OhosPlatformUnifiedView extends PlatformView {
-  private static reloaders: Map<string, () => void> = new Map()
   adId: string = ''
   instanceId: string = ''
+  engine: AMPSEventManager
   nativeUnifiedModule?: NativeUnifiedModule = undefined
 
-  constructor(context: common.Context, viewId: number, args: ESObject, message: BinaryMessenger) {
+  constructor(context: common.Context, viewId: number, args: ESObject, message: BinaryMessenger,
+    engine: AMPSEventManager) {
     super();
+    this.engine = engine
     this.adId = (args.get(AD_ID) as string | undefined) ?? ''
     this.instanceId = (args.get(AD_INSTANCE_ID) as string | undefined) ?? ''
     const unifiedWidget = args.get('unifiedWidget') as Map<string, Object> | undefined
@@ -22,28 +25,12 @@ export class OhosPlatformUnifiedView extends PlatformView {
     }
   }
 
-  static register(adId: string, reloader: () => void): void {
-    if (adId) {
-      OhosPlatformUnifiedView.reloaders.set(adId, reloader)
-    }
-  }
-
-  static unregister(adId: string): void {
-    if (adId) {
-      OhosPlatformUnifiedView.reloaders.delete(adId)
-    }
-  }
-
-  static refresh(adId: string): void {
-    OhosPlatformUnifiedView.reloaders.get(adId)?.()
-  }
-
   getView(): WrappedBuilder<[Params]> {
     return new WrappedBuilder(AMPSUnifiedWrappedBuilder);
   }
 
   dispose(): void {
-    OhosPlatformUnifiedView.unregister(this.adId)
+    this.engine.native.unregisterReloader(this.adId)
   }
 }
 

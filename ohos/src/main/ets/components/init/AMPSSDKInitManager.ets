@@ -1,39 +1,45 @@
 import { Any, MethodCall, MethodResult } from "@ohos/flutter_ohos";
 import { AMPSInitConfigConverter } from "../init/AMPSInitConfigConverter";
 import { AMPSAdSdkMethodNames, AMPSInitChannelMethod } from "../common/common";
-import { AMPSAdSdk, AMPSIInitCallback, AMPSInitConfig } from "xyz.adscope.amps";
+import { AMPSAdSdk, AMPSInitConfig } from "xyz.adscope.amps";
 import { AMPSEventManager } from "../common/AMPSEventManager";
 import { abilityAccessCtrl } from "@kit.AbilityKit";
+import { AMPSInitCoordinator } from "./AMPSInitCoordinator";
 
 export class AMPSSDKInitManager {
-  private static instance: AMPSSDKInitManager;
+  private engine: AMPSEventManager
 
-  public static getInstance(): AMPSSDKInitManager {
-    if (!AMPSSDKInitManager.instance) {
-      AMPSSDKInitManager.instance = new AMPSSDKInitManager();
-    }
-    return AMPSSDKInitManager.instance;
+  constructor(engine: AMPSEventManager) {
+    this.engine = engine
   }
-  static initStatus: number = 0
 
   handleMethodCall(call: MethodCall, result: MethodResult) {
     let method: string = call.method;
     let flutterParams: Map<string, Any> = call.args;
     switch (method) {
       case AMPSAdSdkMethodNames.init:
-        let context = AMPSEventManager.getInstance().getContext()
+        let context = this.engine.getContext()
         if (context) {
           try {
             const ampsConfig = new AMPSInitConfigConverter().convert(flutterParams, context)
             this.initAMPSSDK(ampsConfig)
           } catch (error) {
-            this.sendMessage(AMPSInitChannelMethod.initFailed, { code: -1, message: (error as Error).message })
+            this.engine.sendMessageToFlutter(AMPSInitChannelMethod.initFailed, {
+              code: -1,
+              message: (error as Error).message
+            } as ESObject)
           }
+          result.success(true);
+        } else {
+          this.engine.sendMessageToFlutter(AMPSInitChannelMethod.initFailed, {
+            code: -1,
+            message: 'Ability context is not available.'
+          } as ESObject)
           result.success(true);
         }
         break;
       case AMPSAdSdkMethodNames.permissionTracking:
-        let context1 = AMPSEventManager.getInstance().getContext()
+        let context1 = this.engine.getContext()
         if (context1) {
           try {
             const atManager: abilityAccessCtrl.AtManager = abilityAccessCtrl.createAtManager();
@@ -46,6 +52,8 @@ export class AMPSSDKInitManager {
           } catch (error) {
             result.error(error.code, `权限请求异常: ${error instanceof Error ? error.message : error}`, undefined);
           }
+        } else {
+          result.error('CONTEXT_UNAVAILABLE', 'Ability context is not available.', undefined)
         }
         break;
       case AMPSAdSdkMethodNames.getSdkVersion:
@@ -53,11 +61,9 @@ export class AMPSSDKInitManager {
         result.success(version)
         break
       case AMPSAdSdkMethodNames.getInitStatus:
-        let status = AMPSSDKInitManager.initStatus
-        result.success(status)
+        result.success(AMPSInitCoordinator.initStatus)
         break
       case AMPSAdSdkMethodNames.setPersonalRecommend:
-        // let recommend = call.args as boolean
         result.success(undefined)
         break
       default :
@@ -65,34 +71,13 @@ export class AMPSSDKInitManager {
     }
   }
 
-
   initAMPSSDK(ampsInitConfig?: AMPSInitConfig) {
-    let callback: AMPSIInitCallback = {
-      initSuccess: (): void => {
-        AMPSSDKInitManager.initStatus = 2
-        AMPSSDKInitManager.getInstance().sendMessage(AMPSInitChannelMethod.initSuccess)
-      },
-      initializing: (): void => {
-        AMPSSDKInitManager.initStatus = 1
-        AMPSSDKInitManager.getInstance().sendMessage(AMPSInitChannelMethod.initializing)
-      },
-      alreadyInit: (): void => {
-        AMPSSDKInitManager.initStatus = 4
-        AMPSSDKInitManager.getInstance().sendMessage(AMPSInitChannelMethod.alreadyInit)
-      },
-      initFailed: (code: number, message: string): void => {
-        AMPSSDKInitManager.initStatus = 3
-        AMPSSDKInitManager.getInstance().sendMessage(AMPSInitChannelMethod.initFailed, { code, message })
-      }
+    if (!ampsInitConfig) {
+      return
     }
-    if (ampsInitConfig) {
-      AMPSAdSdk.testMode = false
-      AMPSSDKInitManager.initStatus = 1
+    AMPSAdSdk.testMode = false
+    AMPSInitCoordinator.request(this.engine, (callback) => {
       AMPSAdSdk.init(ampsInitConfig, callback)
-    }
-  }
-
-  public sendMessage = (method: string, args?: Any) => {
-    AMPSEventManager.getInstance().sendMessageToFlutter(method, args)
+    })
   }
 }

@@ -21,18 +21,22 @@ class RewardVideoCallbackPayload {
 }
 
 export class AMPSRewardVideoManager {
-  private static instance?: AMPSRewardVideoManager
+  private engine: AMPSEventManager
   private rewardVideoAds: Map<string, AMPSRewardVideoAd> = new Map<string, AMPSRewardVideoAd>()
   private rewardVideoAdOptions: Map<string, ampsAd.AdOptions> = new Map<string, ampsAd.AdOptions>()
 
-  private constructor() {
+  constructor(engine: AMPSEventManager) {
+    this.engine = engine
   }
 
-  static getInstance() {
-    if (!AMPSRewardVideoManager.instance) {
-      AMPSRewardVideoManager.instance = new AMPSRewardVideoManager()
-    }
-    return AMPSRewardVideoManager.instance!
+  release(): void {
+    const ids: Array<string> = []
+    this.rewardVideoAds.forEach((_ad: AMPSRewardVideoAd, id: string) => {
+      ids.push(id)
+    })
+    ids.forEach((id: string) => {
+      this.releaseRewardVideo(id)
+    })
   }
 
   handleMethodCall(call: MethodCall, result: MethodResult) {
@@ -267,7 +271,7 @@ export class AMPSRewardVideoManager {
 
   private handleShowAd(instanceId: string, result: MethodResult): void {
     try {
-      const context = AMPSEventManager.getInstance().getContext()
+      const context = this.engine.getContext()
       const rewardVideo = this.rewardVideoAds.get(instanceId)
       if (rewardVideo && context) {
         rewardVideo.showAd(context.windowStage)
@@ -283,7 +287,7 @@ export class AMPSRewardVideoManager {
   }
 
   private sendPayload(method: string, payload: RewardVideoCallbackPayload): void {
-    AMPSEventManager.getInstance().sendMessageToFlutter(method, payload as ESObject)
+    this.engine.sendMessageToFlutter(method, payload as ESObject)
   }
 
   private sendMessage(instanceId: string, method: string): void {

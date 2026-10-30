@@ -1,6 +1,6 @@
 import { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformView';
 import { AMPSBannerAdWrapper, AMPSBuildBannerExpressView } from 'xyz.adscope.amps';
-import { AMPSBannerManager } from './AMPSBannerManager';
+import { OhosPlatformBannerView } from './OhosPlatformBannerView';
 
 @Component
 export struct AMPSBannerComponent {
@@ -9,7 +9,8 @@ export struct AMPSBannerComponent {
   bannerAd?: AMPSBannerAdWrapper = undefined
 
   aboutToAppear(): void {
-    this.bannerAd = AMPSBannerManager.getInstance().getBannerAdItem(this.instanceId)
+    const view = this.params.platformView as OhosPlatformBannerView
+    this.bannerAd = view.engine.banner.getBannerAdItem(this.instanceId)
   }
 
   build() {

@@ -1,38 +1,17 @@
 package xyz.adscope.adscope_sdk.manager
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import xyz.adscope.adscope_sdk.data.AMPSAdSdkMethodNames
-import xyz.adscope.adscope_sdk.data.AMPSInitChannelMethod
 import xyz.adscope.adscope_sdk.data.AMPSInitConfigConverter
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel.Result
 import xyz.adscope.adscope_sdk.data.AMPSInitConfigKey
-import xyz.adscope.adscope_sdk.data.ErrorModel
-import xyz.adscope.adscope_sdk.utils.FlutterPluginUtil
 import xyz.adscope.amps.AMPSSDK
-import xyz.adscope.amps.common.AMPSError
 import xyz.adscope.amps.init.AMPSInitConfig
-import xyz.adscope.amps.init.inter.IAMPSInitCallback
 import xyz.adscope.common.v2.log.SDKLog
-import kotlin.synchronized
 
-private val mainThreadHandler = Handler(Looper.getMainLooper())
+class AMPSSDKInitManager(private val engine: AMPSEventManager) {
 
-class AMPSSDKInitManager private constructor() {
-
-    companion object {
-        @Volatile
-        private var instance: AMPSSDKInitManager? = null
-
-        fun getInstance(): AMPSSDKInitManager {
-            return instance ?: synchronized(this) {
-                instance ?: AMPSSDKInitManager().also { instance = it }
-            }
-        }
-    }
     /**
      * 全局方法：根据 code 值获取 Java 枚举 LOG_LEVEL 实例
      * @param code 枚举对应的整数值（可为 null）
@@ -58,7 +37,7 @@ class AMPSSDKInitManager private constructor() {
                 result.success(null)
             }
             AMPSAdSdkMethodNames.INIT -> {
-                val context = FlutterPluginUtil.getActivity()
+                val context = engine.getApplicationContext()
                 if (context != null && flutterParams != null) {
                     val isMediation =
                         flutterParams[AMPSInitConfigKey.IS_MEDIATION] as? Boolean ?: false
@@ -99,37 +78,14 @@ class AMPSSDKInitManager private constructor() {
     }
 
     fun initAMPSSDK(ampsInitConfig: AMPSInitConfig?, context: Context, isMediation: Boolean) {
-        val callback = object : IAMPSInitCallback {
-            override fun successCallback() {
-                val isMain = Looper.myLooper() == Looper.getMainLooper()
-                if(isMain){
-                    sendMessage(AMPSInitChannelMethod.INIT_SUCCESS)
-                }else {
-                    mainThreadHandler.post {
-                        sendMessage(AMPSInitChannelMethod.INIT_SUCCESS)
-                    }
-                }
-            }
-
-            override fun failCallback(p0: AMPSError?) {
-                sendMessage(
-                    AMPSInitChannelMethod.INIT_FAILED,
-                    mapOf(
-                        ErrorModel.CODE to (p0?.code?.toInt() ?: -1),
-                        ErrorModel.MESSAGE to p0?.message
-                    )
-                )
-            }
-        }
-
         if (ampsInitConfig != null) {
-            AMPSSDK.init(context, ampsInitConfig, callback)
+            AMPSInitCoordinator.request(engine) { callback ->
+                AMPSSDK.init(context, ampsInitConfig, callback)
+            }
         }
     }
 
     fun sendMessage(method: String, args: Any? = null) {
-        FlutterPluginUtil.runOnUiThread {
-            AMPSEventManager.getInstance().sendMessageToFlutter(method, args)
-        }
+        engine.sendMessageToFlutter(method, args)
     }
 }

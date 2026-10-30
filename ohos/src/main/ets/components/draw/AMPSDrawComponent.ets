@@ -1,8 +1,6 @@
 import { AMPSDrawAdWrapper, AMPSBuildDrawAdExpressView } from 'xyz.adscope.amps';
-import { AMPSDrawAdManager } from './AMPSDrawAdManager';
 import { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformView';
 import { OhosPlatformDrawView } from './OhosPlatformDrawView';
-import { AMPSEventManager } from '../common/AMPSEventManager';
 import { AmpsDrawCallbackChannelMethod } from '../common/common';
 
 class DrawSizeUpdatePayload {
@@ -20,16 +18,18 @@ export struct AMPSDrawComponent {
   drawAd?: AMPSDrawAdWrapper = undefined
 
   aboutToAppear(): void {
-    this.drawAd = AMPSDrawAdManager.getInstance().getAdItem(this.adId)
+    const view = this.params.platformView as OhosPlatformDrawView
+    this.drawAd = view.engine.draw.getAdItem(this.adId)
   }
 
   private sendSizeUpdate(width: number, height: number): void {
+    const view = this.params.platformView as OhosPlatformDrawView
     const payload = new DrawSizeUpdatePayload()
     payload.adInstanceId = this.instanceId
     payload.adId = this.adId
     payload.width = width
     payload.height = height
-    AMPSEventManager.getInstance().sendMessageToFlutter(
+    view.engine.sendMessageToFlutter(
       AmpsDrawCallbackChannelMethod.drawSizeUpdate,
       payload as ESObject
     )

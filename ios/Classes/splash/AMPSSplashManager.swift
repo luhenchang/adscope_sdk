@@ -11,8 +11,12 @@ import AMPSAdSDK
 
 class AMPSSplashManager: NSObject {
     
-    static let shared = AMPSSplashManager()
-    private override init() {super.init()}
+    private weak var eventManager: AMPSEventManager?
+
+    init(eventManager: AMPSEventManager) {
+        self.eventManager = eventManager
+        super.init()
+    }
     
     private var splashAds: [String: AMPSSplashAd] = [:]
     private var splashBottomParams: [String: [String: Any]] = [:]
@@ -56,6 +60,10 @@ class AMPSSplashManager: NSObject {
         }
     }
     
+    func release() {
+        for id in Array(splashAds.keys) { cleanupViewsAfterAdClosed(instanceId: id) }
+    }
+
     private func instanceId(from arguments: [String: Any]?) -> String? {
         return arguments?[ArgumentKeys.splashInstanceId] as? String
     }
@@ -94,7 +102,7 @@ class AMPSSplashManager: NSObject {
     //构建底部view
     private func buildBotteomView (arguments: [String: Any]?) -> UIView?{
         if let param = resolveBottomParams(arguments) {
-            let windowWidth = getKeyWindow()?.bounds.width ?? 370
+            let windowWidth = eventManager?.viewController?.view.window?.bounds.width ?? 370
             let height = param["height"] as? CGFloat ?? 0
             let bgColor = param["backgroundColor"] as? String
             var imageModel: SplashBottomImage?
@@ -116,7 +124,7 @@ class AMPSSplashManager: NSObject {
                 }
                 
                 if let imageModel = imageModel {
-                    let image = imageModel.imagePath.flatMap { AMPSEventManager.shared.getImage($0) }
+                    let image = imageModel.imagePath.flatMap { eventManager?.getImage($0) }
                     var imageWidth = imageModel.width ?? 0
                     var imageHeight = imageModel.height ?? 0
                     // 宽或高传 0 时，自适应图片原始大小
@@ -184,7 +192,7 @@ class AMPSSplashManager: NSObject {
             return
         }
         
-        guard let window = getKeyWindow() else {
+        guard let window = eventManager?.viewController?.view.window else {
             result(false)
             return
         }
@@ -204,7 +212,7 @@ class AMPSSplashManager: NSObject {
         if let args = args {
             args.forEach { payload[$0.key] = $0.value }
         }
-        AMPSEventManager.shared.sendToFlutter(method, arg: payload)
+        eventManager?.sendToFlutter(method, arg: payload)
     }
 }
 

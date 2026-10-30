@@ -4,16 +4,19 @@ import PlatformViewFactory from '@ohos/flutter_ohos/src/main/ets/plugin/platform
 import { BinaryMessenger } from '@ohos/flutter_ohos/src/main/ets/plugin/common/BinaryMessenger';
 import PlatformView from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformView';
 import { OhosPlatformInterstitialView } from '../interstitial/OhosPlatformInterstitialView';
+import { AMPSEventManager } from '../common/AMPSEventManager';
 
 export class InterstitialFactory extends PlatformViewFactory {
   message: BinaryMessenger;
+  private engine: AMPSEventManager
 
-  constructor(message: BinaryMessenger, createArgsCodes: MessageCodec<Object>) {
+  constructor(message: BinaryMessenger, createArgsCodes: MessageCodec<Object>, engine: AMPSEventManager) {
     super(createArgsCodes);
     this.message = message;
+    this.engine = engine
   }
 
   public create(context: common.Context, viewId: number, args: Object): PlatformView {
-    return new OhosPlatformInterstitialView();
+    return new OhosPlatformInterstitialView(args as ESObject, this.engine);
   }
 }

@@ -11,9 +11,12 @@ import AMPSAdSDK
 
 
 class AMPSSDKInitManager {
-    static let shared: AMPSSDKInitManager = AMPSSDKInitManager()
-    
-    private init() {}
+    private weak var eventManager: AMPSEventManager?
+    private let requester = UUID()
+
+    init(eventManager: AMPSEventManager) {
+        self.eventManager = eventManager
+    }
     
     func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let method = call.method
@@ -43,47 +46,59 @@ class AMPSSDKInitManager {
         let initParam: AMPSIOSInitModel? = Tools.convertToModel(from: flutterParams)
         let appid = initParam?.appId ?? ""
         
-        let config =  AMPSAdSDKManager.sharedInstance().sdkConfiguration
-        
-        if let https = initParam?._isUseHttps{
-            config.isUseHttps = https
-        }
-        if let recommend = initParam?.adController?.isSupportPersonalized{
-            config.recommend = recommend ? .open : .close
-        }
-        if let adapterNames = initParam?.adapterNames {
-            config.adapterName = adapterNames
-        }
-        if let idfa = initParam?.adController?.OAID{
-            config.customIDFA = idfa
-        }
-        if let sensor = initParam?.adController?.isCanUseShakeAd,sensor == false{
-            config.closeShakeAd = true
-        }
-        if let jsonOption = initParam?.optionInfo {
-            config.optionalInfo = jsonOption
-        }
-        if let extensionParam: [String: Any] = flutterParams["extensionParam"] as? [String: Any] {
-            config.customExtraDict = extensionParam
-        }
+        AMPSInitializationCoordinator.shared.initialize(
+            requester: requester,
+            currentStatus: { AMPSAdSDKManager.sharedInstance().sdkInitializationStatus().rawValue },
+            start: { callback in
+                let config =  AMPSAdSDKManager.sharedInstance().sdkConfiguration
 
-        AMPSAdSDKManager.sharedInstance().startAsync(withAppId: appid) { status in
-    
-            if status == AMPSAdSDKInitStatus.success {
-                self.sendMessage(AMPSInitChannelMethod.initSuccess)
-            }else if status == AMPSAdSDKInitStatus.fail {
-                self.sendMessage(AMPSInitChannelMethod.initFailed)
-            }else if status == AMPSAdSDKInitStatus.loading {
-                self.sendMessage(AMPSInitChannelMethod.initializing)
-            }else{
-                self.sendMessage(AMPSInitChannelMethod.alreadyInit)
+                if let https = initParam?._isUseHttps{
+                    config.isUseHttps = https
+                }
+                if let recommend = initParam?.adController?.isSupportPersonalized{
+                    config.recommend = recommend ? .open : .close
+                }
+                if let adapterNames = initParam?.adapterNames {
+                    config.adapterName = adapterNames
+                }
+                if let idfa = initParam?.adController?.OAID{
+                    config.customIDFA = idfa
+                }
+                if let sensor = initParam?.adController?.isCanUseShakeAd,sensor == false{
+                    config.closeShakeAd = true
+                }
+                if let jsonOption = initParam?.optionInfo {
+                    config.optionalInfo = jsonOption
+                }
+                if let extensionParam: [String: Any] = flutterParams["extensionParam"] as? [String: Any] {
+                    config.customExtraDict = extensionParam
+                }
+
+                AMPSAdSDKManager.sharedInstance().startAsync(withAppId: appid) { status in
+                    callback(status.rawValue)
+                }
+            },
+            completion: { [weak self] status in
+                guard let self = self else { return }
+                if status == 2 {
+                    self.sendMessage(AMPSInitChannelMethod.initSuccess)
+                }else if status == 3 {
+                    self.sendMessage(AMPSInitChannelMethod.initFailed)
+                }else if status == 1 {
+                    self.sendMessage(AMPSInitChannelMethod.initializing)
+                }else{
+                    self.sendMessage(AMPSInitChannelMethod.alreadyInit)
+                }
             }
-        }
-    
+        )
     }
-    
+
+    func release() {
+        AMPSInitializationCoordinator.shared.cancel(requester: requester)
+    }
+
     func sendMessage(_ method: String, args: Any? = nil) {
-        AMPSEventManager.shared.sendToFlutter(method)
+        eventManager?.sendToFlutter(method)
     }
 }
 

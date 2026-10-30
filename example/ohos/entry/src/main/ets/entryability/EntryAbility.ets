@@ -2,6 +2,7 @@
 import { FlutterAbility, FlutterEngine } from '@ohos/flutter_ohos';
 import { GeneratedPluginRegistrant } from '../plugins/GeneratedPluginRegistrant';
 import { abilityAccessCtrl, common } from '@kit.AbilityKit';
+import { MultiEngineLabHost } from './MultiEngineLabHost';
 
 export default class EntryAbility extends FlutterAbility {
   private requestOAIDTrackingConsentPermissions(context: common.Context): void {
@@ -20,5 +21,11 @@ export default class EntryAbility extends FlutterAbility {
     //this.requestOAIDTrackingConsentPermissions(this.context)
     super.configureFlutterEngine(flutterEngine)
     GeneratedPluginRegistrant.registerWith(flutterEngine)
+    MultiEngineLabHost.attach('A', flutterEngine, this.context)
+  }
+
+  onDestroy(): void {
+    MultiEngineLabHost.detach('A')
+    super.onDestroy()
   }
 }

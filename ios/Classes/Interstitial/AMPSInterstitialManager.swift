@@ -8,8 +8,12 @@ import AMPSAdSDK
 
 class AMPSInterstitialManager: NSObject {
     
-    static let shared = AMPSInterstitialManager()
-    private override init() {super.init()}
+    private weak var eventManager: AMPSEventManager?
+
+    init(eventManager: AMPSEventManager) {
+        self.eventManager = eventManager
+        super.init()
+    }
     
     private var interstitialAds: [String: AMPSInterstitialAd] = [:]
     
@@ -56,6 +60,10 @@ class AMPSInterstitialManager: NSObject {
         }
     }
     
+    func release() {
+        for id in Array(interstitialAds.keys) { cleanupViewsAfterAdClosed(instanceId: id) }
+    }
+
     private func instanceId(from arguments: [String: Any]?) -> String? {
         return arguments?[ArgumentKeys.adInstanceId] as? String
     }
@@ -95,7 +103,7 @@ class AMPSInterstitialManager: NSObject {
             result(false)
             return
         }
-        guard let vc = getKeyWindow()?.rootViewController else {
+        guard let vc = eventManager?.viewController else {
             result(false)
             return
         }
@@ -114,7 +122,7 @@ class AMPSInterstitialManager: NSObject {
         if let args = args {
             for (k, v) in args { payload[k] = v }
         }
-        AMPSEventManager.shared.sendToFlutter(method, arg: payload)
+        eventManager?.sendToFlutter(method, arg: payload)
     }
 }
 
