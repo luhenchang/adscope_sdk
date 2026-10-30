@@ -17,7 +17,6 @@ import { AdOptionsModule } from '../common/AdOptionsModule';
 import { window } from '@kit.ArkUI';
 import { AdWrapperManager } from '../native/AdWrapperManager';
 import { AMPSEventManager } from '../common/AMPSEventManager';
-import { OhosPlatformUnifiedView } from '../native/OhosPlatformUnifiedView';
 
 class NativeCallbackPayload {
   adInstanceId: string = ''
@@ -29,17 +28,48 @@ class NativeCallbackPayload {
 }
 
 export class AMPSNativeManager {
-  private static instance: AMPSNativeManager;
   private static adIdCounter: number = 0
+  private engine: AMPSEventManager
+  private wrappers: AdWrapperManager = new AdWrapperManager()
+  private reloaders: Map<string, () => void> = new Map<string, () => void>()
   private mWindowStage?: window.WindowStage;
   private nativeAds: Map<string, AMPSNativeAd> = new Map<string, AMPSNativeAd>()
   private adIdsByInstance: Map<string, Array<string>> = new Map<string, Array<string>>()
 
-  public static getInstance(): AMPSNativeManager {
-    if (!AMPSNativeManager.instance) {
-      AMPSNativeManager.instance = new AMPSNativeManager();
+  constructor(engine: AMPSEventManager) {
+    this.engine = engine
+  }
+
+  getWrapper(adId: string): AMPSNativeAdWrapper | undefined {
+    return this.wrappers.getAd(adId)
+  }
+
+  registerReloader(adId: string, reloader: () => void): void {
+    if (adId) {
+      this.reloaders.set(adId, reloader)
     }
-    return AMPSNativeManager.instance;
+  }
+
+  unregisterReloader(adId: string): void {
+    if (adId) {
+      this.reloaders.delete(adId)
+    }
+  }
+
+  refreshReloader(adId: string): void {
+    this.reloaders.get(adId)?.()
+  }
+
+  release(): void {
+    const ids: Array<string> = []
+    this.nativeAds.forEach((_ad: AMPSNativeAd, id: string) => {
+      ids.push(id)
+    })
+    ids.forEach((id: string) => {
+      this.releaseNativeAd(id)
+    })
+    this.reloaders.clear()
+    this.wrappers.clearAllAds()
   }
 
   handleMethodCall(call: MethodCall, result: MethodResult) {
@@ -139,7 +169,7 @@ export class AMPSNativeManager {
     if (!targetAdId) {
       return undefined
     }
-    return AdWrapperManager.getInstance().getAd(targetAdId)
+    return this.wrappers.getAd(targetAdId)
   }
 
   private generateAdId(instanceId: string): string {
@@ -181,8 +211,8 @@ export class AMPSNativeManager {
   }
 
   private clearWrapperByAdId(adId: string): void {
-    AdWrapperManager.getInstance().getAd(adId)?.destroy()
-    AdWrapperManager.getInstance().removeAd(adId)
+    this.wrappers.getAd(adId)?.destroy()
+    this.wrappers.removeAd(adId)
   }
 
   private clearInstanceWrappers(instanceId: string): void {
@@ -248,7 +278,7 @@ export class AMPSNativeManager {
   }
 
   private resolveCarouselAdId(instanceId: string, previousAdId: string, wrapper: AMPSNativeAdWrapper): string | undefined {
-    if (previousAdId && AdWrapperManager.getInstance().getAd(previousAdId)) {
+    if (previousAdId && this.wrappers.getAd(previousAdId)) {
       return previousAdId
     }
     const adIds = this.adIdsByInstance.get(instanceId)
@@ -258,7 +288,7 @@ export class AMPSNativeManager {
     if (previousAdId) {
       for (let i = 0; i < adIds.length; i++) {
         const flutterAdId = adIds[i]
-        const oldWrapper = AdWrapperManager.getInstance().getAd(flutterAdId)
+        const oldWrapper = this.wrappers.getAd(flutterAdId)
         if (oldWrapper && oldWrapper.adId === previousAdId) {
           return flutterAdId
         }
@@ -319,13 +349,13 @@ export class AMPSNativeManager {
     if (!flutterAdId) {
       return
     }
-    const oldWrapper = AdWrapperManager.getInstance().getAd(flutterAdId)
+    const oldWrapper = this.wrappers.getAd(flutterAdId)
     if (oldWrapper === wrapper) {
       return
     }
-    AdWrapperManager.getInstance().addAd(flutterAdId, wrapper)
+    this.wrappers.addAd(flutterAdId, wrapper)
     this.bindWrapperCallbacks(instanceId, flutterAdId, wrapper, false)
-    OhosPlatformUnifiedView.refresh(flutterAdId)
+    this.refreshReloader(flutterAdId)
     this.sendPayload(
       AMPSNativeCallBackChannelMethod.onCarouselAdLoad,
       this.createAdPayload(instanceId, flutterAdId)
@@ -354,7 +384,7 @@ export class AMPSNativeManager {
   private createRenderCallback(instanceId: string, adId: string, notifyRenderSuccess: boolean = true): AMPSNativeRenderListener {
     return {
       renderSuccess: (adWrapper: AMPSNativeAdWrapper): void => {
-        AdWrapperManager.getInstance().addAd(adId, adWrapper)
+        this.wrappers.addAd(adId, adWrapper)
         adWrapper.interactCallBack = this.createInteractiveCallback(instanceId, adId)
         adWrapper.videoPlayCallBack = this.createVideoPlayCallback(instanceId, adId)
         if (notifyRenderSuccess) {
@@ -375,7 +405,7 @@ export class AMPSNativeManager {
         adItems.forEach((item: AMPSNativeAdWrapper) => {
           const adId = this.generateAdId(instanceId)
           adIdList.push(adId)
-          AdWrapperManager.getInstance().addAd(adId, item)
+          this.wrappers.addAd(adId, item)
           this.bindWrapperCallbacks(instanceId, adId, item, true)
           item.renderAd()
         })
@@ -400,7 +430,7 @@ export class AMPSNativeManager {
         return
       }
       const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(args)
-      const context = AMPSEventManager.getInstance().getContext()
+      const context = this.engine.getContext()
       this.mWindowStage = context?.windowStage
       if (!this.mWindowStage) {
         result.error('LOAD_FAILED', 'WindowStage未初始化', undefined)
@@ -432,7 +462,7 @@ export class AMPSNativeManager {
   }
 
   private sendPayload(method: string, payload: NativeCallbackPayload): void {
-    AMPSEventManager.getInstance().sendMessageToFlutter(method, payload as ESObject)
+    this.engine.sendMessageToFlutter(method, payload as ESObject)
   }
 }
 

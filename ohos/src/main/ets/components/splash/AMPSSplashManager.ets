@@ -32,18 +32,29 @@ class SplashShowAdOptions {
 }
 
 export class AMPSSplashManager {
-  private static instance: AMPSSplashManager;
+  static showing?: AMPSSplashManager
+  private engine: AMPSEventManager
   private mWindowStage?: window.WindowStage;
   private mWindow?: window.Window;
   private splashAds: Map<string, AMPSSplashAd> = new Map<string, AMPSSplashAd>();
   private splashBottomModules: Map<string, SplashBottomModule> = new Map<string, SplashBottomModule>();
   private currentShowingInstanceId?: string;
 
-  public static getInstance(): AMPSSplashManager {
-    if (!AMPSSplashManager.instance) {
-      AMPSSplashManager.instance = new AMPSSplashManager();
+  constructor(engine: AMPSEventManager) {
+    this.engine = engine
+  }
+
+  release(): void {
+    const ids: Array<string> = []
+    this.splashAds.forEach((_ad: AMPSSplashAd, id: string) => {
+      ids.push(id)
+    })
+    ids.forEach((id: string) => {
+      this.releaseSplashAd(id)
+    })
+    if (AMPSSplashManager.showing === this) {
+      AMPSSplashManager.showing = undefined
     }
-    return AMPSSplashManager.instance;
   }
 
   getSplashAd(instanceId?: string): AMPSSplashAd | undefined {
@@ -100,6 +111,9 @@ export class AMPSSplashManager {
     this.splashBottomModules.delete(instanceId)
     if (this.currentShowingInstanceId === instanceId) {
       this.currentShowingInstanceId = undefined
+      if (AMPSSplashManager.showing === this) {
+        AMPSSplashManager.showing = undefined
+      }
     }
   }
 
@@ -257,7 +271,7 @@ export class AMPSSplashManager {
 
       const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(args);
       adOption.adCount = 1
-      let context = AMPSEventManager.getInstance().getContext()
+      let context = this.engine.getContext()
       this.mWindowStage = context?.windowStage;
       if (this.mWindowStage) {
         this.mWindow = this.mWindowStage.getMainWindowSync();
@@ -287,10 +301,11 @@ export class AMPSSplashManager {
   private handleSplashShowAd(instanceId: string, args: Map<string, Object> | undefined, result: MethodResult): void {
     try {
       const splashAd = this.splashAds.get(instanceId)
-      const context = AMPSEventManager.getInstance().getContext()
+      const context = this.engine.getContext()
       const windowStage = context?.windowStage ?? this.mWindowStage
       if (splashAd && windowStage) {
         this.currentShowingInstanceId = instanceId
+        AMPSSplashManager.showing = this
         // 兼容旧调用；新接口的底部配置已在创建广告时按实例保存。
         if (args?.has(SPLASH_BOTTOM) || args?.get('type') === 'parent') {
           const splashBottomModule = this.resolveBottomModule(args)
@@ -312,7 +327,7 @@ export class AMPSSplashManager {
   }
 
   private sendPayload(method: string, payload: SplashCallbackPayload): void {
-    AMPSEventManager.getInstance().sendMessageToFlutter(method, payload as ESObject)
+    this.engine.sendMessageToFlutter(method, payload as ESObject)
   }
 
   private sendMessage(instanceId: string, method: string): void {
@@ -322,9 +337,9 @@ export class AMPSSplashManager {
 
 @Builder
 export function SplashBottomBuilder() {
-  if (AMPSSplashManager.getInstance().getCurrentSplashBottomModule()?.initialized) {
+  if (AMPSSplashManager.showing?.getCurrentSplashBottomModule()?.initialized) {
     Stack() {
-      ForEach(AMPSSplashManager.getInstance().getCurrentSplashBottomModule()?.textChildrens ?? [], (item: SplashBottomTextChild) => {
+      ForEach(AMPSSplashManager.showing?.getCurrentSplashBottomModule()?.textChildrens ?? [], (item: SplashBottomTextChild) => {
         Text(item?.text)
           .fontColor(item?.color)
           .fontSize(item?.fontSize)
@@ -333,12 +348,12 @@ export function SplashBottomBuilder() {
             y: item?.y
           })
       })
-      ForEach(AMPSSplashManager.getInstance().getCurrentSplashBottomModule()?.imgChildrens ?? [], (imgItem: SplashBottomImageChild) => {
+      ForEach(AMPSSplashManager.showing?.getCurrentSplashBottomModule()?.imgChildrens ?? [], (imgItem: SplashBottomImageChild) => {
         SplashBottomImageComponent({ imgItem: imgItem })
       })
     }
-    .backgroundColor(AMPSSplashManager.getInstance().getCurrentSplashBottomModule()?.backgroundColor)
-    .height(AMPSSplashManager.getInstance().getCurrentSplashBottomModule()?.height)
+    .backgroundColor(AMPSSplashManager.showing?.getCurrentSplashBottomModule()?.backgroundColor)
+    .height(AMPSSplashManager.showing?.getCurrentSplashBottomModule()?.height)
     .width('100%')
     .alignContent(Alignment.TopStart)
   }

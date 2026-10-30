@@ -1,9 +1,7 @@
-import { Any } from '@ohos/flutter_ohos';
 import { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformView';
 import { AMPSBuildNativeView, AMPSNativeAdWrapper } from 'xyz.adscope.amps';
-import { AMPSEventManager } from '../common/AMPSEventManager';
 import { AMPSNativeCallBackChannelMethod } from '../common/common';
-import { AdWrapperManager } from '../native/AdWrapperManager';
+import { OhosPlatformNativeView } from './OhosPlatformNativeView';
 
 class NativeSizeUpdatePayload {
   adInstanceId: string = ''
@@ -21,16 +19,18 @@ export struct AMPSNativeAdComponent {
   @State closeAd: boolean = false
 
   aboutToAppear(): void {
-    this.wrapper = AdWrapperManager.getInstance().getAd(this.adId)
+    const view = this.params.platformView as OhosPlatformNativeView
+    this.wrapper = view.engine.native.getWrapper(this.adId)
   }
 
   private sendSizeUpdate(width: number, height: number): void {
+    const view = this.params.platformView as OhosPlatformNativeView
     const payload = new NativeSizeUpdatePayload()
     payload.adInstanceId = this.instanceId
     payload.adId = this.adId
     payload.width = width
     payload.height = height
-    AMPSEventManager.getInstance().sendMessageToFlutter(
+    view.engine.sendMessageToFlutter(
       AMPSNativeCallBackChannelMethod.nativeSizeUpdate,
       payload as ESObject
     )

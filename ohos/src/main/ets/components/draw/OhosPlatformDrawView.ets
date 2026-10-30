@@ -1,14 +1,17 @@
 import PlatformView, { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformView';
 import { AD_ID, AD_INSTANCE_ID } from '../common/common';
 import { AMPSDrawComponent } from './AMPSDrawComponent';
+import { AMPSEventManager } from '../common/AMPSEventManager';
 
 @Observed
 export class OhosPlatformDrawView extends PlatformView {
   adId: string = ''
   instanceId: string = ''
+  engine: AMPSEventManager
 
-  constructor(args: ESObject) {
+  constructor(args: ESObject, engine: AMPSEventManager) {
     super();
+    this.engine = engine
     this.adId = (args.get(AD_ID) as string | undefined) ?? ''
     this.instanceId = (args.get(AD_INSTANCE_ID) as string | undefined) ?? ''
   }

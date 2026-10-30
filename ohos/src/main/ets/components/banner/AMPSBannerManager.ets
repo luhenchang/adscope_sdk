@@ -12,19 +12,23 @@ class BannerCallbackPayload {
 }
 
 export class AMPSBannerManager {
-  private static instance?: AMPSBannerManager
+  private engine: AMPSEventManager
   private bannerAds: Map<string, AMPSBannerAd> = new Map<string, AMPSBannerAd>()
   private bannerAdItems: Map<string, AMPSBannerAdWrapper> = new Map<string, AMPSBannerAdWrapper>()
   private mWindowStage?: window.WindowStage
 
-  private constructor() {
+  constructor(engine: AMPSEventManager) {
+    this.engine = engine
   }
 
-  static getInstance() {
-    if (!AMPSBannerManager.instance) {
-      AMPSBannerManager.instance = new AMPSBannerManager()
-    }
-    return AMPSBannerManager.instance!
+  release(): void {
+    const ids: Array<string> = []
+    this.bannerAds.forEach((_ad: AMPSBannerAd, id: string) => {
+      ids.push(id)
+    })
+    ids.forEach((id: string) => {
+      this.releaseBanner(id)
+    })
   }
 
   getBannerAdItem(instanceId: string): AMPSBannerAdWrapper | undefined {
@@ -139,7 +143,7 @@ export class AMPSBannerManager {
         return
       }
       const adOption: ampsAd.AdOptions = AdOptionsModule.getAdOptionFromMap(args)
-      const context = AMPSEventManager.getInstance().getContext()
+      const context = this.engine.getContext()
       this.mWindowStage = context?.windowStage
       if (!this.mWindowStage) {
         result.error('LOAD_FAILED', 'WindowStage未初始化', undefined)
@@ -278,7 +282,7 @@ export class AMPSBannerManager {
   }
 
   private sendPayload(method: string, payload: BannerCallbackPayload): void {
-    AMPSEventManager.getInstance().sendMessageToFlutter(method, payload as ESObject)
+    this.engine.sendMessageToFlutter(method, payload as ESObject)
   }
 
   private sendMessage(instanceId: string, method: string): void {

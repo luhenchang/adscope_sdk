@@ -1,18 +1,26 @@
 import { globalSplashBottomBuilder, OhosPlatformSplashView } from './OhosPlatformSplashView';
 import { AMPSBuildSplashView, AMPSSplashAd } from 'xyz.adscope.amps';
 import { common } from '@kit.AbilityKit';
-import { AMPSSplashManager } from './AMPSSplashManager';
 
 @Component
 struct AMPSSplashComponent {
-
+  platformView?: OhosPlatformSplashView = undefined
   splashAd?: AMPSSplashAd
 
   aboutToAppear(): void {
-    this.splashAd = AMPSSplashManager.getInstance().getSplashAd(OhosPlatformSplashView.splashInstanceId)
+    const view = this.platformView
+    if (!view) {
+      return
+    }
+    const instanceId = view.instanceId.length > 0 ? view.instanceId : undefined
+    this.splashAd = view.engine.splash.getSplashAd(instanceId)
   }
 
   build() {
+    const view = this.platformView
+    if (view) {
+      OhosPlatformSplashView.activeBottom = view.splashBottomModule
+    }
     if (this.splashAd?.isReadyAd() && this.splashAd.isSupportViewBuilder()) {
       Column() {
         AMPSBuildSplashView(

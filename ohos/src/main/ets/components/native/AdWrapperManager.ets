@@ -3,24 +3,10 @@ import {
 } from 'xyz.adscope.amps';
 
 export class AdWrapperManager {
-  // 静态私有实例，用于实现单例模式
-  private static instance: AdWrapperManager;
-
-  // 私有 Map，用于存储广告实例。
-  // 键为 adId，值为 AMPSNativeAdWrapper 实例
   private adMap: Map<string, AMPSNativeAdWrapper>;
 
-  // 私有构造函数，防止外部直接实例化
-  private constructor() {
+  constructor() {
     this.adMap = new Map<string, AMPSNativeAdWrapper>();
-  }
-
-  // 公共静态方法，用于获取单例实例
-  public static getInstance(): AdWrapperManager {
-    if (!AdWrapperManager.instance) {
-      AdWrapperManager.instance = new AdWrapperManager();
-    }
-    return AdWrapperManager.instance;
   }
 
   // --- 业务方法 ---
