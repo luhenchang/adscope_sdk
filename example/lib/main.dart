@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:adscope_sdk/amps_sdk_export.dart';
+import 'package:adscope_sdk_example/multi_engine_lab_page.dart';
 import 'package:adscope_sdk_example/reward_video_page.dart';
 import 'package:adscope_sdk_example/splash_widget_page.dart';
 import 'package:adscope_sdk_example/union_download_app_info_page.dart';
@@ -21,6 +24,11 @@ import 'widgets/button_widget.dart';
 void main() {
   // 插件初始化前建议调用
   WidgetsFlutterBinding.ensureInitialized();
+  final route = PlatformDispatcher.instance.defaultRouteName;
+  if (route == multiEngineLabRoute || route.endsWith(multiEngineLabRoute)) {
+    runApp(const MultiEngineLabApp(engine: 'B'));
+    return;
+  }
   runApp(const MyApp());
 }
 
@@ -52,6 +60,7 @@ class MyApp extends StatelessWidget {
       'RewardVideoPage':(context)=> const RewardVideoPage(title: '激励视频页面'),
       'BannerPage':(context)=> const BannerWidgetPage(title: 'Banner页面'),
       'DrawPage':(context)=> const DrawPage(title: 'Draw页面'),
+      'MultiEngineLabPage': (context) => const MultiEngineLabPage(engine: 'A'),
       'UnionDownloadAppInfoPage': (context) => const UnionDownloadAppInfoPage()
     };
   }
@@ -84,6 +93,7 @@ class _SplashPageState extends State<SplashPage> {
     {'text': '点击跳转激励视频页面', 'route': 'RewardVideoPage'},
     {'text': '点击跳转Banner页面', 'route': 'BannerPage'},
     {'text': '点击跳转Draw页面', 'route': 'DrawPage'},
+    {'text': '多引擎验证', 'route': 'MultiEngineLabPage'},
   ];
 
   @override
