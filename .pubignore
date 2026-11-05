@@ -1,3 +1,7 @@
+# 排除插件根目录的构建和工具缓存
+/build/
+/.dart_tool/
+
 # 排除 example 的 build 产物和 SDK 库文件（这些体积巨大且用户不需要）
 example/build/
 example/.dart_tool/

@@ -52,6 +52,8 @@ class _SplashWidgetState extends State<SplashWidget> {
     return view;
   }
 
+  // 保留供 HarmonyOS 平台视图接入，当前平台分支未启用。
+  // ignore: unused_element
   void _onPlatformViewCreated(int id) {
     registerChannel();
   }

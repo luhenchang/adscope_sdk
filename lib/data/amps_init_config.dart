@@ -229,6 +229,8 @@ class AMPSCustomControllerParam {
   final bool? isCanUsePhoneState;
 
   /// 透传OAID
+  // 保留现有公开参数名，兼容已有接入代码。
+  // ignore: non_constant_identifier_names
   final String? OAID;
 
   /// 是否允许使用个性化推荐
@@ -270,6 +272,7 @@ class AMPSCustomControllerParam {
 
   AMPSCustomControllerParam({
     this.isCanUsePhoneState,
+    // ignore: non_constant_identifier_names
     this.OAID,
     this.isSupportPersonalized,
     this.getUnderageTag,

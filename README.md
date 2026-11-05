@@ -79,7 +79,7 @@ samples, guidance on mobile development, and a full API reference.
 
 ## 穿山甲商城（Android / iOS）
 
-完整说明见 [Flutter 商城接入文档](docs/flutter-mall-integration.md)，包含五种方式、配置、参数、生命周期与测试广告位。
+完整说明见 [Flutter 商城接入文档](doc/flutter-mall-integration.md)，包含五种方式、配置、参数、生命周期与测试广告位。
 
 商城金刚位直接复用现有插屏、激励视频广告，入口由业务方开发。
 商城激励任务通过创建激励视频时的统一配置传入：
@@ -165,7 +165,7 @@ await mall.load();
   原始事件由 `onEvent` 透传，
   当前 iOS 的 `SendFeedReward` 和 Android 7.8.1.4 的 `AD_EVENT_FEED_REWARD` 均为 `2`，
   Flutter 使用 `code == AMPSMallEventCode.feedReward` 验证浏览任务奖励事件，其他事件不作为奖励成功。实际金币入账由业务处理。
-  完整验证步骤见 [商城接入文档](docs/flutter-mall-integration.md#验证浏览金币任务的奖励事件)。
+  完整验证步骤见 [商城接入文档](doc/flutter-mall-integration.md#验证浏览金币任务的奖励事件)。
 - 示例首页的「商城测试入口」进入二级页，提供商城激励、金刚位插屏、商城频道、
   高商词多商品、高商词单商品五个测试入口。
 - 频道和搜索结果页使用同一个嵌入接口，后台广告位及 query 决定内容；频道任务参数需开通对应能力。
