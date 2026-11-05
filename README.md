@@ -79,6 +79,8 @@ samples, guidance on mobile development, and a full API reference.
 
 ## 穿山甲商城（Android / iOS）
 
+Flutter 插件从 `adscope_sdk 0.2.9` 开始支持商城功能，请使用 `0.2.9` 及以上版本。
+
 完整说明见 [Flutter 商城接入文档](doc/flutter-mall-integration.md)，包含五种方式、配置、参数、生命周期与测试广告位。
 
 商城金刚位直接复用现有插屏、激励视频广告，入口由业务方开发。

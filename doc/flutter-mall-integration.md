@@ -2,7 +2,9 @@
 
 更新日期：2026-11-05
 
-适用平台：Android、iOS；适用代码：本仓库当前商城实现。
+适用平台：Android、iOS。
+
+**Flutter 插件从 `adscope_sdk 0.2.9` 版本开始支持本文介绍的商城功能，请使用 `0.2.9` 及以上版本。**
 
 本文将[钉钉《穿山甲商城页设计文档》](https://alidocs.dingtalk.com/i/nodes/Qnp9zOoBVBLbxLEAHe7ra3LB81DK0g6l)中的金刚位、激励任务接入方式转换为 Flutter 用法，并补充当前插件提供的商城频道、高商词多商品和单商品能力。后面三种方式依据当前插件与原生 SDK 接口整理，不代表钉钉原文包含这些章节。
 
@@ -19,6 +21,17 @@
 多商品结果页由 SDK 商城视图展示。单商品走普通自渲染布局，两者应使用各自广告位。
 
 ## 2. SDK 和工程准备
+
+### Flutter 插件版本
+
+在宿主项目的 `pubspec.yaml` 中添加：
+
+```yaml
+dependencies:
+  adscope_sdk: ^0.2.9
+```
+
+执行 `flutter pub get` 安装依赖。除 Flutter 插件版本外，还需配置下文列出的配套原生 SDK 和 GroMore 适配器。
 
 ### Android
 
