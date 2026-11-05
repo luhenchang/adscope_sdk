@@ -54,12 +54,15 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
   bool couldBack = true;
   bool _bLoaded = false;
   bool _pendingShowB = false;
+  bool _mallRewardEnabled = false;
 
   RewardVideoCallBack _callbackFor(String label) {
     return RewardVideoCallBack(
       onLoadSuccess: () async {
         final ad = _rewardAds[label];
-        ad?.setExtraDataMap(<String, String>{'adn_amps': '{"position":2}'});
+        if (ad?.config.mallReward == null) {
+          ad?.setExtraDataMap(<String, String>{'adn_amps': '{"position":2}'});
+        }
         debugPrint('[$label] reward onLoadSuccess id=${ad?.instanceId}');
         final seatId = await ad?.getSeatId();
         debugPrint('[$label] reward seatId=$seatId');
@@ -110,14 +113,22 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
 
   AdOptions _buildOptions() {
     const data = '{"position":1}';
+    final mallReward = _mallRewardEnabled
+        ? const AMPSGMMallRewardConfig(gold: '20', duration: '10')
+        : null;
     if (Platform.isAndroid) {
       return AdOptions(
         spaceId: rewardVideoSpaceId,
         extraDataMap: <String, String>{'adn_amps': data},
+        mallReward: mallReward,
       );
     }
     if (Platform.isIOS) {
-      return AdOptions(spaceId: rewardVideoSpaceId, extra: data);
+      return AdOptions(
+        spaceId: rewardVideoSpaceId,
+        extra: data,
+        mallReward: mallReward,
+      );
     }
     return AdOptions(spaceId: rewardVideoSpaceId);
   }
@@ -166,6 +177,14 @@ class _RewardVideoPageState extends State<RewardVideoPage> {
             Column(
               children: [
                 const SizedBox(height: 100, width: 0),
+                if (Platform.isAndroid || Platform.isIOS)
+                  SwitchListTile(
+                    title: const Text('穿山甲商城任务'),
+                    subtitle: const Text('金币 20，浏览时长 10 秒；对新建实例生效'),
+                    value: _mallRewardEnabled,
+                    onChanged: (value) =>
+                        setState(() => _mallRewardEnabled = value),
+                  ),
                 ButtonWidget(
                   buttonText: '同时创建A、B（A关闭后展示B）',
                   callBack: _startSequentialTest,

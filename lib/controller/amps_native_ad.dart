@@ -5,12 +5,19 @@ import '../adscope_sdk.dart';
 import '../common.dart';
 import '../data/amps_native_interactive_listener.dart';
 import '../data/amps_ad.dart';
+import '../data/amps_mall_parameters.dart';
 import '../data/unified_ad_download_app_info.dart';
 import '../data/unified_pattern.dart';
 import 'native_callback_router.dart';
 
 ///原生广告类
 class AMPSNativeAd {
+  /// 商城专用模式，建议通过 AMPSMallAd 使用。
+  final bool mallMode;
+  final void Function(String adId, int code, Map<String, dynamic>? info)?
+      onMallEvent;
+  late final Future<PlatformException?> _creation;
+  bool _isDestroyed = false;
   static int _instanceCounter = 0;
 
   /// 实例唯一标识，与原生 [AMPSAdInstanceKey.adInstanceId] 对应。
@@ -37,12 +44,29 @@ class AMPSNativeAd {
     this.mCallBack,
     this.mRenderCallBack,
     String? instanceId,
+    this.mallMode = false,
+    this.onMallEvent,
   }) : instanceId = instanceId ?? _generateInstanceId() {
+    if (mallMode && nativeType != NativeType.unified) {
+      throw ArgumentError('Mall mode requires unified native ads');
+    }
+    final userData =
+        mallMode || config.mallQuery != null || config.mallReward != null
+            ? mallUserData(config)
+            : null;
+    final arguments = _wrapArgs({
+      ...config.toMap(nativeType: nativeType),
+      if (mallMode) 'mallMode': true,
+      if (userData != null) 'gmMallUserData': userData,
+    });
     NativeCallbackRouter.instance.register(this.instanceId, _handleCall);
-    AdscopeSdk.invokeMethod(
+    _creation = AdscopeSdk.invokeMethod(
       AMPSAdSdkMethodNames.nativeCreate,
-      _wrapArgs(config.toMap(nativeType: nativeType)),
-    );
+      arguments,
+    ).then<PlatformException?>((_) => null,
+        onError: (Object error) => error is PlatformException
+            ? error
+            : PlatformException(code: 'CREATE_FAILED', message: '$error'));
   }
 
   static String _generateInstanceId() {
@@ -76,6 +100,10 @@ class AMPSNativeAd {
     final args = call.arguments;
     final mapArgs = args is Map ? args : const <dynamic, dynamic>{};
     switch (call.method) {
+      case AMPSNativeCallBackChannelMethod.onMallEvent:
+        onMallEvent?.call(mapArgs['adId'] as String, mapArgs['code'] as int,
+            (mapArgs['info'] as Map?)?.cast<String, dynamic>());
+        break;
       case AMPSNativeCallBackChannelMethod.loadOk:
         final list = (mapArgs["adIds"] as List?)?.cast<String>();
         if (list != null) {
@@ -89,7 +117,8 @@ class AMPSNativeAd {
         );
         break;
       case AMPSNativeCallBackChannelMethod.renderSuccess:
-        mRenderCallBack?.renderSuccess?.call(mapArgs[AMPSSdkCallBackErrorKey.adId]);
+        mRenderCallBack?.renderSuccess
+            ?.call(mapArgs[AMPSSdkCallBackErrorKey.adId]);
         break;
       case AMPSNativeCallBackChannelMethod.renderFailed:
         mRenderCallBack?.renderFailed?.call(
@@ -99,7 +128,8 @@ class AMPSNativeAd {
         );
         break;
       case AMPSNativeCallBackChannelMethod.onCarouselAdLoad:
-        mRenderCallBack?.onCarouselAdLoad?.call(mapArgs[AMPSSdkCallBackErrorKey.adId]);
+        mRenderCallBack?.onCarouselAdLoad
+            ?.call(mapArgs[AMPSSdkCallBackErrorKey.adId]);
         break;
       case AMPSNativeCallBackChannelMethod.onAdShow:
         {
@@ -196,10 +226,10 @@ class AMPSNativeAd {
         {
           final adId = mapArgs[AMPSSdkCallBackErrorKey.adId];
           mVideoPlayerCallBackMap[adId]?.onVideoPlayError?.call(
-            adId,
-            mapArgs[AMPSSdkCallBackErrorKey.code],
-            mapArgs[AMPSSdkCallBackErrorKey.extra],
-          );
+                adId,
+                mapArgs[AMPSSdkCallBackErrorKey.code],
+                mapArgs[AMPSSdkCallBackErrorKey.extra],
+              );
         }
         break;
       case DownLoadCallBackChannelMethod.onInstalled:
@@ -230,7 +260,9 @@ class AMPSNativeAd {
         {
           final adId = mapArgs[AMPSSdkCallBackErrorKey.adId] as String? ?? '';
           final position = mapArgs["position"] ?? 0;
-          mDownloadListenerMap[adId]?.onDownloadProgressUpdate?.call(position, adId);
+          mDownloadListenerMap[adId]
+              ?.onDownloadProgressUpdate
+              ?.call(position, adId);
         }
         break;
       case DownLoadCallBackChannelMethod.onDownloadPaused:
@@ -246,10 +278,13 @@ class AMPSNativeAd {
           double width = 0;
           double height = 0;
           if (param.containsKey("width")) {
-            width = param["width"] is num ? (param["width"] as num).toDouble() : 0;
+            width =
+                param["width"] is num ? (param["width"] as num).toDouble() : 0;
           }
           if (param.containsKey("height")) {
-            height = param["height"] is num ? (param["height"] as num).toDouble() : 0;
+            height = param["height"] is num
+                ? (param["height"] as num).toDouble()
+                : 0;
           }
           width = width >= 0 ? width : 0;
           height = height >= 0 ? height : 0;
@@ -265,8 +300,16 @@ class AMPSNativeAd {
     }
   }
 
-  void load() async {
-    AdscopeSdk.invokeMethod(
+  Future<void> load() async {
+    final error = await _creation;
+    if (_isDestroyed) return;
+    if (error != null) {
+      final callback = mCallBack?.loadFail;
+      if (callback == null) throw error;
+      callback(-1, '${error.code}: ${error.message}');
+      return;
+    }
+    await AdscopeSdk.invokeMethod(
       AMPSAdSdkMethodNames.nativeLoad,
       _typedArgs(),
     );
@@ -279,7 +322,10 @@ class AMPSNativeAd {
       _argsWithAdId(adId),
     );
     if (images is List) {
-      return images.map((item) => item?.toString() ?? '').where((url) => url.isNotEmpty).toList();
+      return images
+          .map((item) => item?.toString() ?? '')
+          .where((url) => url.isNotEmpty)
+          .toList();
     }
     return const [];
   }
@@ -311,6 +357,15 @@ class AMPSNativeAd {
   }
 
   ///获取信息
+  /// 单条自渲染广告的商品扩展字段（价格、商品等），不创建商城视图。
+  /// 与 getMediaExtraInfo 的整个请求级别信息不同，必须传加载返回的 adId。
+  Future<Map<String, dynamic>> getUnifiedExtras(String adId) async {
+    if (_isDestroyed) return {};
+    final value = await AdscopeSdk.invokeMethod(
+        AMPSAdSdkMethodNames.nativeGetUnifiedExtras, _argsWithAdId(adId));
+    return (value as Map?)?.cast<String, dynamic>() ?? {};
+  }
+
   Future<dynamic> getMediaExtraInfo() async {
     try {
       final mediaExtraInfo = await AdscopeSdk.invokeMethod(
@@ -325,6 +380,8 @@ class AMPSNativeAd {
 
   ///销毁
   Future<void> destroy() async {
+    if (_isDestroyed) return;
+    _isDestroyed = true;
     NativeCallbackRouter.instance.unregister(instanceId);
     return await AdscopeSdk.invokeMethod(
       AMPSAdSdkMethodNames.nativeDestroy,
@@ -386,13 +443,15 @@ class AMPSNativeAd {
     }
   }
 
-  void setDownloadListener(String adId, AMPSUnifiedDownloadListener? downloadListener) {
+  void setDownloadListener(
+      String adId, AMPSUnifiedDownloadListener? downloadListener) {
     if (downloadListener != null) {
       mDownloadListenerMap[adId] = downloadListener;
     }
   }
 
-  void setInteractiveListener(String adId, AmpsNativeInteractiveListener? listener) {
+  void setInteractiveListener(
+      String adId, AmpsNativeInteractiveListener? listener) {
     if (listener != null) {
       mInteractiveCallBackMap[adId] = listener;
     }
@@ -404,7 +463,8 @@ class AMPSNativeAd {
     }
   }
 
-  void setNegativeFeedbackListener(String adId, AMPSNegativeFeedbackListener? listener) {
+  void setNegativeFeedbackListener(
+      String adId, AMPSNegativeFeedbackListener? listener) {
     if (listener != null) {
       mNegativeFeedbackListenerMap[adId] = listener;
     }

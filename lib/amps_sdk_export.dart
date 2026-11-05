@@ -1,5 +1,7 @@
 library;
+
 export 'package:adscope_sdk/data/amps_ad.dart';
+export 'package:adscope_sdk/data/amps_gm_mall_reward_config.dart';
 export 'package:adscope_sdk/data/amps_init_config.dart';
 export 'package:adscope_sdk/data/amps_sdk_init_status.dart';
 export 'package:adscope_sdk/data/amps_native_interactive_listener.dart';
@@ -21,6 +23,8 @@ export 'package:adscope_sdk/draw_widget.dart';
 
 export 'package:adscope_sdk/controller/amps_interstitial_ad.dart';
 export 'package:adscope_sdk/controller/amps_native_ad.dart';
+export 'package:adscope_sdk/controller/amps_mall_ad.dart';
+export 'package:adscope_sdk/mall_widget.dart';
 export 'package:adscope_sdk/controller/amps_splash_ad.dart';
 export 'package:adscope_sdk/controller/amps_ad_sdk.dart';
 export 'package:adscope_sdk/controller/amps_reward_video_ad.dart';

@@ -12,6 +12,7 @@ object AdOptionKeys {
     const val KEY_TIMEOUT_INTERVAL = "timeoutInterval"
     const val KEY_EXPRESS_SIZE = "expressSize"
     const val KEY_EXTRA_DATA_MAP = "extraDataMap"
+    const val KEY_GM_MALL_REWARD_USER_DATA = "gmMallRewardUserData"
     const val KEY_USER_ID = "userId"
     const val KEY_EXTRA = "extra"
     const val KEY_CUSTOM_EXTRA_PARAMETER = "customExtraParameters"

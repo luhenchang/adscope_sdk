@@ -20,6 +20,8 @@ class AMPSPlatformViewManager(private val engine: AMPSEventManager) {
     fun init(binding: FlutterPluginBinding) {
         val platformViewRegistry = binding.platformViewRegistry
         val binaryMessenger = binding.binaryMessenger
+        platformViewRegistry.registerViewFactory("xyz.adscope.amps/mall_view_id",
+            xyz.adscope.adscope_sdk.view.MallFactory(engine))
 
         // 注册 Splash 视图工厂
         platformViewRegistry.registerViewFactory(

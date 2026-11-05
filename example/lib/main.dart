@@ -10,6 +10,11 @@ import 'banner_widget_page.dart';
 import 'data/common.dart';
 import 'data/init_data.dart';
 import 'draw_page.dart';
+import 'gm_mall_reward_page.dart';
+import 'gm_mall_test_page.dart';
+import 'gm_mall_page.dart';
+import 'gm_mall_product_page.dart';
+import 'gm_mall_entry_page.dart';
 import 'interstitial_page.dart';
 import 'interstitial_show_page.dart';
 import 'native_page.dart';
@@ -58,6 +63,12 @@ class MyApp extends StatelessWidget {
       'NativeUnifiedPage':(context)=> const NativeUnifiedPage(title: '原生自渲染页面'),
       'NativeUnifiedMultiPage':(context)=> const NativeUnifiedMultiPage(title: '自渲染8条Feed插入'),
       'RewardVideoPage':(context)=> const RewardVideoPage(title: '激励视频页面'),
+      'GMMallTestPage': (context) => const GMMallTestPage(),
+      'GMMallRewardPage': (context) => const GMMallRewardPage(),
+      'GMMallProductPage': (context) => const GMMallProductPage(),
+      'GMMallPage': (context) => const GMMallPage(),
+      'GMMallSearchPage': (context) => const GMMallPage(searchMode: true),
+      'GMMallEntryPage': (context) => const GMMallEntryPage(),
       'BannerPage':(context)=> const BannerWidgetPage(title: 'Banner页面'),
       'DrawPage':(context)=> const DrawPage(title: 'Draw页面'),
       'MultiEngineLabPage': (context) => const MultiEngineLabPage(engine: 'A'),
@@ -81,6 +92,7 @@ class _SplashPageState extends State<SplashPage> {
 
   // 1. 将重复的按钮配置数据化，方便维护
   final List<Map<String, String>> _menuConfig = [
+    {'text': '商城测试入口', 'route': 'GMMallTestPage'},
     {'text': '开屏show案例页面', 'route': 'SplashShowPage'},
     {'text': '开屏多分辨率验证', 'route': 'SplashScaleTestPage'},
     {'text': '开屏组件案例页面', 'route': 'SplashWidgetPage'},

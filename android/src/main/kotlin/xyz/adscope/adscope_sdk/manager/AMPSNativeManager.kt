@@ -31,6 +31,42 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Suppress("UNCHECKED_CAST")
 class AMPSNativeManager(private val engine: AMPSEventManager) {
+    internal val mallStore = AndroidMallStore()
+    private val mallTokens = ConcurrentHashMap<String, Any>()
+
+    internal fun mallFailed(instanceId: String, message: String) {
+        if (!engine.isReleased) sendMessage(instanceId, AMPSNativeCallBackChannelMethod.LOAD_FAIL,
+            mapOf(CODE to -1001, MESSAGE to message))
+    }
+
+    private fun bindMallItem(instanceId: String, adId: String, item: AMPSUnifiedNativeItem) {
+        fun current() = !engine.isReleased && mallStore.item(instanceId, adId) === item
+        engine.unifiedWrappers.addAdItem(adId, item)
+        item.setNativeAdInteractionListener { code, info ->
+            if (current()) sendMessage(instanceId, "Native_onMallEvent", mapOf(
+                AD_ID to adId, CODE to code, "info" to xyz.adscope.adscope_sdk.utils.flutterCodecValue(info)))
+        }
+        item.setNativeAdEventListener(object : AMPSUnifiedAdEventListener {
+            override fun onADExposed() {
+                if (!current()) return
+                sendMessage(instanceId, AMPSNativeCallBackChannelMethod.ON_AD_SHOW, mapOf(AD_ID to adId))
+                sendMessage(instanceId, AMPSNativeCallBackChannelMethod.ON_AD_EXPOSURE, mapOf(AD_ID to adId))
+            }
+            override fun onADClicked() {
+                if (current()) sendMessage(instanceId, AMPSNativeCallBackChannelMethod.ON_AD_CLICKED, mapOf(AD_ID to adId))
+            }
+            override fun onADExposeError(code: Int, message: String?) {
+                if (current()) mallFailed(instanceId, "[$code] $message")
+            }
+            override fun onCarouselAdLoad(newItem: AMPSUnifiedNativeItem?) {
+                if (!current() || newItem == null || newItem === item) return
+                unifiedIdMap(instanceId).remove(item)
+                unifiedIdMap(instanceId)[newItem] = adId
+                bindMallItem(instanceId, adId, newItem)
+                mallStore.replace(instanceId, adId, newItem)
+            }
+        })
+    }
     private val nativeAds = ConcurrentHashMap<String, AMPSNativeAd>()
     private val unifiedAds = ConcurrentHashMap<String, AMPSUnifiedNativeAd>()
 
@@ -122,9 +158,24 @@ class AMPSNativeManager(private val engine: AMPSEventManager) {
         }
     }
 
-    private fun buildUnifiedCallback(instanceId: String) = object : AMPSUnifiedNativeLoadEventListener() {
+    private fun buildUnifiedCallback(instanceId: String, mallToken: Any? = null) = object : AMPSUnifiedNativeLoadEventListener() {
         override fun onAmpsAdLoad(adItems: List<AMPSUnifiedNativeItem?>?) {
             if (engine.isReleased) return
+            if (mallToken != null && mallTokens[instanceId] !== mallToken) return
+            if (mallToken != null) {
+                mallStore.removeOwner(instanceId)
+                val idMap = unifiedIdMap(instanceId)
+                idMap.values.forEach { adDestroy(it) }
+                idMap.clear()
+                val item = adItems?.filterNotNull()?.firstOrNull()
+                if (item == null) { mallFailed(instanceId, "商城广告位未返回广告"); return }
+                val id = UUID.randomUUID().toString().replace("-", "")
+                idMap[item] = id
+                mallStore.put(instanceId, id, item)
+                bindMallItem(instanceId, id, item)
+                sendMessage(instanceId, AMPSNativeCallBackChannelMethod.LOAD_OK, mapOf("adIds" to listOf(id)))
+                return
+            }
             val idMap = unifiedIdMap(instanceId)
             idMap.clear()
             val adIdList = adItems?.filterNotNull()?.map { item ->
@@ -204,6 +255,7 @@ class AMPSNativeManager(private val engine: AMPSEventManager) {
 
         override fun onAmpsAdFailed(p0: AMPSError?) {
             if (engine.isReleased) return
+            if (mallToken != null && mallTokens[instanceId] !== mallToken) return
             sendMessage(
                 instanceId,
                 AMPSNativeCallBackChannelMethod.LOAD_FAIL,
@@ -376,6 +428,20 @@ class AMPSNativeManager(private val engine: AMPSEventManager) {
 
     fun handleMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
+            AMPSAdSdkMethodNames.NATIVE_GET_UNIFIED_EXTRAS -> {
+                val owner = instanceIdFrom(call)
+                val adId = argsMap(call)?.get(AD_ID) as? String
+                val item = unifiedAdIdMapByInstance[owner]?.entries?.firstOrNull { it.value == adId }?.key
+                result.success(xyz.adscope.adscope_sdk.utils.flutterCodecValue(item?.extras ?: emptyMap<String, Any>()))
+            }
+            AMPSAdSdkMethodNames.NATIVE_GET_MALL_INFO -> {
+                result.success(mallStore.info(instanceIdFrom(call) ?: "", argsMap(call)?.get(AD_ID) as? String ?: ""))
+            }
+            AMPSAdSdkMethodNames.NATIVE_SET_MALL_VISIBLE -> {
+                mallStore.setVisible(instanceIdFrom(call) ?: "", argsMap(call)?.get(AD_ID) as? String ?: "",
+                    argsMap(call)?.get("visible") as? Boolean ?: false)
+                result.success(null)
+            }
             AMPSAdSdkMethodNames.NATIVE_CREATE -> {
                 createAd(call, result)
             }
@@ -483,6 +549,8 @@ class AMPSNativeManager(private val engine: AMPSEventManager) {
             AMPSAdSdkMethodNames.NATIVE_DESTROY -> {
                 val instanceId = instanceIdFrom(call)
                 if (instanceId != null) {
+                    mallTokens.remove(instanceId)
+                    mallStore.removeOwner(instanceId)
                     if (nativeTypeFrom(call) == NativeType.NATIVE.value) {
                         nativeAdIdMapByInstance[instanceId]?.values?.forEach { adDestroy(it) }
                         nativeAdIdMapByInstance.remove(instanceId)
@@ -540,12 +608,19 @@ class AMPSNativeManager(private val engine: AMPSEventManager) {
             val nativeType = (adOptionsMap[NATIVE_TYPE] as? Int) ?: NativeType.NATIVE.value
             val adOption: AMPSRequestParameters =
                 AdOptionsModule.getNativeAdOptionFromMap(adOptionsMap, activity)
+            val mallToken = if (adOptionsMap["mallMode"] == true) Any() else null
+            adOption.extraDataMap = xyz.adscope.adscope_sdk.data.GMMallRewardParameters.merge(
+                adOption.extraDataMap, adOptionsMap["gmMallUserData"] as? String)
+            if (mallToken != null) {
+                adOption.adCount = 1
+                mallTokens[instanceId] = mallToken
+            }
             if (nativeType == NativeType.NATIVE.value) {
                 nativeAds[instanceId] =
                     AMPSNativeAd(activity as Context, adOption, buildNativeCallback(instanceId))
             } else {
                 unifiedAds[instanceId] =
-                    AMPSUnifiedNativeAd(activity as Context, adOption, buildUnifiedCallback(instanceId))
+                    AMPSUnifiedNativeAd(activity as Context, adOption, buildUnifiedCallback(instanceId, mallToken))
             }
             result.success(true)
         } catch (e: Exception) {
@@ -577,6 +652,8 @@ class AMPSNativeManager(private val engine: AMPSEventManager) {
     }
 
     fun release() {
+        mallTokens.clear()
+        mallStore.clear()
         nativeAds.values.toList().forEach { runCatching { it.destroy() } }
         nativeAds.clear()
         unifiedAds.values.toList().forEach { runCatching { it.destroy() } }

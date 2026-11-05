@@ -30,6 +30,7 @@ enum AMPSChannels {
 
 // 平台视图注册常量
 enum AMPSPlatformViewIds {
+    static let mallViewId = "xyz.adscope.amps/mall_view_id"
     private static let channelDomain = "xyz.adscope.amps"  // 若可访问可改为 AMPSChannels.channelDomain
     
     static let splashViewId = "\(channelDomain)/splash_view_id"
@@ -162,6 +163,9 @@ enum AMPSNativeCallBackChannelMethod {
 
 // 广告SDK方法名
 enum AMPSAdSdkMethodNames {
+    static let nativeGetUnifiedExtras = "AMPSNative_getUnifiedExtras"
+    static let nativeGetMallInfo = "AMPSNative_getMallInfo"
+    static let nativeSetMallVisible = "AMPSNative_setMallVisible"
     // AMPS广告SDK初始化方法名
     static let testMode = "testMode"
     static let sdk_init = "AMPSAdSdk_init"
@@ -261,6 +265,7 @@ enum AdOptionKeys{
     static let keyIpAddress = "ipAddress"
     static let keyCustomExtraParameters = "customExtraParameters"
     static let keyExtraDataMap = "extraDataMap"
+    static let keyGMMallRewardUserData = "gmMallRewardUserData"
     static let keyAdnAmps = "adn_amps"
 }
 
@@ -319,6 +324,9 @@ let interstitialMethodNames: Set<String> = [
 ]
 
 let nativeMethodNames: Set<String> = [
+    AMPSAdSdkMethodNames.nativeGetUnifiedExtras,
+    AMPSAdSdkMethodNames.nativeGetMallInfo,
+    AMPSAdSdkMethodNames.nativeSetMallVisible,
     AMPSAdSdkMethodNames.nativeCreate,
     AMPSAdSdkMethodNames.nativeLoad,
     AMPSAdSdkMethodNames.nativeShowAd,

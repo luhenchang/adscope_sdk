@@ -1,3 +1,14 @@
+## Unreleased
+- Android 真机联调增加 GroMore 单渠道打包开关；配套升级示例 ASNP/BZ/YT 依赖，修复旧 ASNP 引用已移除 common 接口的启动崩溃。
+- Android 编译包及示例升级核心/common 5.1.3.6，示例 GM/CSJ 5.1.7814.1、穿山甲 7.8.1.4。
+- Android/iOS 嵌入式商城统一接口，支持延迟挂载、显隐、商品扩展字段、原始事件和轮播清理。
+- `AdOptions.mallQuery` 支持商城搜索结果页与普通单商品自渲染；新增逐条 `getUnifiedExtras(adId)`。
+- 示例补充频道奖励参数与单商品页面；金刚位入口复用现有广告接口。
+
+- 新增 `AMPSGMMallRewardConfig` 和 `AdOptions.mallReward`，统一支持 Android / iOS 穿山甲商城激励任务。
+- 激励任务按字段合并商城参数，保留未覆盖的扩展项；修复 iOS 商城能力失败后同一实例无法重试的问题。
+- 新增商城二级测试入口与 Flutter 商城接入文档。
+
 ## 0.2.8
 插件提供多引擎支持
 

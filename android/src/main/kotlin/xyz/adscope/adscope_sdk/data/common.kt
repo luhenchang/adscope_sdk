@@ -159,6 +159,9 @@ object DownLoadCallBackChannelMethod {
 }
 
 object AMPSAdSdkMethodNames {
+    const val NATIVE_GET_UNIFIED_EXTRAS = "AMPSNative_getUnifiedExtras"
+    const val NATIVE_GET_MALL_INFO = "AMPSNative_getMallInfo"
+    const val NATIVE_SET_MALL_VISIBLE = "AMPSNative_setMallVisible"
     // Method name for initializing AMPS Ad SDK
     const val TEST_MODE = "testMode"
     const val INIT = "AMPSAdSdk_init"
@@ -306,6 +309,9 @@ val InterstitialMethodNames: Set<String> = setOf(
 )
 
 val NativeMethodNames: Set<String> = setOf(
+    AMPSAdSdkMethodNames.NATIVE_GET_UNIFIED_EXTRAS,
+    AMPSAdSdkMethodNames.NATIVE_GET_MALL_INFO,
+    AMPSAdSdkMethodNames.NATIVE_SET_MALL_VISIBLE,
     AMPSAdSdkMethodNames.NATIVE_CREATE,
     AMPSAdSdkMethodNames.NATIVE_LOAD,
     AMPSAdSdkMethodNames.NATIVE_SHOW_AD,

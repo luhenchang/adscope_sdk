@@ -15,7 +15,7 @@ A new Flutter plugin project.
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency  'AMPSAdSDK'
+  s.dependency 'AMPSAdSDK', '>= 5.1.3.8'
 
   s.platform = :ios, '11.0'
 

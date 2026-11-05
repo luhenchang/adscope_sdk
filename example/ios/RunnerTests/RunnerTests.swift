@@ -19,8 +19,8 @@ final class RunnerTests: XCTestCase {
     XCTAssertFalse(pluginA.events.splashManager === pluginB.events.splashManager)
     XCTAssertFalse(pluginA.events.interstitialManager === pluginB.events.interstitialManager)
     XCTAssertFalse(pluginA.events.rewardManager === pluginB.events.rewardManager)
-    XCTAssertEqual(a.factories.count, 4)
-    XCTAssertEqual(b.factories.count, 4)
+    XCTAssertEqual(a.factories.count, 5)
+    XCTAssertEqual(b.factories.count, 5)
     pluginA.detachFromEngine(for: a)
     pluginB.detachFromEngine(for: b)
   }

@@ -4,7 +4,7 @@ The normal example AppDelegate is unchanged. `AppDelegate.swift` in this folder 
 
 ## Simulator
 
-The native mediation SDK is used unchanged. Some optional channel SDKs have no arm64 Simulator slice; `ADSCOPE_SIMULATOR_TEST=1` selects the core SDK plus the ASNP adapter for this regression only. Default Podfile installation still includes all normal channels. Simulator ad inventory may return `200500` (no fill); that is a real load-failure callback, not a successful render.
+The native mediation SDK is used unchanged. Some optional channel SDKs have no arm64 Simulator slice; `ADSCOPE_GROMORE_ONLY=0 ADSCOPE_SIMULATOR_TEST=1` selects the core SDK plus the ASNP and GM adapters for this regression only. Default Podfile installation includes only GroMore for mall testing. Simulator ad inventory may return `200500` (no fill); that is a real load-failure callback, not a successful render.
 
 ```sh
 # From repository root; choose an installed simulator UDID as needed.

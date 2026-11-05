@@ -18,6 +18,7 @@ class AMPSPlatformViewRegistry {
         guard let binding = binding else {
             return
         }
+        binding.register(AMPSMallViewFactory(eventManager: eventManager), withId: AMPSPlatformViewIds.mallViewId)
         
         binding.register(AMPSNAtiveViewFactory(eventManager: eventManager), withId: AMPSPlatformViewIds.nativeViewId)
         

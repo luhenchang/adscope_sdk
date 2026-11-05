@@ -1,7 +1,7 @@
-
 import 'dart:ui';
 import '../common.dart';
 import '../widget/splash_bottom_widget.dart';
+import 'amps_gm_mall_reward_config.dart';
 
 ///广告加载入参参数
 class AdOptions {
@@ -15,9 +15,16 @@ class AdOptions {
   final SplashBottomWidget? splashBottomWidget;
   final String? userId;
   final String? extra;
-  final Map<String,dynamic>? extraDataMap;
-  final Map<String,dynamic>? customExtraMap;
+  final Map<String, dynamic>? extraDataMap;
+  final Map<String, dynamic>? customExtraMap;
   final String? ipAddress;
+
+  /// Android / iOS 自渲染请求的高商词；商城搜索页与单商品均使用此参数。
+  final String? mallQuery;
+
+  /// Android / iOS 激励视频或商城频道任务，创建实例时生效。
+  /// 商城专用参数优先于扩展 Map 中的同名参数。
+  final AMPSGMMallRewardConfig? mallReward;
 
   AdOptions({
     required this.spaceId,
@@ -32,12 +39,14 @@ class AdOptions {
     this.extra,
     this.extraDataMap,
     this.customExtraMap,
-    this.ipAddress
+    this.ipAddress,
+    this.mallReward,
+    this.mallQuery,
   });
 
   Map<dynamic, dynamic> toMap({NativeType? nativeType}) {
     final map = <dynamic, dynamic>{
-      'nativeType': nativeType?.value??0,
+      'nativeType': nativeType?.value ?? 0,
       'spaceId': spaceId,
       'apiKey': apiKey,
       'adCount': adCount,
@@ -51,6 +60,10 @@ class AdOptions {
       'customExtraParameters': customExtraMap,
       'ipAddress': ipAddress
     };
+    final mallUserData = mallReward?.toUserData();
+    if (mallUserData != null) {
+      map['gmMallRewardUserData'] = mallUserData;
+    }
     if (splashBottomWidget != null) {
       map[splashBottomView] = splashBottomWidget!.toMap();
     }
@@ -58,10 +71,10 @@ class AdOptions {
   }
 }
 
-
 typedef AdFailureCallback = void Function(int code, String message);
 typedef VideoPlayErrorCallback = void Function(int code, String message);
 typedef VideoSkipToEndCallback = void Function(int? playDurationMs);
+
 ///广告回调相关接口
 class AdCallBack {
   final VoidCallback? onLoadSuccess;
@@ -111,20 +124,19 @@ class RewardVideoCallBack {
   final VoidCallback? onAdReward;
   final AdFailureCallback? onServerRewardFailed;
 
-  const RewardVideoCallBack({
-    this.onLoadSuccess,
-    this.onAdCached,
-    this.onLoadFailure,
-    this.onAdShow,
-    this.onAdClicked,
-    this.onAdClosed,
-    this.onVideoPlayStart,
-    this.onVideoPlayEnd,
-    this.onVideoPlayError,
-    this.onVideoSkipToEnd,
-    this.onAdReward,
-    this.onServerRewardFailed
-  });
+  const RewardVideoCallBack(
+      {this.onLoadSuccess,
+      this.onAdCached,
+      this.onLoadFailure,
+      this.onAdShow,
+      this.onAdClicked,
+      this.onAdClosed,
+      this.onVideoPlayStart,
+      this.onVideoPlayEnd,
+      this.onVideoPlayError,
+      this.onVideoSkipToEnd,
+      this.onAdReward,
+      this.onServerRewardFailed});
 }
 
 class BannerCallBack {
@@ -140,7 +152,6 @@ class BannerCallBack {
   final VoidCallback? onVideoPlayEnd;
   final AdFailureCallback? onVideoPlayError;
 
-
   const BannerCallBack(
       {this.onLoadSuccess,
       this.onLoadFailure,
@@ -155,5 +166,4 @@ class BannerCallBack {
       this.onVideoResume});
 }
 
-
-typedef AdWidgetSizeCall = void Function(double width,double height);
+typedef AdWidgetSizeCall = void Function(double width, double height);

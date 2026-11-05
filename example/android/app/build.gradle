@@ -62,7 +62,12 @@ android {
     }
 }
 dependencies {
-    implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
+    // 商城联调只打包 GroMore；关闭 gradle.properties 的开关即可恢复其他渠道。
+    def groMoreOnly = (project.findProperty('adscopeGroMoreOnly') ?: 'false').toBoolean()
+    implementation fileTree(dir: 'libs', include: groMoreOnly ? [
+        'AMPSSDK-*.aar', 'common*.aar',
+        'AMPSGroMoreAdapter-*.aar', 'open_ad_sdk_*.aar'
+    ] : ['*.jar', '*.aar'])
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'com.google.android.material:material:1.13.0'

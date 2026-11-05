@@ -9,6 +9,7 @@ class AMPSChannels {
   static const ampsSdkNativeAdLoad = '$channelDomain/native_ad_load';
 }
 class AMPSPlatformViewRegistry {
+  static const ampsSdkMallViewId = '$channelDomain/mall_view_id';
   static const ampsSdkSplashViewId = '$channelDomain/splash_view_id';
   static const ampsSdkInterstitialViewId = '$channelDomain/interstitial_view_id';
   static const ampsSdkNativeViewId = '$channelDomain/native_view_id';
@@ -112,6 +113,7 @@ class AmpsDrawCallbackChannelMethod {
 }
 ///原生和原生自渲染标识
 class AMPSNativeCallBackChannelMethod {
+  static const onMallEvent = 'Native_onMallEvent';
   //广告加载回调标识
   static const String loadOk = "loadOk";
   static const String loadFail = "loadFail";
@@ -148,6 +150,9 @@ class DownLoadCallBackChannelMethod {
   static const String onInstalled = "onInstalled";
 }
 class AMPSAdSdkMethodNames {
+  static const nativeGetUnifiedExtras = 'AMPSNative_getUnifiedExtras';
+  static const nativeGetMallInfo = 'AMPSNative_getMallInfo';
+  static const nativeSetMallVisible = 'AMPSNative_setMallVisible';
   /// 设置日志等级
   static const String setLogLevel = "AMPSAdSdk_setLogLevel";
   /// 初始化AMPS广告SDK的方法名

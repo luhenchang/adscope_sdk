@@ -8,6 +8,7 @@ import xyz.adscope.adscope_sdk.data.AMPSRewardedVideoCallBackChannelMethod
 import xyz.adscope.adscope_sdk.data.AdOptionKeys
 import xyz.adscope.adscope_sdk.data.AdOptionsModule
 import xyz.adscope.adscope_sdk.data.ErrorModel
+import xyz.adscope.adscope_sdk.data.GMMallRewardParameters
 import xyz.adscope.amps.ad.reward.AMPSRewardVideoAd
 import xyz.adscope.amps.ad.reward.AMPSRewardVideoLoadEventListener
 import xyz.adscope.amps.common.AMPSError
@@ -177,6 +178,15 @@ class AMPSRewardedVideoManager(private val engine: AMPSEventManager) {
             return
         }
         val adOption = AdOptionsModule.getAdOptionFromMap(adOptionsMap, activity)
+        try {
+            adOption.extraDataMap = GMMallRewardParameters.merge(
+                adOption.extraDataMap,
+                adOptionsMap?.get(AdOptionKeys.KEY_GM_MALL_REWARD_USER_DATA) as? String
+            )
+        } catch (error: UnsupportedOperationException) {
+            result.error("MALL_UNSUPPORTED", error.message, null)
+            return
+        }
         rewardedVideoAdOptions[instanceId] = adOption
         rewardedVideoAds[instanceId] = AMPSRewardVideoAd(activity, adOption, createAdCallback(instanceId))
         result.success(null)

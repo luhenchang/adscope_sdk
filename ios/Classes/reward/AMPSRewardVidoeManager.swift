@@ -52,7 +52,7 @@ class AMPSRewardVideoManager: NSObject {
             result(nil)
         case AMPSAdSdkMethodNames.rewardVideoIsReadyAd:
             if let instanceId = instanceId {
-                result(rewardVideoAds[instanceId] != nil)
+                result(rewardVideoAds[instanceId]?.isReadyAd() ?? false)
             } else {
                 result(false)
             }
@@ -84,10 +84,7 @@ class AMPSRewardVideoManager: NSObject {
             result(FlutterError(code: "INVALID_ARGS", message: "adInstanceId is required", details: nil))
             return
         }
-        let config = AdOptionModule.getAdConfig(para: param)
-        if let temp = config.customExtraDict as? [String: [String: String]] {
-            config.customExtraDict = temp
-        }
+        let config = AdOptionModule.getRewardAdConfig(para: param)
         let ad = AMPSRewardedVideoAd(spaceId: config.spaceId, adConfiguration: config)
         ad.delegate = self
         rewardVideoAdConfigs[instanceId] = config

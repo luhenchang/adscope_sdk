@@ -9,6 +9,16 @@ import Foundation
 import AMPSAdSDK
 import AdScopeFoundation
 struct AdOptionModule{
+    /// 激励请求在创建 SDK 广告对象前完成商城参数合并。
+    static func getRewardAdConfig(para: [String: Any?]) -> AMPSAdConfiguration {
+        let config = getAdConfig(para: para)
+        if let userData = para[AdOptionKeys.keyGMMallRewardUserData] as? String, !userData.isEmpty {
+            config.customExtraDict = AMPSGMMallRewardParameters.merge(
+                config.customExtraDict as? [String: Any], userData: userData
+            )
+        }
+        return config
+    }
     
     static func getAdConfig(para:[String:Any?]) -> AMPSAdConfiguration{
         let config = AMPSAdConfiguration()
@@ -41,6 +51,11 @@ struct AdOptionModule{
             config.customExtraDict = customExtra
         }else if let customExtra = para[AdOptionKeys.keyExtraDataMap] as? [String: Any]{
             config.customExtraDict = customExtra
+        }
+        if let userData = para["gmMallUserData"] as? String, !userData.isEmpty {
+            config.customExtraDict = AMPSGMMallRewardParameters.merge(
+                config.customExtraDict as? [String: Any], userData: userData
+            )
         }
         return config
     }

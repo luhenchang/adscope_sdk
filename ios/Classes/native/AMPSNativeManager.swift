@@ -132,6 +132,12 @@ class AMPSNativeManager: NSObject {
     
     private var expressSlots: [String: AMPSNativeExpressSlot] = [:]
     private var unifiedSlots: [String: AmpsIosUnifiedNativeManager] = [:]
+
+    func mallEntry(instanceId: String, adId: String) -> (AMPSUnifiedNativeAd, AMPSNativeExpressView)? {
+        guard let slot = unifiedSlots[instanceId], slot.isMallMode,
+              let entry = slot.obtainMallEntry(adId: adId) else { return nil }
+        return entry
+    }
     
     func release() {
         for slot in expressSlots.values { slot.cleanup() }
