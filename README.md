@@ -12,6 +12,8 @@ Android and/or iOS.
 For help getting started with Flutter development, view the
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+## [0.2.9] - 2026-11-05
+
 ## [0.2.8] - 2026-10-30
 
 ## [0.2.7] - 2026-10-09
