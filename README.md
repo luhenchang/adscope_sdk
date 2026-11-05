@@ -128,7 +128,7 @@ iOS 示例的 SDK / 适配器版本固定在
 传入 `BUAdSlot.userData`，并保留其他扩展字段。该参数链路有模拟器测试覆盖，
 测试拦截广告构造，不请求广告库存；实际展示仍需有效商城广告位。
 
-接口依据：[穿山甲商城页设计文档](https://alidocs.dingtalk.com/i/nodes/Qnp9zOoBVBLbxLEAHe7ra3LB81DK0g6l)。
+参考：[穿山甲商城接入文档](https://bytedance.larkoffice.com/docx/EUs9dAKIhoAEpjxhCX5cS58dnrb)。
 
 ## Android / iOS 嵌入式商城
 
@@ -195,8 +195,7 @@ await product.load();
 普通自渲染布局、商品字段展示和销毁。金币、时长和 query 统一编码为 name/value JSON；
 显式 `mallQuery`/`mallReward` 覆盖同名扩展项，其余扩展字段保留。
 
-对照 [AMPS 商城页设计文档](https://alidocs.dingtalk.com/i/nodes/Qnp9zOoBVBLbxLEAHe7ra3LB81DK0g6l)
-与 [穿山甲商城接入文档](https://bytedance.larkoffice.com/docx/EUs9dAKIhoAEpjxhCX5cS58dnrb)：
+对照 [穿山甲商城接入文档](https://bytedance.larkoffice.com/docx/EUs9dAKIhoAEpjxhCX5cS58dnrb)：
 
 | 方式 | Flutter 接口 |
 | --- | --- |

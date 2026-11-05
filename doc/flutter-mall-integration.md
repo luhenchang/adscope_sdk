@@ -6,7 +6,12 @@
 
 **Flutter 插件从 `adscope_sdk 0.2.9` 版本开始支持本文介绍的商城功能，请使用 `0.2.9` 及以上版本。**
 
-本文将[钉钉《穿山甲商城页设计文档》](https://alidocs.dingtalk.com/i/nodes/Qnp9zOoBVBLbxLEAHe7ra3LB81DK0g6l)中的金刚位、激励任务接入方式转换为 Flutter 用法，并补充当前插件提供的商城频道、高商词多商品和单商品能力。后面三种方式依据当前插件与原生 SDK 接口整理，不代表钉钉原文包含这些章节。
+本文参考穿山甲官方商城文档，结合 AMPS 原生 SDK 与 Flutter 插件接口，介绍金刚位、商城激励任务、商城频道、高商词多商品和单商品的接入方式。
+
+穿山甲原始文档：
+
+- [商城页介绍](https://bytedance.larkoffice.com/docx/A1DTdkKAKovM6ixIckecFpjcnLF)
+- [商城页接入文档](https://bytedance.larkoffice.com/docx/EUs9dAKIhoAEpjxhCX5cS58dnrb)
 
 ## 1. 选择接入方式
 
@@ -91,7 +96,7 @@ void initializeAds(String appId) {
 
 ## 3. 金刚位入口
 
-钉钉文档中的金刚位复用现有插屏或激励广告接入，入口由媒体自行开发。Flutter 不需要额外的商城入口原生接口。
+金刚位复用现有插屏或激励广告接入，入口由媒体自行开发。Flutter 不需要额外的商城入口原生接口。
 
 以下为插屏入口的最小调用流程；页面中需保留 `ad` 引用，退出时销毁：
 
@@ -178,7 +183,7 @@ Future<AMPSRewardVideoAd> loadMallReward(String spaceId) async {
 ]
 ```
 
-与钉钉原生用法的对应关系：Android 写入 `extraDataMap[AMPSConstants.AMPS_ADN_GM_SHOP_EXTRA_DATA]`；iOS 写入 `customExtraDict["GM"]["userData"]`。
+Flutter 配置与 AMPS 原生接口的对应关系：Android 写入 `extraDataMap[AMPSConstants.AMPS_ADN_GM_SHOP_EXTRA_DATA]`；iOS 写入 `customExtraDict["GM"]["userData"]`。
 
 任务参数在实例创建时生效。更换任务参数时，销毁旧广告并重新创建，不要通过 Android 的 `setExtraDataMap()` 动态修改商城任务，该方法会整体覆盖扩展 Map。
 
