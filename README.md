@@ -161,8 +161,9 @@ await mall.load();
 - `getMallInfo` 返回 `supportsMall`、`viewCreated`、`isValid`、`extras`。Android 无独立商城能力查询，
   `supportsMall` 在视图创建前为 false，此时不代表广告不支持商城；读取 `extras` 不触发视图创建。
   原始事件由 `onEvent` 透传，
-  iOS 渠道事件码 `2` 为 `SendFeedReward`；Android 透传穿山甲事件码，
-  需按 Android 渠道定义处理。奖励发放由业务决定。
+  当前 iOS 的 `SendFeedReward` 和 Android 7.8.1.4 的 `AD_EVENT_FEED_REWARD` 均为 `2`，
+  Flutter 使用 `code == AMPSMallEventCode.feedReward` 验证浏览任务奖励事件，其他事件不作为奖励成功。实际金币入账由业务处理。
+  完整验证步骤见 [商城接入文档](docs/flutter-mall-integration.md#验证浏览金币任务的奖励事件)。
 - 示例首页的「商城测试入口」进入二级页，提供商城激励、金刚位插屏、商城频道、
   高商词多商品、高商词单商品五个测试入口。
 - 频道和搜索结果页使用同一个嵌入接口，后台广告位及 query 决定内容；频道任务参数需开通对应能力。

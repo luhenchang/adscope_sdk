@@ -177,6 +177,15 @@ Future<AMPSRewardVideoAd> loadMallReward(String spaceId) async {
 
 两种场景共用嵌入式商城接口：频道使用频道广告位；高商词多商品使用专用广告位并设置 `mallQuery`。
 
+本节主示例同时包含**浏览金币奖励事件**和**滚动到顶部 / 底部事件**的判断。常量通过 `package:adscope_sdk/amps_sdk_export.dart` 统一导出：
+
+- 奖励事件：`AMPSMallEventCode.feedReward`。
+- 滚动边界事件：`AMPSMallEventCode.reachBound`，方向取 `info['bound']`。
+- 顶部 / 底部：`AMPSMallScrollBound.top` / `AMPSMallScrollBound.bottom`。
+
+任务配置和成功验证步骤见[浏览金币任务奖励验证](#验证浏览金币任务的奖励事件)，事件值及边界完整示例见[商城滚动到边界事件](#商城滚动到边界事件)。
+
+
 ### 创建、加载和挂载
 
 ```dart
@@ -193,7 +202,7 @@ AMPSMallAd createMall({
       spaceId: spaceId,
       mallQuery: query,
       // 频道奖励任务需开通对应能力后再设置：
-      // mallReward: const AMPSGMMallRewardConfig(gold: '20', duration: '10'),
+      mallReward: const AMPSGMMallRewardConfig(gold: '20', duration: '10'),
     ),
     onLoad: AMPSNativeAdListener(
       loadOk: (ids) {
@@ -206,7 +215,21 @@ AMPSMallAd createMall({
       loadFail: onFailure,
     ),
     onEvent: (adId, code, info) {
-      // 接收渠道原始事件；按平台、渠道定义解释 code 和 info。
+      if (code == AMPSMallEventCode.feedReward) {
+        // 收到商城浏览任务奖励事件，在这里接入业务发奖逻辑。
+        // 不需要额外判断 info.success 或 isRewardValid。
+      } else if (code == AMPSMallEventCode.reachBound) {
+        final raw = info?['bound'];
+        final bound = raw is num
+            ? raw.toInt()
+            : int.tryParse(raw?.toString() ?? '');
+        if (bound == AMPSMallScrollBound.top) {
+          // 商城到达顶部，可显示业务头图。
+        } else if (bound == AMPSMallScrollBound.bottom) {
+          // 商城到达底部，按业务需要处理滚动联动。
+        }
+        // 边界事件不是奖励事件，不在这里发金币。
+      }
     },
   );
 }
@@ -250,7 +273,62 @@ final extras = info['extras'];
 
 该接口用于读取状态和渠道扩展字段，不承诺返回商城内全部商品，也不保证包含价格、图片等指定字段。多商品列表由商城视图自身展示。示例的“读取商城信息”按钮会弹窗展示原始结果，`extras` 为空时给出提示。
 
-`onEvent` 透传原始渠道事件。iOS 当前渠道中的事件码 `2` 对应 `SendFeedReward`；Android 事件码按 Android 渠道定义解释，不应跨平台直接套用。业务依据对应事件、任务规则及校验结果处理奖励。
+### 验证浏览金币任务的奖励事件
+
+当前使用版本中，两端浏览任务奖励事件码均为 `2`：Android 对应 `TTAdConstant.AD_EVENT_FEED_REWARD`（已核对 `7.8.1.4` SDK 常量），iOS 对应 `BUNativeAdEventCode_SendFeedReward`。Flutter 使用公开常量 `AMPSMallEventCode.feedReward` 判断，通过 `amps_sdk_export.dart` 导入即可：
+
+```dart
+onEvent: (adId, code, info) {
+  if (code == AMPSMallEventCode.feedReward) {
+    // 已收到浏览任务奖励事件。此处接入业务自己的发奖处理。
+    // 文档未要求再校验 info 中的 success/isRewardValid 字段。
+  } else {
+    // 其他商城事件（例如滚动边界）不算任务奖励。
+  }
+},
+```
+
+验证步骤：
+
+1. 使用商城频道广告位，确认已开通信息流自定义激励任务能力；按[穿山甲接入说明](https://bytedance.larkoffice.com/docx/EUs9dAKIhoAEpjxhCX5cS58dnrb)联系对接方加入相应白名单。
+2. 请求时传入 `mallReward.gold` 和 `mallReward.duration`，例如金币 `10`、浏览时长 `2` 秒。
+3. 挂载并显示商城，完成 SDK 的浏览任务，观察是否收到 `onEvent` 且 `code == AMPSMallEventCode.feedReward`。不能仅凭本地计时或广告加载成功判定完成。
+4. 示例会显示“浏览奖励验证：已收到奖励事件（code=2）”，并记录原始 `adId/code/info`；若未收到，就没有验证成功。其他事件码不触发成功提示。
+
+收到该事件说明 SDK 通知浏览任务奖励，不等于业务账户已经到账；实际金币增加由媒体业务处理。业务发奖应按用户及任务标识做幂等校验，避免重复回调导致重复入账。`info` 原样透传，当前不预设其中存在额外成功字段。
+
+频道浏览任务使用 `AMPSMallAd.onEvent`；商城激励视频则使用 `RewardVideoCallBack.onAdReward`，两种流程分别处理。
+
+### 商城滚动到边界事件
+
+商城滚动到顶部或底部时，同样通过 `AMPSMallAd.onEvent` 返回。根据[穿山甲商城接入文档的滑动事件示例](https://bytedance.larkoffice.com/docx/EUs9dAKIhoAEpjxhCX5cS58dnrb)，Android 和 iOS 均使用事件码 `200`，通过 `info['bound']` 区分方向。Flutter 已提供以下常量：
+
+| 常量 | 值 | 含义 |
+| --- | --- | --- |
+| `AMPSMallEventCode.feedReward` | `2` | 浏览任务奖励事件 |
+| `AMPSMallEventCode.reachBound` | `200` | 商城滚动到边界 |
+| `AMPSMallScrollBound.top` | `1` | `info['bound']` 表示到达顶部 |
+| `AMPSMallScrollBound.bottom` | `2` | `info['bound']` 表示到达底部 |
+
+在同一个 `onEvent` 中处理，避免覆盖其他事件监听：
+
+```dart
+onEvent: (adId, code, info) {
+  if (code == AMPSMallEventCode.feedReward) {
+    // 浏览任务奖励，接入业务发奖逻辑。
+  } else if (code == AMPSMallEventCode.reachBound) {
+    final raw = info?['bound'];
+    final bound = raw is num ? raw.toInt() : int.tryParse(raw?.toString() ?? '');
+    if (bound == AMPSMallScrollBound.top) {
+      // 到达顶部，可由业务展示头图。
+    } else if (bound == AMPSMallScrollBound.bottom) {
+      // 到达底部，按业务需要处理。
+    }
+  }
+},
+```
+
+边界事件用于页面滚动联动，不代表浏览任务完成，也不应触发奖励发放。频道和多商品示例会显示最新边界，并保留原始事件日志。
 
 ## 6. 高商词单商品
 

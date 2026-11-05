@@ -28,6 +28,8 @@ class _GMMallPageState extends State<GMMallPage> {
   bool _readingInfo = false;
   bool _visible = true;
   int _generation = 0;
+  String _rewardEventStatus = '尚未请求';
+  String _scrollBoundary = '尚未收到边界事件';
 
   void _log(String value) {
     if (!mounted) return;
@@ -45,11 +47,17 @@ class _GMMallPageState extends State<GMMallPage> {
     FocusScope.of(context).unfocus();
     final generation = ++_generation;
     final previous = _ad;
+    final reward =
+        AMPSGMMallRewardConfig(gold: _gold.text, duration: _duration.text);
     _ad = null;
     setState(() {
       _adId = null;
       _loading = true;
       _visible = true;
+      _scrollBoundary = '尚未收到边界事件';
+      _rewardEventStatus = reward.toUserData() == null
+          ? '本次未配置浏览奖励任务'
+          : '等待奖励事件（code=${AMPSMallEventCode.feedReward}）';
     });
     try {
       await previous?.destroy();
@@ -58,8 +66,7 @@ class _GMMallPageState extends State<GMMallPage> {
       final ad = AMPSMallAd(
         config: AdOptions(
             spaceId: _space.text.trim(),
-            mallReward: AMPSGMMallRewardConfig(
-                gold: _gold.text, duration: _duration.text),
+            mallReward: reward,
             customExtraMap: query.isEmpty
                 ? null
                 : {
@@ -84,7 +91,29 @@ class _GMMallPageState extends State<GMMallPage> {
           },
         ),
         onEvent: (adId, code, info) {
-          if (generation == _generation) _log('商城事件 $code：${jsonEncode(info)}');
+          if (!mounted || generation != _generation) return;
+          _log('商城事件 $code：${jsonEncode(info)}');
+          // Android AD_EVENT_FEED_REWARD / iOS SendFeedReward 当前均为 2。
+          // 表示 SDK 通知浏览任务完成，不代表业务账户已入账。
+          if (code == AMPSMallEventCode.feedReward) {
+            setState(() => _rewardEventStatus =
+                '已收到奖励事件（code=${AMPSMallEventCode.feedReward}）');
+            _log('浏览奖励事件验证成功，adId=$adId；请由业务处理发奖');
+            ScaffoldMessenger.of(context)
+                .showSnackBar(const SnackBar(content: Text('已收到商城浏览奖励事件')));
+          } else if (code == AMPSMallEventCode.reachBound) {
+            final rawBound = info?['bound'];
+            final bound = rawBound is num
+                ? rawBound.toInt()
+                : int.tryParse(rawBound?.toString() ?? '');
+            final message = switch (bound) {
+              AMPSMallScrollBound.top => '到达顶部',
+              AMPSMallScrollBound.bottom => '到达底部',
+              _ => '未知边界：$rawBound',
+            };
+            setState(() => _scrollBoundary = message);
+            _log('商城滚动边界：$message');
+          }
         },
       );
       _ad = ad;
@@ -151,6 +180,7 @@ class _GMMallPageState extends State<GMMallPage> {
     setState(() {
       _adId = null;
       _loading = false;
+      _rewardEventStatus = '实例已销毁';
     });
     try {
       await ad?.destroy();
@@ -242,6 +272,9 @@ class _GMMallPageState extends State<GMMallPage> {
               child: const Text('销毁商城')),
         ]),
         const SizedBox(height: 12),
+        Text('浏览奖励验证：$_rewardEventStatus'),
+        Text('商城滚动边界：$_scrollBoundary'),
+        const Text('传入金币和浏览时长后，完成任务应收到浏览奖励事件；该状态仅验证事件收到，不执行金币入账。'),
         SizedBox(
             height: MediaQuery.sizeOf(context).height * .55,
             child: _adId == null || _ad == null

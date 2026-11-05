@@ -2,6 +2,7 @@ library;
 
 export 'package:adscope_sdk/data/amps_ad.dart';
 export 'package:adscope_sdk/data/amps_gm_mall_reward_config.dart';
+export 'package:adscope_sdk/data/amps_mall_event_code.dart';
 export 'package:adscope_sdk/data/amps_init_config.dart';
 export 'package:adscope_sdk/data/amps_sdk_init_status.dart';
 export 'package:adscope_sdk/data/amps_native_interactive_listener.dart';
