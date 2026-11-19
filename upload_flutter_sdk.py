@@ -24,11 +24,11 @@ UPLOAD_URL = "https://mediation-api-gw.beizi.biz/media/sdk/upload/flutter"
 
 DEFAULT_FLUTTER_VERSIONS = [
     {
-        "version": "0.2.6",
+        "version": "0.2.9",
         "downloadUrl": "https://pub.dev/packages/adscope_sdk",
         "fileSize": 8600263,
-        "flutterUpdateTime": "2026-09-21 14:00:00",
-        "supportedSdkVersions": "Android ≥ v5.1.3.0, iOS ≥ v5.1.2.8",
+        "flutterUpdateTime": "2026-11-05 14:00:00",
+        "supportedSdkVersions": "Android ≥ v5.1.3.7, iOS ≥ v5.1.3.7",
     }
 ]
 
